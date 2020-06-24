@@ -1,0 +1,31 @@
+y-offsets:
+  r5: 1.0
+  r4: 2.0
+  r3: 4.0
+  r2: 8.0
+  1: 16.0
+x-offsets:
+  1u:
+    x: 1.0
+  1.25u:
+    x: 1.25
+  1.5u:
+    x: 1.5
+  1.75u:
+    x: 1.75
+  2u:
+    x: 2.0
+  2.25u:
+    x: 2.25
+  2.75u:
+    x: 2.75
+special-offsets:
+  iso-enter:
+    x: 1.0
+    y: 1.5
+  num-enter:
+    x: 0.0
+    y: 1.5
+  num-plus:
+    x: 0.0
+    y: 1.5
