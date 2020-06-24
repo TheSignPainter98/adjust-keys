@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+# Copyright (C) Edward Jones
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+# This was written on literally the hottest day of the year :(
+
+from argparse import ArgumentParser, Namespace
+from os.path import exists
+from sys import stderr
+from yaml import FullLoader, load
+
+verbose:bool = False
+
+def main(args:[str]) -> int:
+    pargs = parse_args(args)
+    printi(pargs)
+
+    if pargs.apply_offsets:
+        printi('Applying offsets')
+        return 0
+    elif pargs.generate_offsets:
+        printi('applying offsets')
+        return 0
+    else:
+        printe('No operation specified, see `%s -h` for more information' % args[0])
+
+def parse_args(args:[str]) -> Namespace:
+    global verbose
+    ap:ArgumentParser = ArgumentParser()
+
+    ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Output verbosely')
+    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from, default=opts.yml', default='opts.yml')
+    ap.add_argument('-O', '--offsets', action='store', dest='offsets_file', help='specify an offset file', default='opts.yml')
+    ap.add_argument('-a', '--apply-offsets', action='store_true', dest='apply_offsets', help='apply offsets')
+    ap.add_argument('-g', '--generate-offsets', action='store_true', dest='generate_offsets', help='generate offsets')
+
+    pargs:Namespace = ap.parse_args(args[1:])
+
+    rargs:dict = {}
+    if exists(pargs.opt_file):
+        with open(pargs.opt_file, 'r') as i:
+            rargs = load(i, Loader=FullLoader)
+    elif pargs.opt_file != 'opts.yml':
+        printe('Failed to find options file %s' % pargs.opt_file)
+        exit(1)
+
+    dargs = dict(rargs, **pargs.__dict__)
+    verbose = dargs['verbose']
+
+    return Namespace(**dargs)
+
+def printi(*args, **kwargs):
+    if verbose:
+        printe(*args, **kwargs)
+
+def printe(*args, **kwargs):
+    print(*args, file=stderr, **kwargs)
+
+if __name__ == '__main__':
+    from sys import argv, exit
+    exit(main(argv))
