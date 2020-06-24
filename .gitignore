@@ -1,1 +1,2 @@
-opts.yml
+*.yml
+*.json

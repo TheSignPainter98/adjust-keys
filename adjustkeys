@@ -19,7 +19,7 @@
 
 from argparse import ArgumentParser, Namespace
 from os.path import exists
-from sys import stderr
+from sys import argv, exit, stderr, stdin
 from yaml import FullLoader, load
 
 verbose:bool = False
@@ -28,14 +28,56 @@ def main(args:[str]) -> int:
     pargs = parse_args(args)
     printi(pargs)
 
-    if pargs.apply_offsets:
-        printi('Applying offsets')
-        return 0
-    elif pargs.generate_offsets:
-        printi('applying offsets')
-        return 0
+    profile = read_yaml(pargs.profile_file)
+    glyph_offsets = read_yaml(pargs.glyph_offset_file)
+    layout = read_yaml(pargs.layout_file)
+    glyph_map = read_yaml(pargs.glyph_map_file)
+
+    if not sanitise_inputs(profile, glyph_offsets, layout, glyph_map):
+        return 1
+
+    printi('profile', profile)
+    printi('glyph_offsets', glyph_offsets)
+    printi('layout', layout)
+    printi('glyph_map', glyph_map)
+    printi(len(layout))
+
+    return 0
+
+def read_yaml(fname:str) -> dict:
+    if fname == '-':
+        printi('Reading %s from stdin, please either type something or redirect a file in here' % fname)
+        return load(stdin, Loader=FullLoader)
     else:
-        printe('No operation specified, see `%s -h` for more information' % args[0])
+        if exists(fname):
+            with open(fname, 'r') as f:
+                return load(f, Loader=FullLoader)
+        else:
+            printe('Failed to read file "%s"' % fname)
+            exit(1)
+
+def write_yaml(fname:str, data:dict):
+    if fname == '-':
+        print(dump(data))
+    else:
+        with open(fname, 'w+') as f:
+            print(dump(data), file=f)
+
+def sanitise_inputs(profile:dict, glyph_offsets:dict, layout:dict, glyph_map:dict) -> bool:
+    if not profile:
+        printe('No data present in profile file')
+        return False
+    if not glyph_offsets:
+        printe('No data present in glyph offset file')
+        return False
+    if not layout:
+        printe('No data present in layout file')
+        return False
+    if not glyph_map:
+        printe('No data present in glyph map file')
+        return False
+    return True
+
 
 def parse_args(args:[str]) -> Namespace:
     global verbose
@@ -43,9 +85,12 @@ def parse_args(args:[str]) -> Namespace:
 
     ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Output verbosely')
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from, default=opts.yml', default='opts.yml')
-    ap.add_argument('-O', '--offsets', action='store', dest='offsets_file', help='specify an offset file', default='opts.yml')
-    ap.add_argument('-a', '--apply-offsets', action='store_true', dest='apply_offsets', help='apply offsets')
-    ap.add_argument('-g', '--generate-offsets', action='store_true', dest='generate_offsets', help='generate offsets')
+    ap.add_argument('-P', '--profile', action='store', dest='profile_file', help='specify the prile YAML file to use', default='kat.yml')
+    ap.add_argument('-O', '--glyph-offsets', action='store', dest='glyph_offset_file', help='specify the file containing offsets for each glyph from the center of a keys', default='glyph-offsets.yml')
+    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use', default='layout.yml')
+    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon', default='glyph-map.yml')
+    ap.add_argument('-x', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right', default=0.0)
+    ap.add_argument('-y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards', default=0.0)
 
     pargs:Namespace = ap.parse_args(args[1:])
 
@@ -64,11 +109,10 @@ def parse_args(args:[str]) -> Namespace:
 
 def printi(*args, **kwargs):
     if verbose:
-        printe(*args, **kwargs)
+        print(*args, file=stderr, **kwargs)
 
 def printe(*args, **kwargs):
-    print(*args, file=stderr, **kwargs)
+    print(f'{argv[0]}:', *args, file=stderr, **kwargs)
 
 if __name__ == '__main__':
-    from sys import argv, exit
     exit(main(argv))
