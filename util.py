@@ -15,10 +15,18 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
+from functools import reduce
+
 def append(a:list, b:list) -> list:
     return a + b
 
-def union(a:dict, b:dict) -> dict:
+def list_intersection(a:list, b:list) -> list:
+    return [x for x in a if x in b]
+
+def nat_join(las:[dict], lbs:[dict], key:object) -> [dict]:
+    return list(reduce(append, list(map(lambda la: [dict_union(la, lb) for lb in lbs if la[key] == lb[key]], las))))
+
+def dict_union(a:dict, b:dict) -> dict:
     return dict(a, **b)
 
 def rem(d:dict, k) -> dict:
