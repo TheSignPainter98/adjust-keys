@@ -1,2 +1,3 @@
 *.yml
 *.json
+__pycache__/
