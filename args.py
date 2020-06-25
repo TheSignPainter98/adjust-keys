@@ -17,7 +17,7 @@
 
 from argparse import ArgumentParser, Namespace
 from os.path import exists
-from util import union
+from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
 ##
@@ -52,4 +52,4 @@ def parse_args(args:[str]) -> Namespace:
         printe('Failed to find options file %s' % pargs.opt_file)
         exit(1)
 
-    return Namespace(**union(yargs, pargs))
+    return Namespace(**dict_union(yargs, pargs))
