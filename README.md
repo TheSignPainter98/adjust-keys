@@ -16,3 +16,25 @@ I wrote this in Python so that anyone learning to code could have an example of 
 Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 Haskell would have been a _far_ better option.
 Everyone has their regrets, eh?
+
+## How to obtain &amp; Usage
+
+Assuming `git` is installed, you can get this code by running
+
+```bash
+git clone https://github.com/TheSignPainter98/adjust-keys
+```
+
+I don't plan to release this on any package managers.
+
+To run the code, go into the `adjust-keys` directory the above creates and run:
+
+```bash
+./main.py
+```
+
+More information about usage can be found using
+
+```bash
+./main.py -h
+```
