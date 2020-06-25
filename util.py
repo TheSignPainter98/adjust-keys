@@ -23,8 +23,8 @@ def append(a:list, b:list) -> list:
 def list_intersection(a:list, b:list) -> list:
     return [x for x in a if x in b]
 
-def nat_join(las:[dict], lbs:[dict], key:object) -> [dict]:
-    return list(reduce(append, list(map(lambda la: [dict_union(la, lb) for lb in lbs if la[key] == lb[key]], las))))
+def nat_join(las:[dict], ka:object, lbs:[dict], kb:object) -> [dict]:
+    return list(reduce(append, list(map(lambda la: [dict_union(la, lb) for lb in lbs if la[ka] == lb[kb]], las))))
 
 def dict_union(a:dict, b:dict) -> dict:
     return dict(a, **b)
