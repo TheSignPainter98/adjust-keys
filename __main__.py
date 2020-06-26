@@ -20,11 +20,12 @@
 
 
 from args import parse_args
-from layout import Layout
+from layout import parse_layout
 from log import init_logging, printe, printi
+from positions import resolve_positions
 from sys import argv, exit
 from yaml_io import read_yaml, write_yaml
-from util import nat_join
+from util import inner_join
 
 ##
 # @brief Entry point function, should be treated as the first thing called
@@ -38,12 +39,18 @@ def main(args:[str]) -> int:
 
     #  profile = read_yaml(pargs.profile_file)
     glyph_offsets = read_yaml(pargs.glyph_offset_file)
-    #  layout = Layout(read_yaml(pargs.layout_file))
+    glyph_offsets_rel = list(map(lambda m: { 'glyph': m[0], 'off-x': m[1]['x'] if 'x' in m[1] else 0.0, 'off-y': m[1]['y'] if 'y' in m[1] else 0.0 }, glyph_offsets.items()))
+    layout:[dict] = parse_layout(read_yaml(pargs.layout_file))
     glyph_map = read_yaml(pargs.glyph_map_file)
-    #  print(glyph_map[0])
+    # Gee, a functor type class would really help here, you know? But that would require Python to have a decent type system and let's face it that'll probably never happen.
     glyph_rel = list(map(lambda m: { 'key': m[0], 'glyph': m[1] }, glyph_map.items()))
 
-    write_yaml('-', glyph_rel)
+    key_offsets = inner_join(glyph_rel, 'glyph', glyph_offsets_rel, 'glyph')
+    offset_layout = inner_join(key_offsets, 'key', layout, 'key')
+
+    positions = resolve_positions(offset_layout, pargs.unit_length, pargs.delta_x, pargs.delta_y, pargs.global_x_offset, pargs.global_y_offset)
+
+    write_yaml('-', positions)
 
     return 0
 
