@@ -17,7 +17,7 @@
 
 from log import die, printi, printw
 from re import match
-from util import append, key_subst, rem
+from util import key_subst, rem
 
 
 def parse_layout(layout: [[dict]]) -> [dict]:
@@ -36,7 +36,7 @@ def parse_layout(layout: [[dict]]) -> [dict]:
                 else:
                     return max(parts, default=0, key=len)
 
-            ret = {'id': str(key_name(key))}
+            ret = {'key': str(key_name(key))}
         elif type(key) == dict:
             ret = dict(key)
         else:
@@ -55,18 +55,18 @@ def parse_layout(layout: [[dict]]) -> [dict]:
         else:
             ret['height'] = 1.0
 
-        #  if ('id' not in ret or key == '') and ('dim-x' not in ret and 'dim-y' not in ret):
+        #  if ('key' not in ret or key == '') and ('dim-x' not in ret and 'dim-y' not in ret):
         if 'dim-x' not in ret and 'dim-y' not in ret:
-            if 'id' not in ret or key == '':
-                printw("Key \"%s\" %s 'id' field, please put one in" %
+            if 'key' not in ret or key == '':
+                printw("Key \"%s\" %s 'key' field, please put one in" %
                        (str(key), 'missing' if key != '' else 'has empty'))
-                ret['id'] = 'SOME_ID'
+                ret['key'] = 'SOME_ID'
 
-            if ret['id'] in seenKeys.keys():
-                seenKeys[ret['id']] += 1
-                ret['id'] = ret['id'] + '-' + str(seenKeys[ret['id']])
+            if ret['key'] in seenKeys.keys():
+                seenKeys[ret['key']] += 1
+                ret['key'] = ret['key'] + '-' + str(seenKeys[ret['key']])
             else:
-                seenKeys[ret['id']] = 1
+                seenKeys[ret['key']] = 1
 
         return ret
 
@@ -92,8 +92,7 @@ def parse_layout(layout: [[dict]]) -> [dict]:
                 # Assume that if dim-y is present there is no corresponding key
                 row += key['dim-y']
                 col = 0
-                # Assume that if x is present there is no corresponding key
-                # Gee, a functor type class would really help here, you know? But that would require Python to have a decent type system and let's face it that'll probably never happen.
+                numDeltaY -= 1
             else:
                 col += key['width']
                 if 'dim-x' not in key:
@@ -101,8 +100,8 @@ def parse_layout(layout: [[dict]]) -> [dict]:
                     parsed_layout += [key]
                     numDeltaX += 1
 
+        numDeltaY += 1
         if 'dim-y' not in line[-1]:
             row += 1
-            numDeltaY += 1
 
     return parsed_layout

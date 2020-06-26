@@ -33,13 +33,15 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Output verbosely')
     ap.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='Suppress messages more than usual')
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: opts.yml)', default='opts.yml', metavar='file')
+    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap(default: 1.0)', default=1.0, metavar='num')
+    ap.add_argument('-x', '--delta-x', action='store', type=float, dest='delta_x', help='Horizontal distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
+    ap.add_argument('-y', '--delta-y', action='store', type=float, dest='delta_y', help='Vertical distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
+    ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', default=0.0, metavar='num')
+    ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', default=0.0, metavar='num')
     ap.add_argument('-P', '--profile', action='store', dest='profile_file', help='specify the prile YAML file to use (default: kat.yml)', default='kat.yml', metavar='file')
     ap.add_argument('-O', '--glyph-offsets', action='store', dest='glyph_offset_file', help='specify the file containing offsets for each glyph from the center of a keys (default: glyph-offsets.yaml)', default='glyph-offsets.yml', metavar='file')
     ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', default='layout.yml', metavar='file')
     ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon (default: glyph-map.yml)', default='glyph-map.yml', metavar='file')
-    ap.add_argument('-x', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', default=0.0, metavar='num')
-    ap.add_argument('-y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', default=0.0, metavar='num')
-    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap(default: 1.0)', default=1.0, metavar='num')
 
     # Obtain parsed arguments
     pargs:dict = ap.parse_args(args[1:]).__dict__
