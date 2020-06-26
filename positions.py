@@ -24,6 +24,6 @@ def resolve_positions(data: [dict], ulen: float, dx: float, dy: float,
 def resolve_position(data: dict, ulen: float, dx: float, dy: float, ox: float,
                      oy: float) -> dict:
     ret = dict(data)
-    ret['pos-x'] = ox + ulen * (ret['col'] + ret['off-x']) + dx * ret['num-dx']
-    ret['pos-y'] = oy + ulen * (ret['row'] + ret['off-y']) + dy * ret['num-dy']
+    ret['pos-x'] = ox + ulen * (ret['col'] + ret['off-x'] + ret['p-off-x']) + dx * ret['num-dx']
+    ret['pos-y'] = oy + ulen * (ret['row'] + ret['off-y'] + ret['p-off-y']) + dy * ret['num-dy']
     return ret
