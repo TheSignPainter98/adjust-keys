@@ -15,103 +15,94 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from functools import reduce
 from log import die, printi, printw
 from re import match
-from util import append, rem
+from util import append, key_subst, rem
 
 
-class Layout:
-    def __init__(self, layout: dict):
-        def parse_key(key: 'either str dict') -> dict:
-            ret: dict
-            if type(key) == str:
+def parse_layout(layout: [[dict]]) -> [dict]:
+    seenKeys: 'str->int' = {}
 
-                def key_name(name: str) -> str:
-                    parts = list(reversed(key.split('\n')))
-                    alphaNums = list(
-                        filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
-                    if alphaNums != []:
-                        return alphaNums[0]
-                    else:
-                        return max(parts, default=0, key=len)
+    def parse_key(key: 'either str dict') -> dict:
+        ret: dict
+        if type(key) == str:
 
-                ret = {'id': str(key_name(key))}
-            elif type(key) == dict:
-                ret = dict(key)
-            else:
-                die('Unknown key type entered: %s' % type(key))
+            def key_name(name: str) -> str:
+                parts = list(reversed(key.split('\n')))
+                alphaNums = list(
+                    filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
+                if alphaNums != []:
+                    return alphaNums[0]
+                else:
+                    return max(parts, default=0, key=len)
 
-            if 'x' in ret:
-                ret = rem(ret, 'x')
+            ret = {'id': str(key_name(key))}
+        elif type(key) == dict:
+            ret = dict(key)
+        else:
+            die('Unknown key type entered: %s' % type(key))
 
-            if 'w' in ret:
-                ret['width'] = float(ret['w'])
-                del ret['w']
-            else:
-                ret['width'] = 1.0
+        if 'x' in ret:
+            ret = key_subst(ret, 'x', 'dim-x')
+        if 'y' in ret:
+            ret = key_subst(ret, 'y', 'dim-y')
+        if 'w' in ret:
+            ret = key_subst(ret, 'w', 'width')
+        else:
+            ret['width'] = 1.0
+        if 'h' in ret:
+            ret = key_subst(ret, 'h', 'height')
+        else:
+            ret['height'] = 1.0
 
-            if 'h' in ret:
-                ret['height'] = float(ret['h'])
-                del ret['h']
-            else:
-                ret['height'] = 1.0
-
+        #  if ('id' not in ret or key == '') and ('dim-x' not in ret and 'dim-y' not in ret):
+        if 'dim-x' not in ret and 'dim-y' not in ret:
             if 'id' not in ret or key == '':
-                ret['id'] = 'SOME_ID'
                 printw("Key \"%s\" %s 'id' field, please put one in" %
                        (str(key), 'missing' if key != '' else 'has empty'))
+                ret['id'] = 'SOME_ID'
 
-            if ret['id'] in self.seenKeys.keys():
-                self.seenKeys[ret['id']] += 1
-                ret['id'] = ret['id'] + '-' + str(self.seenKeys[ret['id']])
+            if ret['id'] in seenKeys.keys():
+                seenKeys[ret['id']] += 1
+                ret['id'] = ret['id'] + '-' + str(seenKeys[ret['id']])
             else:
-                self.seenKeys[ret['id']] = 1
+                seenKeys[ret['id']] = 1
 
-            return ret
+        return ret
 
-        if type(layout) != list and type(layout[0]) != list:
-            die('Expected a list of lists in the layout (see the JSON output of KLE)'
-                )
+    if type(layout) != list and type(layout[0]) != list:
+        die('Expected a list of lists in the layout (see the JSON output of KLE)'
+            )
 
-        self.seenKeys: 'str->int' = {}
-        self.layout: [Group] = []
-        row: int = 0
-        for line in layout:
-            col: int = 0
-            prevCol:int = 0
-            groupContent: [[dict]] = []
-            prevSlice: int = 0
-            for i in range(0, len(line)):
-                if 'y' in line[i]:
-                    # Assume that if y is present there is no corresponding key
-                    row += line[i]['y']
-                    col = -1
-                if 'x' in line[i]:
-                    # Assume that if x is present there is no corresponding key
-                    # Gee, a functor type class would really help here, you know? But that would require Python to have a decent class system and let's face it that'll probably never happen.
-                    self.layout += [Group((row, prevCol), list(map(parse_key, line[prevSlice:i])))]
-                    prevSlice = i + 1
-                    col += line[i]['x']
-                    prevCol = col
-                else:
-                    col += line[i]['w'] if 'w' in line[i] else 1
-            if 'x' not in line[-1]:
-                self.layout += [Group((row, prevCol), list(map(parse_key, line[prevSlice:])))]
+    parsed_layout: [dict] = []
+    row: int = 0
+    numDeltaY: int = 0
+    for line in layout:
+        col: int = 0
+        prevCol: int = 0
+        numDeltaX: int = 0
+        for key in line:
+            key = parse_key(key)
+            printi('Operating on %s' % key)
+            key['col'] = col
+            key['row'] = row
+            key['num-dx'] = numDeltaX
+            key['num-dy'] = numDeltaY
+            if 'dim-y' in key:
+                # Assume that if dim-y is present there is no corresponding key
+                row += key['dim-y']
+                col = 0
+                # Assume that if x is present there is no corresponding key
+                # Gee, a functor type class would really help here, you know? But that would require Python to have a decent type system and let's face it that'll probably never happen.
+            else:
+                col += key['width']
+                if 'dim-x' not in key:
+                    # Assume that if dim-x is present there is no corresponding key
+                    parsed_layout += [key]
+                    numDeltaX += 1
+
+        if 'dim-y' not in line[-1]:
             row += 1
+            numDeltaY += 1
 
-        for g in self.layout:
-            print(g)
-
-
-    def __str__(self) -> str:
-        return str(self.layout)
-
-
-class Group:
-    def __init__(self, pos: [int, int], keys: [dict]):
-        self.pos = pos
-        self.keys = keys
-
-    def __str__(self) -> str:
-        return str(self.pos) + ' |-> ' + str(self.keys)
+    return parsed_layout

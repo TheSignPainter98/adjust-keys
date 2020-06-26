@@ -16,6 +16,7 @@
 #
 
 from functools import reduce
+from log import die
 
 def append(a:list, b:list) -> list:
     return a + b
@@ -28,6 +29,11 @@ def nat_join(las:[dict], ka:object, lbs:[dict], kb:object) -> [dict]:
 
 def dict_union(a:dict, b:dict) -> dict:
     return dict(a, **b)
+
+def key_subst(a:dict, k1:object, k2:object) -> dict:
+    t = rem(a, k1)
+    t[k2] = a[k1]
+    return t
 
 def rem(d:dict, k) -> dict:
     if k not in d:
