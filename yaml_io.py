@@ -47,8 +47,8 @@ def read_yaml(fname:str) -> dict:
 # @return Nothing
 def write_yaml(fname:str, data:dict):
     if fname == '-':
-        print(dump(data))
+        print(dump(data), end='')
     else:
         with open(fname, 'w+') as f:
-            print(dump(data), file=f)
+            print(dump(data), file=f, end='')
 
