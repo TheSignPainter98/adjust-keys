@@ -24,7 +24,7 @@ from log import die, init_logging, printe, printi
 from positions import resolve_positions
 from sys import argv, exit
 from yaml_io import read_yaml, write_yaml
-from util import dict_union, inner_join
+from util import dict_union, inner_join, rob_rem
 
 
 ##
@@ -71,13 +71,11 @@ def collect_data(pargs: Namespace) -> [dict]:
     glyph_offsets = read_yaml(pargs.glyph_offset_file)
     glyph_offsets_rel = list(
         map(
-            lambda m: {
+            lambda m: dict_union({
                 'glyph': m[0],
                 'off-x': m[1]['x'] if 'x' in m[1] else 0.0,
                 'off-y': m[1]['y'] if 'y' in m[1] else 0.0,
-                'glyph-width': m[1]['glyph-width'],
-                'glyph-height': m[1]['glyph-height'],
-            }, glyph_offsets.items()))
+            }, rob_rem(rob_rem(m[1], 'x'), 'y')), glyph_offsets.items()))
     layout: [dict] = parse_layout(layout_row_profiles,
                                   read_yaml(pargs.layout_file))
     glyph_map = read_yaml(pargs.glyph_map_file)
