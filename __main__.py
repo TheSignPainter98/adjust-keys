@@ -24,7 +24,7 @@ from log import die, init_logging, printe, printi
 from positions import resolve_positions
 from sys import argv, exit
 from yaml_io import read_yaml, write_yaml
-from util import inner_join
+from util import dict_union, inner_join
 
 
 ##
@@ -74,7 +74,9 @@ def collect_data(pargs: Namespace) -> [dict]:
             lambda m: {
                 'glyph': m[0],
                 'off-x': m[1]['x'] if 'x' in m[1] else 0.0,
-                'off-y': m[1]['y'] if 'y' in m[1] else 0.0
+                'off-y': m[1]['y'] if 'y' in m[1] else 0.0,
+                'glyph-width': m[1]['glyph-width'],
+                'glyph-height': m[1]['glyph-height'],
             }, glyph_offsets.items()))
     layout: [dict] = parse_layout(layout_row_profiles,
                                   read_yaml(pargs.layout_file))
@@ -93,10 +95,7 @@ def collect_data(pargs: Namespace) -> [dict]:
     profile_x_y_offset_keys = inner_join(profile_x_offset_keys, 'profile-part',
                                          profile_y_offsets_rel, 'profile-part')
     data = list(map(lambda k: k if 'key-type' not in k else dict_union(k, list(filter(lambda s: s['key-type'] == k['key-type'], profile_special_offsets_rel))[0]), profile_x_y_offset_keys))
-    #  profile_x_y_special_offset_keys = inner_join(profile_x_y_offset_keys,
-                                                 #  'profile-part',
-                                                 #  profile_special_offsets_rel,
-                                                 #  'profile-part')
+
     return data
 
 
