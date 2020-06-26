@@ -30,8 +30,7 @@ from yaml_io import read_yaml, write_yaml
 def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
 
-    ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Output verbosely')
-    ap.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='Suppress messages more than usual')
+    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely', default=0)
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: opts.yml)', default='opts.yml', metavar='file')
     ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap(default: 1.0)', default=1.0, metavar='num')
     ap.add_argument('-x', '--delta-x', action='store', type=float, dest='delta_x', help='Horizontal distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
