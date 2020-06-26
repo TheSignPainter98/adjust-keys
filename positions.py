@@ -24,7 +24,6 @@ def resolve_positions(data: [dict], ulen: float, dx: float, dy: float,
 def resolve_position(data: dict, ulen: float, dx: float, dy: float, ox: float,
                      oy: float) -> dict:
     ret = dict(data)
-    print(ret)
     ret['pos-x'] = ox + ulen * (ret['col'] + ret['off-x'] + ret['p-off-x'] - ret['glyph-width']/2) + dx * ret['num-dx']
     ret['pos-y'] = oy + ulen * (ret['row'] + ret['off-y'] + ret['p-off-y'] - ret['glyph-height']/2) + dy * ret['num-dy']
     return ret
