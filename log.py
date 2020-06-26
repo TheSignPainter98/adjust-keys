@@ -17,8 +17,7 @@
 
 from sys import argv, stderr
 
-verbose:bool = False
-quiet:bool = False
+verbosity:int = 0
 
 ##
 # @brief Initialise logging, should be called before any logging is to take place
@@ -27,12 +26,9 @@ quiet:bool = False
 # @param quiet_in:bool Whether to output quietly
 #
 # @return Nothing
-def init_logging(verbose_in:bool, quiet_in:bool):
-    global quiet, verbose
-    if verbose_in and quiet_in:
-        die("Please don't try to output both verbosely and quietly, it doesn't make any sense")
-    verbose = verbose_in
-    quiet = quiet_in
+def init_logging(verbosity_in:bool):
+    global verbosity
+    verbosity = verbosity_in
 
 ##
 # @brief Write a message to stderr and exit
@@ -53,7 +49,7 @@ def die(*args, **kwargs):
 #
 # @return Nothing
 def printi(*args, **kwargs):
-    if verbose:
+    if verbosity >= 1:
         print(*args, file=stderr, **kwargs)
 
 ##
@@ -74,5 +70,5 @@ def printe(*args, **kwargs):
 #
 # @return Nothing
 def printw(*args, **kwargs):
-    if not quiet:
+    if verbosity >= 0:
         print(f'{argv[0]}: WARNING:', *args, **kwargs)
