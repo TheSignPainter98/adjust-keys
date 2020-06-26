@@ -20,8 +20,10 @@ from re import match
 from util import key_subst, rem
 
 
-def parse_layout(layout: [[dict]]) -> [dict]:
+def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
     seenKeys: 'str->int' = {}
+    if len(layout_row_profiles) < len(layout):
+        die('Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but needed at least %d' %(len(layout_row_profiles), len(layout)))
 
     def parse_key(key: 'either str dict') -> dict:
         ret: dict
@@ -77,6 +79,7 @@ def parse_layout(layout: [[dict]]) -> [dict]:
     parsed_layout: [dict] = []
     row: int = 0
     numDeltaY: int = 0
+    lineInd:int = 0
     for line in layout:
         col: int = 0
         prevCol: int = 0
@@ -88,6 +91,7 @@ def parse_layout(layout: [[dict]]) -> [dict]:
             key['row'] = row
             key['num-dx'] = numDeltaX
             key['num-dy'] = numDeltaY
+            key['profile-part'] = layout_row_profiles[lineInd]
             if 'dim-y' in key:
                 # Assume that if dim-y is present there is no corresponding key
                 row += key['dim-y']
@@ -103,5 +107,6 @@ def parse_layout(layout: [[dict]]) -> [dict]:
         numDeltaY += 1
         if 'dim-y' not in line[-1]:
             row += 1
+        lineInd += 1
 
     return parsed_layout

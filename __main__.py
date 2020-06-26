@@ -18,14 +18,14 @@
 # This was written on literally the hottest day of the year :(
 # This was written the very next day, also on the hottest day of the year D:
 
-
-from args import parse_args
+from args import parse_args, Namespace
 from layout import parse_layout
-from log import init_logging, printe, printi
+from log import die, init_logging, printe, printi
 from positions import resolve_positions
 from sys import argv, exit
 from yaml_io import read_yaml, write_yaml
 from util import inner_join
+
 
 ##
 # @brief Entry point function, should be treated as the first thing called
@@ -33,26 +33,72 @@ from util import inner_join
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def main(args:[str]) -> int:
+def main(args: [str]) -> int:
     pargs = parse_args(args)
     init_logging(pargs.verbose, pargs.quiet)
 
-    #  profile = read_yaml(pargs.profile_file)
-    glyph_offsets = read_yaml(pargs.glyph_offset_file)
-    glyph_offsets_rel = list(map(lambda m: { 'glyph': m[0], 'off-x': m[1]['x'] if 'x' in m[1] else 0.0, 'off-y': m[1]['y'] if 'y' in m[1] else 0.0 }, glyph_offsets.items()))
-    layout:[dict] = parse_layout(read_yaml(pargs.layout_file))
-    glyph_map = read_yaml(pargs.glyph_map_file)
-    # Gee, a functor type class would really help here, you know? But that would require Python to have a decent type system and let's face it that'll probably never happen.
-    glyph_rel = list(map(lambda m: { 'key': m[0], 'glyph': m[1] }, glyph_map.items()))
+    data = collect_data(pargs)
 
-    key_offsets = inner_join(glyph_rel, 'glyph', glyph_offsets_rel, 'glyph')
-    offset_layout = inner_join(key_offsets, 'key', layout, 'key')
-
-    positions = resolve_positions(offset_layout, pargs.unit_length, pargs.delta_x, pargs.delta_y, pargs.global_x_offset, pargs.global_y_offset)
+    positions = resolve_positions(data, pargs.unit_length, pargs.delta_x,
+                                  pargs.delta_y, pargs.global_x_offset,
+                                  pargs.global_y_offset)
 
     write_yaml('-', positions)
 
     return 0
+
+
+def collect_data(pargs: Namespace) -> [dict]:
+    profile: dict = read_yaml(pargs.profile_file)
+    profile_x_offsets_rel: [dict] = list(
+        map(lambda m: {
+            'width': m[0],
+            'p-off-x': m[1]
+        }, profile['x-offsets'].items()))
+    profile_y_offsets_rel: [dict] = list(
+        map(lambda m: {
+            'profile-part': m[0],
+            'p-off-y': m[1]
+        }, profile['y-offsets'].items()))
+    profile_special_offsets_rel: [dict] = list(
+        map(
+            lambda m: {
+                'key-type': m[0],
+                'p-off-x': m[1]['x'] if 'x' in m[1] else 0.0,
+                'p-off-y': m[1]['y'] if 'y' in m[1] else 0.0
+            }, profile['special-offsets'].items()))
+    layout_row_profiles: [str] = read_yaml(pargs.layout_row_profile_file)
+    glyph_offsets = read_yaml(pargs.glyph_offset_file)
+    glyph_offsets_rel = list(
+        map(
+            lambda m: {
+                'glyph': m[0],
+                'off-x': m[1]['x'] if 'x' in m[1] else 0.0,
+                'off-y': m[1]['y'] if 'y' in m[1] else 0.0
+            }, glyph_offsets.items()))
+    layout: [dict] = parse_layout(layout_row_profiles,
+                                  read_yaml(pargs.layout_file))
+    glyph_map = read_yaml(pargs.glyph_map_file)
+    # Gee, a functor type class would really help here, you know? But that would require Python to have a decent type system and let's face it that'll probably never happen.
+    glyph_rel = list(
+        map(lambda m: {
+            'key': m[0],
+            'glyph': m[1]
+        }, glyph_map.items()))
+
+    key_offsets = inner_join(glyph_rel, 'glyph', glyph_offsets_rel, 'glyph')
+    glyph_offset_layout = inner_join(key_offsets, 'key', layout, 'key')
+    profile_x_offset_keys = inner_join(glyph_offset_layout, 'width',
+                                       profile_x_offsets_rel, 'width')
+    profile_x_y_offset_keys = inner_join(profile_x_offset_keys, 'profile-part',
+                                         profile_y_offsets_rel, 'profile-part')
+    data = list(map(lambda k: k if 'key-type' not in k else dict_union(k, list(filter(lambda s: s['key-type'] == k['key-type'], profile_special_offsets_rel))[0]), profile_x_y_offset_keys))
+    #  profile_x_y_special_offset_keys = inner_join(profile_x_y_offset_keys,
+                                                 #  'profile-part',
+                                                 #  profile_special_offsets_rel,
+                                                 #  'profile-part')
+    return data
+
 
 if __name__ == '__main__':
     exit(main(argv))

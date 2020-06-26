@@ -49,7 +49,10 @@ def list_intersection(a:list, b:list) -> list:
 #
 # @return A list of united, equal-key dictionaries [union(la, lb) | ls <- las, lb <- lbs, la[ka] == lb[kb]]
 def inner_join(las:[dict], ka:object, lbs:[dict], kb:object) -> [dict]:
-    return list(reduce(concat, list(map(lambda la: [dict_union(la, lb) for lb in lbs if la[ka] == lb[kb]], las))))
+    if las == [] or lbs == []:
+        return []
+    else:
+        return list(reduce(concat, list(map(lambda la: [dict_union(la, lb) for lb in lbs if la[ka] == lb[kb]], las))))
 
 ##
 # @brief Output the union of a pair of dictionaries
