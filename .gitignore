@@ -1,4 +1,3 @@
-*.yml
 *.json
 __pycache__/
 adjustkeys.zip
