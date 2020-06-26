@@ -90,3 +90,26 @@ def rem(d:dict, k) -> dict:
     t = dict(d)
     del t[k]
     return t
+
+##
+# @brief Return a copt of a dictionary with a particular key removed if present
+#
+# @param d:dict A dictionary
+# @param k A key possibly in `d`
+#
+# @return `d` without the entry at `k` if `k` is in `d`, otherwise `d`
+def rob_rem(d:dict, k) -> dict:
+    t = dict(d)
+    if k in t:
+        del t[k]
+    return t
+
+##
+# @brief Compute the difference between a pair of lists
+#
+# @param a:list A list
+# @param b:list Another list
+#
+# @return `a` \ `b`
+def list_diff(a:list, b:list) -> list:
+    return [x for x in a and x not in b]
