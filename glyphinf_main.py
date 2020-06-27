@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from functools import reduce
+from log import die, printe
 from os.path import basename
 from svgpathtools import svg2paths
 from sys import argv, exit, stderr
@@ -10,13 +11,17 @@ from yaml_io import write_yaml
 
 
 def main(args: [str]) -> int:
-    #  write_yaml('/dev/null', list(map(lambda a: glyph_inf(basename(a)[:-4], a), args)))
-    write_yaml('-', glyph_inf(basename(args[1])[:-4], args[1]))
+    write_yaml('/dev/null', list(map(lambda a: glyph_inf(basename(a)[:-4], a), args[1:])))
+    if len(args) == 1:
+        die('Insufficient arguments, please pass at least one .svg file')
+    elif any(list(filter(lambda a: not a.endswith('.svg'), args[1:]))):
+        die('Only svg file-names are valid, the following have the wrong extension:', ' '.join(list(filter(lambda a: not a.endswith('.svg'), args[1:]))))
+
+    write_yaml('-', list(map(lambda a: glyph_inf(basename(a)[:-4], a), args[1:])))
     return 0
 
 
 def glyph_inf(gname: str, gpath: str) -> dict:
-    print(gname, '@', gpath)
     gfile: Document = parse(gpath).documentElement
     svg_width:float = float(gfile.attributes['width'].value)
     svg_height:float = float(gfile.attributes['height'].value)
@@ -29,10 +34,10 @@ def glyph_inf(gname: str, gpath: str) -> dict:
     with open(tmpLoc, 'w+') as o:
         print(gfile.toxml(), file=o)
 
-    # This library doesn't seem to support just reading from a buffer, so to the disk we go!
+    # This library doesn't seem to support just reading from a buffer, so to the disk we go! ...and also ridiculous running time too
     (paths,attrs) = svg2paths(tmpLoc)
     (xmin,xmax,ymin,ymax) = paths[0].bbox()
-    print(paths[0].bbox())
+    #  print(paths[0].bbox())
     return {gname : { 'x': 0.5 * (1 - (xmax + xmin)/svg_width), 'y': 0.5 * (1 - (ymax + ymin)/svg_height), 'glyph-width': (xmax - xmin)/svg_width, 'glyph-height': (ymax - ymin)/svg_height }}
 
 
