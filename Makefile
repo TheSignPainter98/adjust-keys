@@ -2,11 +2,26 @@
 
 .DEFAULT_GOAL := adjustkeys
 
-PY_SRCS = $(wildcard *.py)
+ADJUST_KEYS_SRCS = $(shell ./deps adjust_keys_main.py)
+GLYPH_INF_KEYS_SRCS = $(shell ./deps adjust_keys_main.py)
 
-adjustkeys: $(PY_SRCS)
-	zip $@.zip $^
-	echo '#!/usr/bin/python3' | cat - $@.zip > $@
+
+adjustkeys: $(ADJUST_KEYS_SRCS)
+	$(RM) $(wildcard bin/*)
+	mkdir bin
+	cp $^ bin
+	mv bin/adjust_keys_main.py bin/__main__.py
+	zip bin/$@.zip bin/$^
+	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
+	chmod 700 $@
+
+glyphinf: $(GLYPH_INF_KEYS_SRCS)
+	$(RM) $(wildcard bin/*)
+	mkdir bin
+	cp $^ bin
+	mv bin/glyphinf_main.py bin/__main__.py
+	zip bin/$@.zip bin/$^
+	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
 	chmod 700 $@
 
 clean:
