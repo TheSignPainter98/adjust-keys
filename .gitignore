@@ -1,4 +1,6 @@
 *.json
 __pycache__/
-adjustkeys.zip
 adjustkeys
+glyphinf
+bin/
+*.swp
