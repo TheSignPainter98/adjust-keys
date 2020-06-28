@@ -24,7 +24,7 @@ Assuming `git` is installed, you can build the code with the following commands.
 ```bash
 git clone https://github.com/TheSignPainter98/adjust-keys
 cd adjust-keys
-make # Optional
+make # (This step is optional, so don't worry if it doesn't work, see below)
 ```
 
 I've only tested this on Linux, so the build system might require the installation of a few dependencies.
