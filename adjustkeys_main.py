@@ -45,7 +45,8 @@ def main(args: [str]) -> int:
                 lambda m: {
                     'glyph': m['glyph'],
                     'pos-x': m['pos-x'],
-                    'pos-y': m['pos-y']
+                    'pos-y': m['pos-y'],
+                    'src': m['src']
                 }, positions)))
 
     return 0

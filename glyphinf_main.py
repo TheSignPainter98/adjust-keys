@@ -39,7 +39,7 @@ def glyph_inf(gname: str, gpath: str) -> dict:
     (paths,attrs) = svg2paths(gpath)
     if len(paths) > 0:
         (xmin,xmax,ymin,ymax) = paths[0].bbox()
-        return {gname : { 'x': float(0.5 * (1 - (xmax + xmin)/svg_width)), 'y': float(0.5 * (1 - (ymax + ymin)/svg_height)), 'glyph-width': float((xmax - xmin)/svg_width), 'glyph-height': float((ymax - ymin)/svg_height) }}
+        return {gname : { 'x': float(0.5 * (1 - (xmax + xmin)/svg_width)), 'y': float(0.5 * (1 - (ymax + ymin)/svg_height)), 'glyph-width': float((xmax - xmin)/svg_width), 'glyph-height': float((ymax - ymin)/svg_height), 'src': gpath }}
     else:
         die('No paths detected for glyph %s @ %s' %(gname, gpath))
 
