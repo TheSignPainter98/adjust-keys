@@ -5,7 +5,7 @@ from log import die, printe
 from os.path import basename
 from svgpathtools import svg2paths
 from sys import argv, exit, stderr
-from util import list_diff
+from util import dict_union, list_diff
 from xml.dom.minidom import Document, Element, parse
 from yaml_io import write_yaml
 
@@ -17,7 +17,8 @@ def main(args: [str]) -> int:
     elif any(list(filter(lambda a: not a.endswith('.svg'), args[1:]))):
         die('Only svg file-names are valid, the following have the wrong extension:', ' '.join(list(filter(lambda a: not a.endswith('.svg'), args[1:]))))
 
-    write_yaml('-', list(map(lambda a: glyph_inf(basename(a)[:-4], a), args[1:])))
+    glyphInf:dict = dict(reduce(lambda a,b: dict_union(a,b), map(lambda a: glyph_inf(basename(a)[:-4], a), args[1:]), {}))
+    write_yaml('-', glyphInf)
     return 0
 
 
