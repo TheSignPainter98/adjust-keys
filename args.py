@@ -31,6 +31,8 @@ def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
 
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely', default=0)
+    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files', default=0)
+    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files', default=0)
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: opts.yml)', default='opts.yml', metavar='file')
     ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap(default: 1.0)', default=1.0, metavar='num')
     ap.add_argument('-x', '--delta-x', action='store', type=float, dest='delta_x', help='Horizontal distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
