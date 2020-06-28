@@ -57,7 +57,6 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
         else:
             ret['height'] = 1.0
 
-        #  if ('key' not in ret or key == '') and ('dim-x' not in ret and 'dim-y' not in ret):
         if 'dim-x' not in ret and 'dim-y' not in ret:
             if 'key' not in ret or key == '':
                 printw("Key \"%s\" %s 'key' field, please put one in" %
