@@ -45,7 +45,7 @@ To see what goes in there, just omit that last part and the script will print it
 To obtain a single `svg` image which positions your glyphs onto a given keycap layout of a given profile (with some appropriate parameters), call:
 
 ```bash
-python3 ./adjustkeys_main.py -u unit_length -x x-margin-between-caps -y same-for-y -P profile_file.yml -G glyphs.yml -L layout_file.yml -Q profile_rows.yml -M glyph_map_file.yml
+python3 ./adjustkeys_main.py -u unit_length -x x-margin-between-caps -y same-for-y -P profile_file.yml -G glyphs.yml -L layout_file.yml -R profile_rows.yml -M glyph_map_file.yml
 ```
 A subset of the above options should be sufficient---each of the above has a default value so you can clean things up a little by making use of those.
 
