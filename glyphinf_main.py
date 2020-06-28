@@ -26,20 +26,13 @@ def glyph_inf(gname: str, gpath: str) -> dict:
     gfile: Document = parse(gpath).documentElement
     svg_width:float = float(gfile.attributes['width'].value)
     svg_height:float = float(gfile.attributes['height'].value)
-    nodes: [Element] = node_list(gfile)
-    reqNodes:[Element] = list(filter(lambda n: necessary_for_glyphs(gname, n), nodes))
-    for excessNode in list_diff(nodes, reqNodes):
-        excessNode.parentNode.removeChild(excessNode)
 
-    tmpLoc:str = '/tmp/glyph-%s.svg' % gname
-    with open(tmpLoc, 'w+') as o:
-        print(gfile.toxml(), file=o)
-
-    # This library doesn't seem to support just reading from a buffer, so to the disk we go! ...and also ridiculous running time too
-    (paths,attrs) = svg2paths(tmpLoc)
-    (xmin,xmax,ymin,ymax) = paths[0].bbox()
-    #  print(paths[0].bbox())
-    return {gname : { 'x': 0.5 * (1 - (xmax + xmin)/svg_width), 'y': 0.5 * (1 - (ymax + ymin)/svg_height), 'glyph-width': (xmax - xmin)/svg_width, 'glyph-height': (ymax - ymin)/svg_height }}
+    (paths,attrs) = svg2paths(gpath)
+    if len(paths) > 0:
+        (xmin,xmax,ymin,ymax) = paths[0].bbox()
+        return {gname : { 'x': float(0.5 * (1 - (xmax + xmin)/svg_width)), 'y': float(0.5 * (1 - (ymax + ymin)/svg_height)), 'glyph-width': float((xmax - xmin)/svg_width), 'glyph-height': float((ymax - ymin)/svg_height) }}
+    else:
+        die('No paths detected for glyph %s @ %s' %(gname, gpath))
 
 
 def necessary_for_glyphs(gname:str, elem: Element) -> bool:
