@@ -17,24 +17,43 @@ Of course, using Python was an absolutely terrible idea due to it's basically us
 Haskell would have been a _far_ better option.
 Everyone has their regrets, eh?
 
-## How to obtain &amp; Usage
+## How to obtain &amp; use
 
-Assuming `git` is installed, you can get this code by running
+Assuming `git` is installed, you can build the code with the following commands.
 
 ```bash
 git clone https://github.com/TheSignPainter98/adjust-keys
+cd adjust-keys
+make # Optional
 ```
 
-I don't plan to release this on any package managers.
+I've only tested this on Linux, so the build system might require the installation of a few dependencies.
+The binaries produced should be cross-platform---they're just zips of Python scripts.
 
-To run the code, go into the `adjust-keys` directory the above creates and run:
+The last step is optional and only used to obtain single binaries which are a little easier to distribute.
+If you have run it, to test the binary you can replace `python3 ./glyphinf_main.py` with `./glyphinf` and `python3 ./adjustkeys_main.py` with `./adjustkeys` in the following commands.
+
+Once you're in the `adjust-keys` directory, you can obtain positioning information about your glyphs by calling `glyphinf` on them.
 
 ```bash
-./main.py
+python3 ./glyphinf_main.py /path/to/glyphs/*.svg > glyphs.yml
 ```
 
-More information about usage can be found using
+The `> glyphs.yml` just copies the output of the script into the `glyphs.yml` file for later use.
+To see what goes in there, just omit that last part and the script will print its output to the console.
+
+To obtain a single `svg` image which positions your glyphs onto a given keycap layout of a given profile (with some appropriate parameters), call:
 
 ```bash
-./main.py -h
+python3 ./adjustkeys_main.py -u unit_length -x x-margin-between-caps -y same-for-y -P profile_file.yml -G glyphs.yml -L layout_file.yml -Q profile_rows.yml -M glyph_map_file.yml
 ```
+A subset of the above options should be sufficient---each of the above has a default value so you can clean things up a little by making use of those.
+
+Further usage information about usage can be found using
+
+```bash
+python3 ./adjustkeys_main.py -h
+python3 ./glyphinf_main.py -h
+```
+
+I don't plan to release this on any package managers---unless requested.
