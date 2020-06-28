@@ -20,8 +20,10 @@
 
 from adjust_keys import adjust_keys
 from args import parse_args, Namespace
+from layout import parse_layout
 from sys import argv, exit
-from yaml_io import write_yaml
+from util import concat
+from yaml_io import read_yaml, write_yaml
 
 
 ##
@@ -32,6 +34,14 @@ from yaml_io import write_yaml
 # @return Zero if and only if the program is to exit successfully
 def main(args: [str]) -> int:
     pargs: Namespace = parse_args(args)
+
+    if pargs.listKeys:
+        print('\n'.join(list(map(lambda k: k['key'], parse_layout(read_yaml(pargs.layout_row_profile_file), read_yaml(pargs.layout_file))))))
+        return 0
+    if pargs.listGlyphs:
+        print('\n'.join(list(map(lambda p: p[0], read_yaml(pargs.glyph_offset_file).items()))))
+        return 0
+
     positions: [dict] = adjust_keys(
         pargs.verbosity, pargs.profile_file, pargs.layout_row_profile_file,
         pargs.glyph_offset_file, pargs.layout_file, pargs.glyph_map_file,
