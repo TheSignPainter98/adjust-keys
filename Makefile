@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := all
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjust_keys_main.py)
+ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys_main.py)
 GLYPH_INF_KEYS_SRCS = $(shell ./deps glyphinf_main.py)
 
 all: adjustkeys glyphinf
@@ -12,8 +12,8 @@ adjustkeys: $(ADJUST_KEYS_SRCS)
 	$(RM) -r bin/
 	mkdir bin
 	cp $^ bin
-	mv bin/adjust_keys_main.py bin/__main__.py
-	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v adjust_keys_main) __main__.py && cd ../
+	mv bin/adjustkeys_main.py bin/__main__.py
+	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v adjustkeys_main) __main__.py && cd ../
 	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
 	chmod 700 $@
 
