@@ -1,3 +1,132 @@
-Esc: beth
-P: ayin
-Enter: mem
+Esc:
+F1: F1
+F2: F2
+F3: F3
+F4: F4
+F5: F5
+F6: F6
+F7: F7
+F8: F8
+F9: F9
+F10: F10
+F11: F11
+F12: F12
+PrtSc: Ns
+Scroll Lock: Nr
+Break: Nr2
+'`': N`¬
+1: 1
+2: 2
+3: 3
+4: 4
+5: 5
+6: 6
+7: 7
+8: 8
+9: 9
+0: 10
+-: N-_
+=: N=+
+SOME_ID:
+Backspace: Nb
+Insert: Nf
+Home: Nh
+PgUp: Ng1
+Num Lock: Nm
+/: Nt2
+'*':
+--2: Nz3
+SOME_ID-2:
+Tab:
+Q: qoph
+W: waw
+E: 104
+R: resh
+T: teth2
+Y: yodh
+U: teth
+I: beth
+O: ayin
+P: pe
+'[':
+']':
+Enter:
+Delete: Nt
+End:
+PgDn: Ng2
+Home-2:
+8-2:
+PgUp-2:
+SOME_ID-3:
++:
+SOME_ID-4:
+Caps Lock:
+A: alph
+S: sade
+D: daleth
+F:
+G: gamel
+H: heth
+J: he
+K: kaph
+L: lamedh
+;: Nd
+"'": Na
+'#':
+4-2:
+5-2:
+6-2:
+SOME_ID-5:
+Shift:
+\: Ny
+Z: zayin
+X: sin
+C: samekh
+V: taw
+B: beth2
+N: nun
+M: mem
+',':
+'.': Ng
+/-2: Ny2
+SOME_ID-6:
+Shift-2:
+↑: arr-up
+End-2:
+2-2:
+PgDn-2:
+SOME_ID-7:
+Enter-2:
+SOME_ID-8:
+Ctrl: Nk
+SOME_ID-9:
+Win: Nf2
+SOME_ID-10:
+Alt: Nl
+SOME_ID-11:
+SOME_ID-12:
+SOME_ID-13:
+AltGr: Nl
+SOME_ID-14:
+Win-2: Nf2
+SOME_ID-15:
+Menu: Nn
+SOME_ID-16:
+Ctrl-2: Nk
+←: arr-lft
+↓: arr-dn
+→: arr-rgt
+Ins:
+Del: word-space
+# # Ns-1
+# # Ns-2
+# # Ns-3
+# Ns2
+# # Ns2-1
+# Ns3
+# # Nt-1
+# # Nt-2
+# Nz
+# Nz-1
+# Nz2
+# Nz4
