@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from log import printe
+from log import printe, printi
 from os.path import exists
 from sys import stdin
 from yaml import dump, FullLoader, load
