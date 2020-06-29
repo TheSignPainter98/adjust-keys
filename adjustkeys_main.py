@@ -42,22 +42,13 @@ def main(args: [str]) -> int:
         print('\n'.join(list(map(lambda p: p[0], read_yaml(pargs.glyph_offset_file).items()))))
         return 0
 
-    positions: [dict] = adjust_keys(
+    svg: str = adjust_keys(
         pargs.verbosity, pargs.profile_file, pargs.layout_row_profile_file,
         pargs.glyph_offset_file, pargs.layout_file, pargs.glyph_map_file,
         pargs.unit_length, pargs.delta_x, pargs.delta_y, pargs.global_x_offset,
         pargs.global_y_offset)
 
-    write_yaml(
-        '-',
-        list(
-            map(
-                lambda m: {
-                    'glyph': m['glyph'],
-                    'pos-x': m['pos-x'],
-                    'pos-y': m['pos-y'],
-                    'src': m['src']
-                }, positions)))
+    print(svg)
 
     return 0
 
