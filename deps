@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from functools import reduce
+from log import die
 from os.path import exists
 from util import concat, list_diff
 from sys import exit, argv
