@@ -5,3 +5,4 @@ glyphinf
 bin/
 *.swp
 *.svg
+*.c

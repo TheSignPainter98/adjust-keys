@@ -8,26 +8,25 @@ GLYPH_INF_KEYS_SRCS = $(shell ./deps glyphinf_main.py)
 all: adjustkeys glyphinf
 .PHONY: all
 
-adjustkeys: $(ADJUST_KEYS_SRCS)
+define compilePython
 	$(RM) -r bin/
+	cython3 -X language_level=3 $^
 	mkdir bin
 	cp $^ bin
-	mv bin/adjustkeys_main.py bin/__main__.py
-	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v adjustkeys_main) __main__.py && cd ../
+	mv bin/$(@)_main.py bin/__main__.py
+	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py && cd ../
 	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
 	chmod 700 $@
+endef
+
+adjustkeys: $(ADJUST_KEYS_SRCS)
+	$(compilePython)
 
 glyphinf: $(GLYPH_INF_KEYS_SRCS)
-	$(RM) -r bin/
-	mkdir bin
-	cp $^ bin
-	mv bin/glyphinf_main.py bin/__main__.py
-	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v glyphinf_main) __main__.py && cd ../
-	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
-	chmod 700 $@
+	$(compilePython)
 
 clean:
-	$(RM) -r __pycache__/ adjustkeys adjustkeys.zip
+	$(RM) -r __pycache__/ adjustkeys adjustkeys.zip *.c
 .PHONY: clean
 
 run: adjustkeys

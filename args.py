@@ -16,6 +16,7 @@
 #
 
 from argparse import ArgumentParser, Namespace
+from log import printe
 from os.path import exists
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
