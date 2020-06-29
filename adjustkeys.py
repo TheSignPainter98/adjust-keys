@@ -45,14 +45,14 @@ def adjust_keys(verbosity: int, profile_file: str,
         positions[i]['svg'].setAttribute('x', str(positions[i]['pos-x']))
         positions[i]['svg'].setAttribute('y', str(positions[i]['pos-y']))
 
-    svgWidth: int = (max(list(map(lambda p: p['pos-x'], positions))) +
-                     1) * unit_length
-    svgHeight: int = (max(list(map(lambda p: p['pos-y'], positions))) +
-                      1) * unit_length
+    svgWidth: int = max(list(map(lambda p: p['pos-x'],
+                                 positions))) + unit_length
+    svgHeight: int = max(list(map(lambda p: p['pos-y'],
+                                  positions))) + unit_length
     svg: str = ''.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
-        ] + list(map(lambda p: p['svg'].toxml(), positions)) + ['</svg>'])
+    ] + list(map(lambda p: p['svg'].toxml(), positions)) + ['</svg>'])
 
     return svg
 
