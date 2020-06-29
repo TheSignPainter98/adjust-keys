@@ -18,7 +18,7 @@
 # This was written on literally the hottest day of the year :(
 # This was written the very next day, also on the hottest day of the year D:
 
-from adjust_keys import adjust_keys
+from adjustkeys import adjust_keys
 from args import parse_args, Namespace
 from layout import parse_layout
 from sys import argv, exit
@@ -48,7 +48,11 @@ def main(args: [str]) -> int:
         pargs.unit_length, pargs.delta_x, pargs.delta_y, pargs.global_x_offset,
         pargs.global_y_offset)
 
-    print(svg)
+    if pargs.output_location == '-':
+        print(svg)
+    else:
+        with open(pargs.output_location, 'w+') as f:
+            print(svg, file=f)
 
     return 0
 
