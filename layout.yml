@@ -61,7 +61,7 @@
 
     ='
   - w: 2
-  - Backspace
+    key: Backspace
   - x: 0.25
   - Insert
   - Home
@@ -72,7 +72,7 @@
   - '*'
   - '-'
 - - w: 1.5
-  - Tab
+    key: Tab
   - Q
   - W
   - E
@@ -112,9 +112,10 @@
 
     PgUp'
   - h: 2
-  - +
+    key: +
+    key-type: num-plus
 - - w: 1.75
-  - Caps Lock
+    key: Caps Lock
   - A
   - S
   - D
@@ -142,7 +143,7 @@
 
     →'
 - - w: 1.25
-  - Shift
+    key: Shift
   - '|
 
     \'
@@ -163,7 +164,7 @@
 
     /'
   - w: 2.75
-  - Shift
+    key: Shift
   - x: 1.25
   - ↑
   - x: 1.25
@@ -177,32 +178,33 @@
 
     PgDn'
   - h: 2
-  - Enter
+    key: Enter
+    key-type: num-enter
 - - w: 1.25
-  - Ctrl
+    key: Ctrl
   - w: 1.25
-  - Win
+    key: Win
   - w: 1.25
-  - Alt
+    key: Alt
   - a: 7
     w: 6.25
-  - ''
+    key: ''
   - a: 4
     w: 1.25
-  - AltGr
+    key: AltGr
   - w: 1.25
-  - Win
+    key: Win
   - w: 1.25
-  - Menu
+    key: Menu
   - w: 1.25
-  - Ctrl
+    key: Ctrl
   - x: 0.25
   - ←
   - ↓
   - →
   - x: 0.25
-    w: 2
-  - '0
+  - w: 2
+    key: '0
 
     Ins'
   - '.
