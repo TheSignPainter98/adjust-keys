@@ -71,4 +71,4 @@ def printe(*args, **kwargs):
 # @return Nothing
 def printw(*args, **kwargs):
     if verbosity >= 0:
-        print(f'{argv[0]}: WARNING:', *args, **kwargs)
+        print(f'{argv[0]}: WARNING:', *args, file=stderr, **kwargs)
