@@ -15,11 +15,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
+from functools import reduce
 from layout import parse_layout
 from log import die, init_logging
+from os.path import exists
 from positions import resolve_positions
+from svgpathtools import svg2paths
+from util import concat, dict_union, inner_join, rob_rem
+from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
-from util import dict_union, inner_join, rob_rem
 
 
 def adjust_keys(verbosity: int, profile_file: str,
@@ -31,8 +35,26 @@ def adjust_keys(verbosity: int, profile_file: str,
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
                                 glyph_offset_file, layout_file, glyph_map_file)
 
-    return resolve_positions(data, unit_length, delta_x, delta_y,
-                             global_x_offset, global_y_offset)
+    positions: [dict] = resolve_positions(data, unit_length, delta_x, delta_y,
+                                          global_x_offset, global_y_offset)
+
+    for i in range(len(positions)):
+        with open(positions[i]['src'], 'r') as f:
+            positions[i] = dict_union(
+                positions[i], {'svg': parseString(f.read()).documentElement})
+        positions[i]['svg'].setAttribute('x', str(positions[i]['pos-x']))
+        positions[i]['svg'].setAttribute('y', str(positions[i]['pos-y']))
+
+    svgWidth: int = (max(list(map(lambda p: p['pos-x'], positions))) +
+                     1) * unit_length
+    svgHeight: int = (max(list(map(lambda p: p['pos-y'], positions))) +
+                      1) * unit_length
+    svg: str = ''.join([
+        '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        % (svgWidth, svgHeight, svgWidth, svgHeight)
+        ] + list(map(lambda p: p['svg'].toxml(), positions)) + ['</svg>'])
+
+    return svg
 
 
 def collect_data(profile_file: str, layout_row_profile_file: str,
