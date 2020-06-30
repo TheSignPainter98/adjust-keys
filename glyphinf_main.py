@@ -23,10 +23,10 @@ def main(args: [str]) -> int:
 
     if len(fargs) == 0:
         die('Insufficient arguments, please pass at least one .svg file')
-    elif any(list(filter(lambda a: not a.endswith('.svg'), fargs[1:]))):
-        die('Only svg file-names are valid, the following have the wrong extension:', ' '.join(list(filter(lambda a: not a.endswith('.svg'), fargs[1:]))))
+    elif any(list(filter(lambda a: not a.endswith('.svg'), fargs))):
+        die('Only svg file-names are valid, the following have the wrong extension:', ' '.join(list(filter(lambda a: not a.endswith('.svg'), fargs))))
 
-    glyphInf:dict = dict(reduce(lambda a,b: dict_union(a,b), map(lambda f: glyph_inf(basename(f)[:-4], f), fargs[1:]), {}))
+    glyphInf:dict = dict(reduce(lambda a,b: dict_union(a,b), map(lambda f: glyph_inf(basename(f)[:-4], f), fargs), {}))
     write_yaml('-', glyphInf)
     return 0
 
