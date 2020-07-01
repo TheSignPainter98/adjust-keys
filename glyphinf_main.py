@@ -3,7 +3,6 @@
 from functools import reduce
 from log import die, printe
 from os.path import basename
-from svgpathtools import svg2paths
 from sys import argv, exit, stderr
 from util import dict_union, list_diff
 from xml.dom.minidom import Document, Element, parse
