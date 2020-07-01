@@ -85,9 +85,7 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
             lambda m: dict_union(
                 {
                     'glyph': m[0],
-                    'off-x': m[1]['x'] if 'x' in m[1] else 0.0,
-                    'off-y': m[1]['y'] if 'y' in m[1] else 0.0,
-                }, rob_rem(rob_rem(m[1], 'x'), 'y')), glyph_offsets.items()))
+                }, m[1]), glyph_offsets.items()))
     layout: [dict] = parse_layout(layout_row_profiles, read_yaml(layout_file))
     glyph_map = read_yaml(glyph_map_file)
     glyph_rel = list(

@@ -1,522 +1,352 @@
 '1':
-  glyph-height: 0.34782536231884054
-  glyph-width: 0.0
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/1.svg
-  x: 0.003782608695652223
-  y: -0.018993115942029015
 '10':
-  glyph-height: 0.07971014492753623
-  glyph-width: 0.23550724637681153
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/10.svg
-  x: 0.002528985507246395
-  y: -0.05859782608695652
+'102':
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
+  src: ../glyphs/102.svg
 '104':
-  glyph-height: 0.3423898550724638
-  glyph-width: 0.20652173913043473
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/104.svg
-  x: -0.000942028985507215
-  y: -0.0026565217391304463
 '2':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.07246376811594209
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/2.svg
-  x: 0.0010942028985507224
-  y: -0.01907536231884055
 '3':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.14492753623188412
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/3.svg
-  x: 0.0005942028985506664
-  y: -0.01907536231884055
 '4':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.275363768115942
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/4.svg
-  x: 0.00734130434782615
-  y: -0.01907536231884055
 '5':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.15217391304347822
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/5.svg
-  x: 0.0032210144927536377
-  y: -0.01907536231884055
 '6':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.15217391304347827
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/6.svg
-  x: 0.002717391304347838
-  y: -0.01907536231884055
 '7':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.2246376811594203
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/7.svg
-  x: 0.009463768115942017
-  y: -0.01907536231884055
 '8':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.30796992753623187
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/8.svg
-  x: 0.007148007246376764
-  y: -0.01907536231884055
 '9':
-  glyph-height: 0.347827536231884
-  glyph-width: 0.307970652173913
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/9.svg
-  x: 0.0030288043478260973
-  y: -0.01907536231884055
 F1:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.06884057971014498
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F1.svg
-  x: 0.0029057971014492257
-  y: 0.01254480286738352
 F10:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.20833333333333334
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F10.svg
-  x: 0.0006231884057971149
-  y: 0.01254480286738352
 F11:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.33152246376811595
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F11.svg
-  x: 0.003743115942028974
-  y: 0.01254480286738352
 F12:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.41485688405797105
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F12.svg
-  x: 0.0014356884057971087
-  y: 0.01254480286738352
 F2:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.1485507246376812
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F2.svg
-  x: 0.002405797101449225
-  y: 0.01254480286738352
 F3:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.23188405797101444
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F3.svg
-  x: 9.420289855077701e-05
-  y: 0.01254480286738352
 F4:
-  glyph-height: 0.34408602150537637
-  glyph-width: 0.31521630434782605
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F4.svg
-  x: 0.005032065217391246
-  y: 0.01254480286738352
 F5:
-  glyph-height: 0.18279805271158342
-  glyph-width: 0.27174202700511707
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F5.svg
-  x: 0.004278003875535452
-  y: 0.007167281887935861
 F6:
-  glyph-height: 0.36738422939068166
-  glyph-width: 0.27174244155699073
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F6.svg
-  x: 0.004928934136290808
-  y: 0.009677777777777452
 F7:
-  glyph-height: 0.3673835125448033
-  glyph-width: 0.27174256663697527
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F7.svg
-  x: 0.0032768227632396507
-  y: 0.009856630824372548
 F8:
-  glyph-height: 0.3673835125448033
-  glyph-width: 0.311594340952706
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F8.svg
-  x: 0.0009710835198310508
-  y: 0.009856630824372548
 F9:
-  glyph-height: 0.3673835125448033
-  glyph-width: 0.311594340952706
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/F9.svg
-  x: 0.0002174603314255008
-  y: 0.009856630824372548
 N-_:
-  glyph-height: 0.1485507246376811
-  glyph-width: 0.20833695652173914
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/N-_.svg
-  x: 0.0011213768115942435
-  y: -0.019076086956521743
 N=+:
-  glyph-height: 0.37681304347826083
-  glyph-width: 0.2318840579710149
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/N=+.svg
-  x: 0.003340579710144731
-  y: -0.01907536231884055
 "N`\xAC":
-  glyph-height: 0.34239275362318833
-  glyph-width: 0.16123188405797126
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: "../glyphs/N`\xAC.svg"
-  x: -0.007492753623188575
-  y: -0.021792753623188332
 Na:
-  glyph-height: 0.15217391304347846
-  glyph-width: 0.1340579710144929
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Na.svg
-  x: 0.0034601449275361573
-  y: -0.0034057971014493926
 Nb:
-  glyph-height: 0.050724637681159424
-  glyph-width: 0.050724637681159625
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nb.svg
-  x: 0.0033913043478260296
-  y: 0.0025326086956521943
 Nd:
-  glyph-height: 0.161231884057971
-  glyph-width: 0.28985434782608704
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nd.svg
-  x: -0.0014713768115939274
-  y: -0.0043115942028985055
 Nf:
-  glyph-height: 0.37137931383837797
-  glyph-width: 0.24638156122858887
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nf.svg
-  x: 0.0024126868124591527
-  y: -0.0023258888032466896
 Nf2:
-  glyph-height: 0.3514507246376811
-  glyph-width: 0.17391304347826086
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nf2.svg
-  x: 0.0
-  y: 0.002964492753623149
 Ng:
-  glyph-height: 0.3768123188405798
-  glyph-width: 0.028985507246376812
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ng.svg
-  x: 0.001351449275362293
-  y: 0.000264855072463821
 Ng1:
-  glyph-height: 0.3478271739130435
-  glyph-width: 0.2427536231884058
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ng1.svg
-  x: 0.003800724637681163
-  y: -0.011220471014492861
 Ng2:
-  glyph-height: 0.3478268115942029
-  glyph-width: 0.24275362318840585
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ng2.svg
-  x: 0.0037210144927535826
-  y: 0.005105434782608664
 Nh:
-  glyph-height: 0.347827536231884
-  glyph-width: 0.23369565217391305
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nh.svg
-  x: 0.0015797101449275819
-  y: -0.01907536231884055
 Nk:
-  glyph-height: 0.37681341354888964
-  glyph-width: 0.2862324367633629
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nk.svg
-  x: 0.005434506255999949
-  y: 0.0011530835860391053
 Nl:
-  glyph-height: 0.07789855072463762
-  glyph-width: 0.20471014492753645
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nl.svg
-  x: -0.0009057971014493349
-  y: 0.0020579710144927876
 Nm:
-  glyph-height: 0.34782717391304374
-  glyph-width: 0.2391304347826087
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nm.svg
-  x: -0.0010615942028985303
-  y: -0.011220471014492639
 Nn:
-  glyph-height: 0.37862463768115956
-  glyph-width: 0.028985507246377225
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nn.svg
-  x: -0.000989130434782437
-  y: 0.000247101449275533
 Nr:
-  glyph-height: 0.36200836915161916
-  glyph-width: 0.20108695652173933
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nr.svg
-  x: 0.0033188405797100473
-  y: 0.012544202520964831
 Nr2:
-  glyph-height: 0.05017921146953405
-  glyph-width: 0.050724637681159424
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nr2.svg
-  x: 0.0019094202898550239
-  y: 0.01254480286738352
 Ns:
-  glyph-height: 0.15398550724637686
-  glyph-width: 0.26992753623188404
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns.svg
-  x: 0.0003043478260869592
-  y: 0.0005760869565217264
 Ns-1:
-  glyph-height: 0.3620088202384637
-  glyph-width: 0.24637587028499322
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns-1.svg
-  x: 0.0006585261661214981
-  y: 0.012543976977542448
 Ns-2:
-  glyph-height: 0.16845878136200726
-  glyph-width: 0.16666666666666677
+  glyph-src-height: 279.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns-2.svg
-  x: 0.0028731884057971446
-  y: 0.10035842293906816
 Ns-3:
-  glyph-height: 0.3369576086956522
-  glyph-width: 0.2010869565217392
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns-3.svg
-  x: -0.0031159420289855744
-  y: -0.011220471014492861
 Ns2:
-  glyph-height: 0.3424044078178261
-  glyph-width: 0.1503623188405799
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns2.svg
-  x: -0.0022210144927536923
-  y: -0.002331189416159396
 Ns3:
-  glyph-height: 0.3424044078178261
-  glyph-width: 0.15036231884057977
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ns3.svg
-  x: 0.004521739130434743
-  y: -0.002331189416159396
-Ns3-1:
-  glyph-height: 0.3442036231884058
-  glyph-width: 0.23566344605475026
-  src: ../glyphs/Ns3-1.svg
-  x: 0.0017338969404188664
-  y: -0.0015431159420289386
+Ns4:
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
+  src: ../glyphs/Ns4.svg
 Nt:
-  glyph-height: 0.1557971014492753
-  glyph-width: 0.27898623188405797
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nt.svg
-  x: 0.004797463768116017
-  y: -0.017264492753623184
 Nt-1:
-  glyph-height: 0.18840579710144928
-  glyph-width: 0.37318840579710205
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nt-1.svg
-  x: 0.0018115942028984477
-  y: 0.0003913043478260825
 Nt-2:
-  glyph-height: 0.33695797101449276
-  glyph-width: 0.23007246376811605
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nt-2.svg
-  x: 0.00381884057971027
-  y: 0.0003920289855072756
 Nt2:
-  glyph-height: 0.3768167200945949
-  glyph-width: 0.24637990715685731
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nt2.svg
-  x: 0.0020628337486826576
-  y: -0.011220366418253747
 Ny:
-  glyph-height: 0.34782753623188406
-  glyph-width: 0.21739130434782608
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ny.svg
-  x: 0.0
-  y: 0.0003920289855072756
 Ny2:
-  glyph-height: 0.33695724637681157
-  glyph-width: 0.20289855072463747
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Ny2.svg
-  x: 0.000844202898550861
-  y: 0.000264855072463821
 Nz:
-  glyph-height: 0.1539855072463768
-  glyph-width: 0.27898731884057976
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nz.svg
-  x: 0.005058876811594226
-  y: 0.0008840579710144847
 Nz3:
-  glyph-height: 0.37681268115942085
-  glyph-width: 0.23188405797101444
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nz3.svg
-  x: -0.0009384057971013604
-  y: -0.011220471014492972
 Nz4:
-  glyph-height: 0.0
-  glyph-width: 0.19021739130434784
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nz4.svg
-  x: 0.0009456521739130141
-  y: 0.00026449275362322444
 Nz5:
-  glyph-height: 0.3659435129418237
-  glyph-width: 0.18478249374177216
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/Nz5.svg
-  x: 0.0018119819634410672
-  y: -0.003411611543375548
 alph:
-  glyph-height: 0.37680978260869596
-  glyph-width: 0.24275740597657036
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/alph.svg
-  x: 0.004842973700719344
-  y: -0.003403079710144974
 arr-dn:
-  glyph-height: 0.3768112318840583
-  glyph-width: 0.1986539855072464
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/arr-dn.svg
-  x: 0.0011222826086956794
-  y: 0.0011538043478261373
 arr-lft:
-  glyph-height: 0.184161231884058
-  glyph-width: 0.3725673913043484
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/arr-lft.svg
-  x: -0.00199891304347799
-  y: -0.0009682971014491892
 arr-rgt:
-  glyph-height: 0.184161231884058
-  glyph-width: 0.3768126811594204
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/arr-rgt.svg
-  x: 0.0027487318840579422
-  y: -0.0009682971014491892
 arr-up:
-  glyph-height: 0.3768125905797101
-  glyph-width: 0.1986539855072464
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/arr-up.svg
-  x: 0.0011222826086956794
-  y: 0.003888179347826093
 ayin:
-  glyph-height: 0.3478246376811594
-  glyph-width: 0.25
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/ayin.svg
-  x: 0.003304347826086962
-  y: 6.086956521733633e-05
 beth:
-  glyph-height: 0.3423898550724638
-  glyph-width: 0.21376811594202905
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/beth.svg
-  x: 0.0074311594202898235
-  y: 0.0027782608695651745
 beth2:
-  glyph-height: 0.34782681159420287
-  glyph-width: 0.18659420289855072
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/beth2.svg
-  x: 0.007876811594202948
-  y: 0.000264855072463821
 daleth:
-  glyph-height: 0.37137638542714785
-  glyph-width: 0.28985347537634665
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/daleth.svg
-  x: 0.0056549985577386
-  y: -0.0006888991847036063
 gamel:
-  glyph-height: 0.3768100711443943
-  glyph-width: 0.18478695692655484
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/gamel.svg
-  x: 0.03183188426037886
-  y: -0.003406558630701495
 he:
-  glyph-height: 0.3713753623188406
-  glyph-width: 0.1902173913043482
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/he.svg
-  x: 0.002746376811594009
-  y: -0.006123913043478257
 heth:
-  glyph-height: 0.37681014492753623
-  glyph-width: 0.20289855072463772
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/heth.svg
-  x: 0.0005289855072463379
-  y: -0.0034065217391304747
 kaph:
-  glyph-height: 0.34782463768115984
-  glyph-width: 0.15942028985507245
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/kaph.svg
-  x: 0.006775362318840572
-  y: -0.0034065217391306968
 lamedh:
-  glyph-height: 0.3478246376811594
-  glyph-width: 0.22693831509798212
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/lamedh.svg
-  x: 0.0015018569437625362
-  y: -0.0034065217391304747
 mem:
-  glyph-height: 0.34782681159420265
-  glyph-width: 0.26524959742351023
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/mem.svg
-  x: 0.00015780998389708367
-  y: 0.00026485507246393203
 nun:
-  glyph-height: 0.3496384057971011
-  glyph-width: 0.2181481481481479
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/nun.svg
-  x: 0.0024730273752014975
-  y: -0.0006409420289853474
 pe:
-  glyph-height: 0.34815739265363294
-  glyph-width: 0.20225288929197613
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/pe.svg
-  x: 0.0013155438753033044
-  y: 0.00022724705145416024
 qoph:
-  glyph-height: 0.3478246376811594
-  glyph-width: 0.2065217391304352
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/qoph.svg
-  x: 0.003688405797101224
-  y: 6.086956521733633e-05
 resh:
-  glyph-height: 0.3768101554999372
-  glyph-width: 0.2536264403900054
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/resh.svg
-  x: 0.01848575814588488
-  y: 6.087485141764715e-05
 sade:
-  glyph-height: 0.3478246376811594
-  glyph-width: 0.15760869565217386
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/sade.svg
-  x: -0.011057971014492685
-  y: -0.0034065217391304747
 samekh:
-  glyph-height: 0.37137753623188413
-  glyph-width: 0.1902173913043481
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/samekh.svg
-  x: -0.0001811594202899558
-  y: -0.002452536231884017
 sin:
-  glyph-height: 0.37681274237535983
-  glyph-width: 0.2753619565217391
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/sin.svg
-  x: 0.0012280797101449914
-  y: 0.0002646433050738639
 taw:
-  glyph-height: 0.37681478890496306
-  glyph-width: 0.25362623120100275
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/taw.svg
-  x: 0.00022644927536230597
-  y: 0.0002654732227007073
 teth:
-  glyph-height: 0.3478246376811594
-  glyph-width: 0.25
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/teth.svg
-  x: 0.004307971014492706
-  y: 6.086956521733633e-05
 teth2:
-  glyph-height: 0.37681014492753695
-  glyph-width: 0.27898478260869575
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/teth2.svg
-  x: 0.005307608695652166
-  y: 6.086956521733633e-05
 waw:
-  glyph-height: 0.37681014492753667
-  glyph-width: 0.23188563420654137
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/waw.svg
-  x: 0.0013720871798852396
-  y: 6.086956521733633e-05
 word-space:
-  glyph-height: 0.043478260869565424
-  glyph-width: 0.043478260869565216
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/word-space.svg
-  x: 0.0015579710144927872
-  y: 0.0011521739130436193
 yodh:
-  glyph-height: 0.3713782608695655
-  glyph-width: 0.29529028728028334
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/yodh.svg
-  x: 0.003899059258408999
-  y: -0.004136956521738955
 zayin:
-  glyph-height: 0.3768124780732345
-  glyph-width: 0.25181640364335295
+  glyph-src-height: 276.0
+  glyph-src-width: 276.0
   src: ../glyphs/zayin.svg
-  x: -0.0009864329017141849
-  y: 0.0002649346887911297

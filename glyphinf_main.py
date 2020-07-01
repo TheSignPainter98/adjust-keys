@@ -35,13 +35,7 @@ def glyph_inf(gname: str, gpath: str) -> dict:
     gfile: Document = parse(gpath).documentElement
     svg_width:float = float(gfile.attributes['width'].value)
     svg_height:float = float(gfile.attributes['height'].value)
-
-    (paths,attrs) = svg2paths(gpath)
-    if len(paths) > 0:
-        (xmin,xmax,ymin,ymax) = paths[0].bbox()
-        return {gname : { 'x': float(0.5 * (1 - (xmax + xmin)/svg_width)), 'y': float(0.5 * (1 - (ymax + ymin)/svg_height)), 'glyph-width': float((xmax - xmin)/svg_width), 'glyph-height': float((ymax - ymin)/svg_height), 'src': gpath }}
-    else:
-        die('No paths detected for glyph %s @ %s' %(gname, gpath))
+    return { gname : { 'glyph-src-width': float(svg_width), 'glyph-src-height': float(svg_height), 'src': gpath } }
 
 
 def necessary_for_glyphs(gname:str, elem: Element) -> bool:
