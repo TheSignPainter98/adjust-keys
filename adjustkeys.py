@@ -20,7 +20,6 @@ from layout import parse_layout
 from log import die, init_logging
 from os.path import exists
 from positions import resolve_positions
-from svgpathtools import svg2paths
 from util import concat, dict_union, inner_join, rob_rem
 from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
