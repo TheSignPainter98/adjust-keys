@@ -15,16 +15,16 @@ PrtSc: Ns
 Scroll Lock: Nr
 Break: Nr2
 '`': N`¬
-1: 1
-2: 2
-3: 3
-4: 4
-5: 5
-6: 6
-7: 7
-8: 8
-9: 9
-0: 10
+'1': '1'
+'2': '2'
+'3': '3'
+'4': '4'
+'5': '5'
+'6': '6'
+'7': '7'
+'8': '8'
+'9': '9'
+'0': '10'
 -: N-_
 =: N=+
 SOME_ID:
@@ -40,7 +40,7 @@ SOME_ID-2:
 Tab:
 Q: qoph
 W: waw
-E: 104
+E: '104'
 R: resh
 T: teth2
 Y: yodh
@@ -54,9 +54,9 @@ Enter:
 Delete: Nt
 End:
 PgDn: Ng2
-Home-2:
-8-2:
-PgUp-2:
+Home-2: '7'
+8-2: '8'
+PgUp-2: '9'
 SOME_ID-3:
 +:
 SOME_ID-4:
@@ -64,7 +64,7 @@ Caps Lock:
 A: alph
 S: sade
 D: daleth
-F:
+F: '102'
 G: gamel
 H: heth
 J: he
@@ -73,9 +73,9 @@ L: lamedh
 ;: Nd
 "'": Na
 '#':
-4-2:
-5-2:
-6-2:
+4-2: '4'
+5-2: '5'
+6-2: '6'
 SOME_ID-5:
 Shift:
 \: Ny
@@ -92,9 +92,9 @@ M: mem
 SOME_ID-6:
 Shift-2:
 ↑: arr-up
-End-2:
-2-2:
-PgDn-2:
+End-2: '3'
+2-2: '2'
+PgDn-2: '1'
 SOME_ID-7:
 Enter-2:
 SOME_ID-8:
