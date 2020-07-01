@@ -17,13 +17,20 @@
 
 
 def resolve_positions(data: [dict], ulen: float, dx: float, dy: float,
-                      ox: float, oy: float) -> [dict]:
-    return list(map(lambda d: resolve_position(d, ulen, dx, dy, ox, oy), data))
+        gx: float, gy: float) -> [dict]:
+    return list(map(lambda d: resolve_position(d, ulen, dx, dy, gx, gy), data))
 
 
-def resolve_position(data: dict, ulen: float, dx: float, dy: float, ox: float,
-                     oy: float) -> dict:
-    ret = dict(data)
-    ret['pos-x'] = ox + ulen * (ret['col'] + ret['off-x'] + ret['p-off-x'] - ret['glyph-width']/2) + dx * ret['num-dx']
-    ret['pos-y'] = oy + ulen * (ret['row'] + ret['off-y'] + ret['p-off-y'] - ret['glyph-height']/2) + dy * ret['num-dy']
+def resolve_position(data: dict, ulen: float, dx: float, dy: float, gx: float,
+        gy: float) -> dict:
+    ret:dict = dict(data)
+    # Compute the centre of the keycap
+    kx:float = gx + ulen * (ret['p-off-x'] + ret['col']) + dx * ret['num-dx']
+    ky:float = gy + ulen * (ret['p-off-y'] + ret['row']) + dy * ret['num-dy']
+    # Compute the location of the top left corner of the glyph svg from the centre of a keycap
+    cx:float = - 0.5 * ret['glyph-src-width']
+    cy:float = - 0.5 * ret['glyph-src-height']
+    # Compute compute where to place the svg
+    ret['pos-x'] = kx + cx
+    ret['pos-y'] = ky + cy
     return ret
