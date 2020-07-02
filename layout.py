@@ -17,7 +17,7 @@
 
 from log import die, printi, printw
 from re import match
-from util import key_subst, rem
+from util import dict_union, key_subst, rem, safe_get
 
 
 def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
@@ -25,24 +25,39 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
     if len(layout_row_profiles) < len(layout):
         die('Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but needed at least %d' %(len(layout_row_profiles), len(layout)))
 
-    def parse_key(key: 'either str dict') -> dict:
+    def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)') -> [int,dict]:
         ret: dict
+        shift: int = 1
         if type(key) == str:
-
-            def key_name(name: str) -> str:
-                parts = list(reversed(key.split('\n')))
-                alphaNums = list(
-                    filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
-                if alphaNums != []:
-                    return alphaNums[0]
-                else:
-                    return max(parts, default=0, key=len)
-
-            ret = {'key': str(key_name(key))}
+            parts:[str] = list(reversed(key.split('\n')))
+            alphaNums:[str] = list(filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
+            ret = { 'key': str(alphaNums[0] if alphaNums != [] else str(max(parts, default=0, key=len))) }
         elif type(key) == dict:
-            ret = dict(key)
+            if nextKey and type(nextKey) == str:
+                ret = dict_union(key, { 'key': nextKey })
+                shift = 2
+            else:
+                ret = dict(key)
         else:
-            die('Unknown key type entered: %s' % type(key))
+            die('Malformed data when reading %s and %s' %(str(key), str(layout)))
+
+        if 'key-type' not in ret:
+            ret_key:str = safe_get(ret, 'key')
+            if safe_get(ret, 'x') == 0.25 \
+                and safe_get(ret, 'a') == 7 \
+                and safe_get(ret, 'w') == 1.25 \
+                and safe_get(ret, 'h') == 2 \
+                and safe_get(ret, 'w2') == 1.5 \
+                and safe_get(ret, 'h2') == 1 \
+                and safe_get(ret, 'x2') == -0.25:
+                    ret['key-type'] = 'iso-enter'
+                    printw(ret['key-type'])
+            elif ret_key == '+' and safe_get(ret, 'h') == 2:
+                    ret['key-type'] = 'num-plus'
+                    printw(ret['key-type'])
+            elif ret_key and ret_key.lower() == 'enter' and safe_get(ret, 'h') == 2:
+                    ret['key-type'] = 'num-enter'
+                    printw(ret['key-type'])
 
         if 'x' in ret:
             ret = key_subst(ret, 'x', 'dim-x')
@@ -58,20 +73,22 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
             ret['height'] = 1.0
 
         if 'dim-x' not in ret and 'dim-y' not in ret:
-            if 'key' not in ret or key == '':
+            printi(ret)
+            if 'key' not in ret:
                 printw("Key \"%s\" %s 'key' field, please put one in" %
                        (str(key), 'missing' if key != '' else 'has empty'))
                 ret['key'] = 'SOME_ID'
-
             if ret['key'] in seenKeys.keys():
                 seenKeys[ret['key']] += 1
                 ret['key'] = ret['key'] + '-' + str(seenKeys[ret['key']])
             else:
                 seenKeys[ret['key']] = 1
 
-        return ret
+        if 'a' in key:
+            printi('"%s" "%s" |-> %s' %(key, nextKey, ret), shift)
+        return (shift, ret)
 
-    if type(layout) != list and type(layout[0]) != list:
+    if type(layout) != list and any(list(map(lambda l: type(l) != list, layout))):
         die('Expected a list of lists in the layout (see the JSON output of KLE)'
             )
 
@@ -83,26 +100,31 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
         col: int = 0
         prevCol: int = 0
         numDeltaX: int = 0
-        for key in line:
-            key = parse_key(key)
-            printi('Operating on %s' % key)
-            key['col'] = col
-            key['row'] = row
-            key['num-dx'] = numDeltaX
-            key['num-dy'] = numDeltaY
-            key['profile-part'] = layout_row_profiles[lineInd]
-            if 'dim-y' in key:
+        i:int = 0
+        while i < len(line):
+            printi('Operating on %s and %s' %(line[i], safe_get(line, i+1)))
+            (shift, line[i]) = parse_key(line[i], safe_get(line, i+1))
+            line[i]['col'] = col
+            line[i]['row'] = row
+            line[i]['num-dx'] = numDeltaX
+            line[i]['num-dy'] = numDeltaY
+            line[i]['profile-part'] = layout_row_profiles[lineInd]
+            if 'dim-y' in line[i]:
                 # Assume that if dim-y is present there is no corresponding key
-                row += key['dim-y']
+                row += line[i]['dim-y']
                 col = 0
                 numDeltaY -= 1
             else:
-                col += key['width']
-                if 'dim-x' not in key:
-                    # Assume that if dim-x is present there is no corresponding key
-                    parsed_layout += [key]
+                if 'dim-x' not in line[i]:
+                    col += line[i]['width']
                     numDeltaX += 1
-
+                else:
+                    col += line[i]['dim-x']
+                    line[i]['col'] = col
+                    col += line[i]['width']
+                if 'key' in line[i]:
+                    parsed_layout += [line[i]]
+            i += shift
         numDeltaY += 1
         if 'dim-y' not in line[-1]:
             row += 1

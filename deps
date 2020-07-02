@@ -3,7 +3,7 @@
 from functools import reduce
 from log import die
 from os.path import exists
-from util import concat, list_diff
+from util import concat, list_diff, safe_get
 from sys import exit, argv
 
 
@@ -36,10 +36,6 @@ def get_deps(mod: str) -> [str]:
             lambda l: safe_get(l, 0) == 'import' or safe_get(l, 2) == 'import',
             list(map(lambda l: l.split(' '), code))))
     return list(map(lambda l: l[1] if l[0] == 'from' else l[3], import_lines))
-
-
-def safe_get(a: [object], i: int) -> object:
-    return a[i] if len(a) > i else None
 
 
 if __name__ == '__main__':

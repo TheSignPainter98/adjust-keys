@@ -14,14 +14,17 @@ x-offsets:
   2.75: 1.375
 special-offsets:
   iso-enter:
-    x: 1.9
+    x: 0.75
     y: 1
   num-enter:
-    x: 0.0
+    x: 0.5
     y: 1
   num-plus:
-    x: 0.0
+    x: 0.5
     y: 1
   stepped-caps:
+    x: 0.625
+    y: 0.5
+  stepped-ctrl:
     x: 0.625
     y: 0.5
