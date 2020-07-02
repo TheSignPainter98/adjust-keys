@@ -108,7 +108,11 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
 
 
 def glyph_files(dname: str) -> [str]:
+    if not exists(dname):
+        die('Directory "%s" doesn\'t exist' % dname)
     svgs:[str] = []
     for (root, _, fnames) in walk(dname):
         svgs += list(map(lambda f: join(root, f), list(filter(lambda f: f.endswith('.svg'), fnames))))
+    if svgs == []:
+        die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
