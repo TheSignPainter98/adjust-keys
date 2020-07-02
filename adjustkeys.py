@@ -18,7 +18,9 @@
 from functools import reduce
 from layout import parse_layout
 from log import die, init_logging
-from os.path import exists
+from glyphinf import glyph_inf
+from os import walk
+from os.path import exists, join
 from positions import resolve_positions
 from util import concat, dict_union, inner_join, rob_rem
 from xml.dom.minidom import Element, parseString
@@ -26,13 +28,13 @@ from yaml_io import read_yaml
 
 
 def adjust_keys(verbosity: int, profile_file: str,
-                layout_row_profile_file: str, glyph_offset_file: str,
-                layout_file: str, glyph_map_file: str, unit_length: int,
-                delta_x: int, delta_y: int, global_x_offset: int,
+                layout_row_profile_file: str, glyph_dir: str, layout_file: str,
+                glyph_map_file: str, unit_length: int, delta_x: int,
+                delta_y: int, global_x_offset: int,
                 global_y_offset: int) -> [dict]:
     init_logging(verbosity)
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
-                                glyph_offset_file, layout_file, glyph_map_file)
+                                glyph_dir, layout_file, glyph_map_file)
 
     positions: [dict] = resolve_positions(data, unit_length, delta_x, delta_y,
                                           global_x_offset, global_y_offset)
@@ -45,9 +47,9 @@ def adjust_keys(verbosity: int, profile_file: str,
         positions[i]['svg'].setAttribute('y', str(positions[i]['pos-y']))
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'],
-                                 positions))) + unit_length
+                                 positions)), default=0) + unit_length
     svgHeight: int = max(list(map(lambda p: p['pos-y'],
-                                  positions))) + unit_length
+                                  positions)), default=0) + unit_length
     svg: str = ''.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
@@ -57,7 +59,7 @@ def adjust_keys(verbosity: int, profile_file: str,
 
 
 def collect_data(profile_file: str, layout_row_profile_file: str,
-                 glyph_offset_file: str, layout_file: str,
+                 glyph_dir: str, layout_file: str,
                  glyph_map_file: str) -> [dict]:
     profile: dict = read_yaml(profile_file)
     profile_x_offsets_rel: [dict] = list(
@@ -78,22 +80,16 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
                 'p-off-y': m[1]['y'] if 'y' in m[1] else 0.0
             }, profile['special-offsets'].items()))
     layout_row_profiles: [str] = read_yaml(layout_row_profile_file)
-    glyph_offsets = read_yaml(glyph_offset_file)
-    glyph_offsets_rel = list(
-        map(
-            lambda m: dict_union(
-                {
-                    'glyph': m[0],
-                }, m[1]), glyph_offsets.items()))
+    glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     layout: [dict] = parse_layout(layout_row_profiles, read_yaml(layout_file))
     glyph_map = read_yaml(glyph_map_file)
-    glyph_rel = list(
+    glyph_map_rel = list(
         map(lambda m: {
             'key': m[0],
             'glyph': m[1]
         }, glyph_map.items()))
 
-    key_offsets = inner_join(glyph_rel, 'glyph', glyph_offsets_rel, 'glyph')
+    key_offsets = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
     glyph_offset_layout = inner_join(key_offsets, 'key', layout, 'key')
     profile_x_offset_keys = inner_join(glyph_offset_layout, 'width',
                                        profile_x_offsets_rel, 'width')
@@ -109,3 +105,10 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
             profile_x_y_offset_keys))
 
     return data
+
+
+def glyph_files(dname: str) -> [str]:
+    svgs:[str] = []
+    for (root, _, fnames) in walk(dname):
+        svgs += list(map(lambda f: join(root, f), list(filter(lambda f: f.endswith('.svg'), fnames))))
+    return svgs
