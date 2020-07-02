@@ -128,3 +128,19 @@ def rob_rem(d: dict, k) -> dict:
 # @return `a` \ `b`
 def list_diff(a: list, b: list) -> list:
     return [x for x in a if x not in b]
+
+
+##
+# @brief Safely get the value at a key from a structure or None if the structure doesn't ahve the key
+#
+# @param [object]
+# @param object
+#
+# @return
+def safe_get(a: [object], i: object) -> object:
+    if type(a) == list:
+        return a[i] if len(a) > i else None
+    elif type(a) == dict:
+        return a[i] if i in a else None
+    else:
+        die('Can\'t safely-get from unhandled type %s (more code is needed in %s)' %(type(a), __file__))
