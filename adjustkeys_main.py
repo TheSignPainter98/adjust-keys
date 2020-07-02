@@ -44,7 +44,7 @@ def main(args: [str]) -> int:
 
     svg: str = adjust_keys(
         pargs.verbosity, pargs.profile_file, pargs.layout_row_profile_file,
-        pargs.glyph_offset_file, pargs.layout_file, pargs.glyph_map_file,
+        pargs.glyph_dir, pargs.layout_file, pargs.glyph_map_file,
         pargs.unit_length, pargs.delta_x, pargs.delta_y, pargs.global_x_offset,
         pargs.global_y_offset)
 
