@@ -23,20 +23,25 @@ from util import dict_union, key_subst, rem, safe_get
 def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
     seenKeys: 'str->int' = {}
     if len(layout_row_profiles) < len(layout):
-        die('Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but needed at least %d' %(len(layout_row_profiles), len(layout)))
+        printw('Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but should have at least %d' %(len(layout_row_profiles), len(layout)))
 
     def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)') -> [int,dict]:
         ret: dict
         shift: int = 1
-        if type(key) == str:
-            parts:[str] = list(reversed(key.split('\n')))
+        def parse_name(txt:str) -> str:
+            parts:[str] = list(reversed(txt.split('\n')))
             alphaNums:[str] = list(filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
-            ret = { 'key': str(alphaNums[0] if alphaNums != [] else str(max(parts, default=0, key=len))) }
+            return str(alphaNums[0] if alphaNums != [] else str(max(parts, default=0, key=len)))
+        if type(key) == str:
+            printi('a')
+            ret = { 'key': parse_name(key) }
         elif type(key) == dict:
             if nextKey and type(nextKey) == str:
-                ret = dict_union(key, { 'key': nextKey })
+                printi('b')
+                ret = dict_union(key, { 'key': parse_name(nextKey) })
                 shift = 2
             else:
+                printi('c')
                 ret = dict(key)
         else:
             die('Malformed data when reading %s and %s' %(str(key), str(layout)))
@@ -51,18 +56,18 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
                 and safe_get(ret, 'h2') == 1 \
                 and safe_get(ret, 'x2') == -0.25:
                     ret['key-type'] = 'iso-enter'
-                    printw(ret['key-type'])
             elif ret_key == '+' and safe_get(ret, 'h') == 2:
                     ret['key-type'] = 'num-plus'
-                    printw(ret['key-type'])
             elif ret_key and ret_key.lower() == 'enter' and safe_get(ret, 'h') == 2:
                     ret['key-type'] = 'num-enter'
-                    printw(ret['key-type'])
+
+        if 'a' in ret:
+            ret = rem(ret, 'a')
 
         if 'x' in ret:
-            ret = key_subst(ret, 'x', 'dim-x')
+            ret = key_subst(ret, 'x', 'shift-x')
         if 'y' in ret:
-            ret = key_subst(ret, 'y', 'dim-y')
+            ret = key_subst(ret, 'y', 'shift-y')
         if 'w' in ret:
             ret = key_subst(ret, 'w', 'width')
         else:
@@ -72,20 +77,16 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
         else:
             ret['height'] = 1.0
 
-        if 'dim-x' not in ret and 'dim-y' not in ret:
-            printi(ret)
-            if 'key' not in ret:
-                printw("Key \"%s\" %s 'key' field, please put one in" %
-                       (str(key), 'missing' if key != '' else 'has empty'))
-                ret['key'] = 'SOME_ID'
-            if ret['key'] in seenKeys.keys():
-                seenKeys[ret['key']] += 1
-                ret['key'] = ret['key'] + '-' + str(seenKeys[ret['key']])
-            else:
-                seenKeys[ret['key']] = 1
+        if 'key' not in ret:
+            printw("Key \"%s\" %s 'key' field, please put one in" %
+                   (str(key), 'missing' if key != '' else 'has empty'))
+            ret['key'] = 'SOME_ID'
+        if ret['key'] in seenKeys.keys():
+            seenKeys[ret['key']] += 1
+            ret['key'] = ret['key'] + '-' + str(seenKeys[ret['key']])
+        else:
+            seenKeys[ret['key']] = 1
 
-        if 'a' in key:
-            printi('"%s" "%s" |-> %s' %(key, nextKey, ret), shift)
         return (shift, ret)
 
     if type(layout) != list and any(list(map(lambda l: type(l) != list, layout))):
@@ -93,40 +94,42 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
             )
 
     parsed_layout: [dict] = []
-    row: int = 0
-    numDeltaY: int = 0
+    row: float = 0.0
+    numDeltaY: int = -1
     lineInd:int = 0
     for line in layout:
-        col: int = 0
-        prevCol: int = 0
+        col: float = 0.0
+        prevCol: float = 0.0
         numDeltaX: int = 0
         i:int = 0
+        numDeltaY += 1
         while i < len(line):
             printi('Operating on %s and %s' %(line[i], safe_get(line, i+1)))
             (shift, line[i]) = parse_key(line[i], safe_get(line, i+1))
-            line[i]['col'] = col
-            line[i]['row'] = row
-            line[i]['num-dx'] = numDeltaX
-            line[i]['num-dy'] = numDeltaY
-            line[i]['profile-part'] = layout_row_profiles[lineInd]
-            if 'dim-y' in line[i]:
-                # Assume that if dim-y is present there is no corresponding key
-                row += line[i]['dim-y']
-                col = 0
-                numDeltaY -= 1
+            key:dict = line[i]
+            key['num-dx'] = numDeltaX
+            if 'shift-x' in key:
+                col += key['shift-x']
             else:
-                if 'dim-x' not in line[i]:
-                    col += line[i]['width']
-                    numDeltaX += 1
-                else:
-                    col += line[i]['dim-x']
-                    line[i]['col'] = col
-                    col += line[i]['width']
-                if 'key' in line[i]:
-                    parsed_layout += [line[i]]
+                numDeltaX += 1
+            if 'shift-y' in key:
+                row += key['shift-y']
+            key['row'] = row
+            if 'shift-y' in key:
+                col = 0
+                if i != 0:
+                    numDeltaY += 1
+                printi('Adding %f to row' % key['shift-y'])
+            key['col'] = col
+            col += key['width'] if 'width' in key else 1
+            key['num-dy'] = numDeltaY
+            key['profile-part'] = layout_row_profiles[lineInd if lineInd < len(layout_row_profiles) else len(layout_row_profiles) - 1]
+            printi(key)
+            if 'key' in key:
+                printi('Adding to layout...')
+                parsed_layout += [key]
             i += shift
-        numDeltaY += 1
-        if 'dim-y' not in line[-1]:
+        if 'shift-y' not in line[-1]:
             row += 1
         lineInd += 1
 
