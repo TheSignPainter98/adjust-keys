@@ -5,7 +5,7 @@
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys_main.py)
 GLYPH_INF_KEYS_SRCS = $(shell ./deps glyphinf_main.py)
 
-all: adjustkeys glyphinf
+all: adjustkeys
 .PHONY: all
 
 define compilePython
@@ -20,9 +20,6 @@ define compilePython
 endef
 
 adjustkeys: $(ADJUST_KEYS_SRCS)
-	$(compilePython)
-
-glyphinf: $(GLYPH_INF_KEYS_SRCS)
 	$(compilePython)
 
 clean:
