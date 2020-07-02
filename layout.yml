@@ -21,16 +21,16 @@
 
     Break'
 - - y: 0.5
-  - '¬
+  - '~
 
     `'
   - '!
 
     1'
-  - '"
+  - '@
 
     2'
-  - '£
+  - '#
 
     3'
   - '$
@@ -61,7 +61,7 @@
 
     ='
   - w: 2
-    key: Backspace
+  - Backspace
   - x: 0.25
   - Insert
   - Home
@@ -72,7 +72,7 @@
   - '*'
   - '-'
 - - w: 1.5
-    key: Tab
+  - Tab
   - Q
   - W
   - E
@@ -89,14 +89,10 @@
   - '}
 
     ]'
-  - x: 0.25
-  - w: 1.25
-    h: 2
-    w2: 1.5
-    h2: 1
-    x2: -0.25
-    key: Enter
-    key-type: iso-enter
+  - w: 1.5
+  - '|
+
+    \'
   - x: 0.25
   - Delete
   - End
@@ -112,10 +108,18 @@
 
     PgUp'
   - h: 2
-    key: +
-    key-type: num-plus
-- - w: 1.75
-    key: Caps Lock
+  - +
+  - x: 0.25
+    a: 7
+    w: 1.25
+    h: 2
+    w2: 1.5
+    h2: 1
+    x2: -0.25
+  - Enter
+- - a: 4
+    w: 1.75
+  - Caps Lock
   - A
   - S
   - D
@@ -128,13 +132,12 @@
   - ':
 
     ;'
-  - '@
+  - '"
 
     '''
-  - '~
-
-    #'
-  - x: 4.75
+  - w: 2.25
+  - Enter
+  - x: 3.5
   - '4
 
     ←'
@@ -142,11 +145,8 @@
   - '6
 
     →'
-- - w: 1.25
-    key: Shift
-  - '|
-
-    \'
+- - w: 2.25
+  - Shift
   - Z
   - X
   - C
@@ -164,7 +164,7 @@
 
     /'
   - w: 2.75
-    key: Shift
+  - Shift
   - x: 1.25
   - ↑
   - x: 1.25
@@ -178,35 +178,67 @@
 
     PgDn'
   - h: 2
-    key: Enter
-    key-type: num-enter
+  - Enter
 - - w: 1.25
-    key: Ctrl
+  - Ctrl
   - w: 1.25
-    key: Win
+  - Win
   - w: 1.25
-    key: Alt
+  - Alt
   - a: 7
     w: 6.25
-    key: ''
+  - ''
   - a: 4
     w: 1.25
-    key: AltGr
+  - Alt
   - w: 1.25
-    key: Win
+  - Win
   - w: 1.25
-    key: Menu
+  - Menu
   - w: 1.25
-    key: Ctrl
+  - Ctrl
   - x: 0.25
   - ←
   - ↓
   - →
   - x: 0.25
-  - w: 2
-    key: '0
+    w: 2
+  - '0
 
     Ins'
   - '.
 
     Del'
+- - w: 1.5
+  - Ctrl
+  - Win
+  - w: 1.5
+  - Alt
+  - a: 7
+    w: 7
+  - ''
+  - a: 4
+    w: 1.5
+  - Alt
+  - Menu
+  - w: 1.5
+  - Ctrl
+  - x: 0.25
+  - ←
+  - ↓
+  - →
+  - x: 0.25
+    w: 1.25
+    w2: 1.75
+    l: true
+  - Caps Lock
+  - x: 1
+    a: 7
+    w: 1.75
+  - ''
+- - x: 4
+    w: 6
+  - ''
+- - x: 4
+    w: 3
+  - ''
