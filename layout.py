@@ -106,14 +106,19 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
             (shift, line[i]) = parse_key(line[i], safe_get(line, i+1))
             key:dict = line[i]
             printi('>>>', shift, key)
+            printi(col)
 
             # Handle shifts
             if 'shift-y' in key:
                 row += key['shift-y']
                 numDeltaY += 1
                 col = 0
+            if 'dfudge-y' in key:
+                numDeltaY += key['dfudge-y']
             if 'shift-x' in key:
                 col += key['shift-x']
+            if 'dfudge-x' in key:
+                numDeltaX += key['dfudge-x']
             numDeltaX += 1
 
             # Apply current position data

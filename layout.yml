@@ -138,6 +138,7 @@
   - w: 2.25
   - Enter
   - x: 3.5
+    dfudge-x: 4
   - '4
 
     ←'
@@ -166,8 +167,10 @@
   - w: 2.75
   - Shift
   - x: 1.25
+    dfudge-x: 3
   - ↑
   - x: 1.25
+    dfudge-x: 1
   - '1
 
     End'
@@ -187,6 +190,7 @@
   - Alt
   - a: 7
     w: 6.25
+    dfudge-x: 5
   - ''
   - a: 4
     w: 1.25
@@ -198,10 +202,12 @@
   - w: 1.25
   - Ctrl
   - x: 0.25
+    dfudge-x: 1
   - ←
   - ↓
   - →
   - x: 0.25
+    dfudge-x: 1
     w: 2
   - '0
 
@@ -216,6 +222,7 @@
   - Alt
   - a: 7
     w: 7
+    dfudge-x: 6
   - ''
   - a: 4
     w: 1.5
@@ -224,15 +231,18 @@
   - w: 1.5
   - Ctrl
   - x: 0.25
+    dfudge-x: 1
   - ←
   - ↓
   - →
   - x: 0.25
+    dfudge-x: 1
     w: 1.25
     w2: 1.75
     l: true
   - Caps Lock
   - x: 1
+    dfudge-x: 1
     a: 7
     w: 1.75
   - ''
