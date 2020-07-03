@@ -33,15 +33,12 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
             alphaNums:[str] = list(filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
             return str(alphaNums[0] if alphaNums != [] else str(max(parts, default=0, key=len)))
         if type(key) == str:
-            printi('a')
             ret = { 'key': parse_name(key) }
         elif type(key) == dict:
-            if nextKey and type(nextKey) == str:
-                printi('b')
+            if nextKey is not None and type(nextKey) == str:
                 ret = dict_union(key, { 'key': parse_name(nextKey) })
                 shift = 2
             else:
-                printi('c')
                 ret = dict(key)
         else:
             die('Malformed data when reading %s and %s' %(str(key), str(layout)))
@@ -104,33 +101,58 @@ def parse_layout(layout_row_profiles:[str], layout: [[dict]]) -> [dict]:
         i:int = 0
         numDeltaY += 1
         while i < len(line):
+            # Parse for the next key
             printi('Operating on %s and %s' %(line[i], safe_get(line, i+1)))
             (shift, line[i]) = parse_key(line[i], safe_get(line, i+1))
             key:dict = line[i]
-            key['num-dx'] = numDeltaX
-            if 'shift-x' in key:
-                col += key['shift-x']
-            else:
-                numDeltaX += 1
+            printi('>>>', shift, key)
+
+            # Handle shifts
             if 'shift-y' in key:
                 row += key['shift-y']
-            key['row'] = row
-            if 'shift-y' in key:
+                numDeltaY += 1
                 col = 0
-                if i != 0:
-                    numDeltaY += 1
-                printi('Adding %f to row' % key['shift-y'])
+            if 'shift-x' in key:
+                col += key['shift-x']
+            numDeltaX += 1
+
+            # Apply current position data
+            key['row'] = row
             key['col'] = col
-            col += key['width'] if 'width' in key else 1
+            key['num-dx'] = numDeltaX
             key['num-dy'] = numDeltaY
-            key['profile-part'] = layout_row_profiles[lineInd if lineInd < len(layout_row_profiles) else len(layout_row_profiles) - 1]
-            printi(key)
+            key['profile-part'] = layout_row_profiles[lineInd]
+
+            # Add to layout
             if 'key' in key:
-                printi('Adding to layout...')
                 parsed_layout += [key]
+
+            # Move col to next position
+            col += key['width']
+            #  key['num-dx'] = numDeltaX
+            #  if 'shift-x' in key:
+                #  col += key['shift-x']
+            #  else:
+                #  numDeltaX += 1
+            #  if 'shift-y' in key:
+                #  row += key['shift-y']
+            #  key['row'] = row
+            #  if 'shift-y' in key:
+                #  col = 0
+                #  if i != 0:
+                    #  numDeltaY += 1
+                #  printi('Adding %f to row' % key['shift-y'])
+            #  key['col'] = col
+            #  col += key['width'] if 'width' in key else 1
+            #  key['num-dy'] = numDeltaY
+            #  key['profile-part'] = layout_row_profiles[lineInd if lineInd < len(layout_row_profiles) else len(layout_row_profiles) - 1]
+            #  printi(key)
+            #  if 'key' in key:
+                #  printi('Adding to layout...')
+                #  parsed_layout += [key]
             i += shift
-        if 'shift-y' not in line[-1]:
+        if len(line) >1 and 'shift-y' not in line[-1]:
             row += 1
-        lineInd += 1
+        lineInd = min([lineInd + 1, len(layout_row_profiles) - 1])
 
     return parsed_layout
