@@ -31,21 +31,21 @@ from yaml_io import read_yaml, write_yaml
 def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
 
-    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely', default=0)
-    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout (default: -) ', default='-')
-    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files', default=0)
-    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files', default=0)
-    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: opts.yml)', default='opts.yml', metavar='file')
-    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap (default: 276.0)', default=276.0, metavar='num')
-    ap.add_argument('-x', '--delta-x', action='store', type=float, dest='delta_x', help='Horizontal distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
-    ap.add_argument('-y', '--delta-y', action='store', type=float, dest='delta_y', help='Vertical distance between adjacent keycaps without a separating margin', default=0.0, metavar='num')
-    ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', default=0.0, metavar='num')
-    ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', default=0.0, metavar='num')
-    ap.add_argument('-P', '--profile', action='store', dest='profile_file', help='specify the profile YAML file to use (default: kat.yml)', default='kat.yml', metavar='file')
-    ap.add_argument('-G', '--glyph-loc', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs', default='.', metavar='file')
-    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', default='layout.yml', metavar='file')
-    ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', default='layout_row_profiles.yml', metavar='file')
-    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon (default: glyph-map.yml)', default='glyph-map.yml', metavar='file')
+    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely')
+    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout (default: -) ')
+    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files')
+    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files')
+    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: opts.yml)', metavar='file', default='opts.yml')
+    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap (default: 276.0)', metavar='num')
+    ap.add_argument('-x', '--delta-x', action='store', type=float, dest='delta_x', help='Horizontal distance between adjacent keycaps without a separating margin', metavar='num')
+    ap.add_argument('-y', '--delta-y', action='store', type=float, dest='delta_y', help='Vertical distance between adjacent keycaps without a separating margin', metavar='num')
+    ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', metavar='num')
+    ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', metavar='num')
+    ap.add_argument('-P', '--profile', action='store', dest='profile_file', help='specify the profile YAML file to use (default: kat.yml)', metavar='file')
+    ap.add_argument('-G', '--glyph-loc', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs', metavar='file')
+    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', metavar='file')
+    ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', metavar='file')
+    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon (default: glyph-map.yml)', metavar='file')
 
     # Obtain parsed arguments
     pargs:dict = ap.parse_args(args[1:]).__dict__
@@ -58,4 +58,7 @@ def parse_args(args:[str]) -> Namespace:
         printe('Failed to find options file %s' % pargs.opt_file)
         exit(1)
 
-    return Namespace(**dict_union(yargs, pargs))
+    return Namespace(**dict_union_ignore_none(yargs, pargs))
+
+def dict_union_ignore_none(a:dict, b:dict) -> dict:
+    return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))
