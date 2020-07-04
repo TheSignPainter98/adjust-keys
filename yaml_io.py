@@ -32,7 +32,7 @@ def read_yaml(fname:str) -> dict:
         return load(stdin, Loader=FullLoader)
     else:
         if exists(fname):
-            with open(fname, 'r') as f:
+            with open(fname, 'r', encoding='utf-8') as f:
                 return load(f, Loader=FullLoader)
         else:
             printe('Failed to read file "%s"' % fname)
@@ -49,6 +49,6 @@ def write_yaml(fname:str, data:dict):
     if fname == '-':
         print(dump(data), end='')
     else:
-        with open(fname, 'w+') as f:
+        with open(fname, 'w+', encoding='utf-8') as f:
             print(dump(data), file=f, end='')
 
