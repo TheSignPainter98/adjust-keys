@@ -42,27 +42,39 @@ def list_intersection(a: list, b: list) -> list:
 
 
 ##
-# @brief The inner join of a pair of lists of dictionaries using a pair of keys.
+# @brief The inner join of a pair of lists of dictionaries using pairs of keys and a condition between them.
 # Outputs the list of unions of dictionaries in the input lists which share the same values at the specified keys
 #
 # @param las:[dict] A  list of dictionaries
-# @param ka:object A key present in all of `las` used to join by equality
+# @param ka:object A key present in all of `las` used to join by cond
 # @param lbs:[dict] Another list of dictionaries
-# @param kb:object A key present in all of `lbs` used to join by equality
+# @param kb:object A key present in all of `lbs` used to join by cond
+# @param cond Specify the condition between values, or None for equality
 #
 # @return A list of united, equal-key dictionaries [union(la, lb) | ls <- las, lb <- lbs, la[ka] == lb[kb]]
-def inner_join(las: [dict], ka: object, lbs: [dict], kb: object) -> [dict]:
+def inner_join(las: [dict],
+               ka: object,
+               lbs: [dict],
+               kb: object,
+               cond=None) -> [dict]:
     if las == [] or lbs == []:
         return []
     else:
+
+        def eq(a: object, b: object) -> bool:
+            return a == b
+
+        if cond is None:
+            cond = eq
         return list(
             reduce(
                 concat,
                 list(
                     map(
-                        lambda la:
-                        [dict_union(la, lb) for lb in lbs if la[ka] == lb[kb]],
-                        las))))
+                        lambda la: [
+                            dict_union(la, lb) for lb in lbs
+                            if cond(la[ka], lb[kb])
+                        ], las))))
 
 
 ##
@@ -143,4 +155,5 @@ def safe_get(a: [object], i: object) -> object:
     elif type(a) == dict:
         return a[i] if i in a else None
     else:
-        die('Can\'t safely-get from unhandled type %s (more code is needed in %s)' %(type(a), __file__))
+        die('Can\'t safely-get from unhandled type %s (more code is needed in %s)'
+            % (type(a), __file__))
