@@ -34,7 +34,6 @@ PgUp: Ng1
 Num Lock: Nm
 /: Nt2
 '*': Ns3
---2: Nz3
 Tab: Nt3
 Q: qoph
 W: waw
@@ -52,9 +51,6 @@ Enter: Nz
 Delete: Nt4
 End: Nf
 PgDn: Ng2
-Home-2: '7'
-8-2: '8'
-PgUp-2: '9'
 +: Ns4
 Caps Lock: Nz5
 A: alph
@@ -68,10 +64,7 @@ K: kaph
 L: lamedh
 ;: Nd
 "'": Na
-'#':
-4-2: '4'
-5-2: '5'
-6-2: '6'
+'#': Nh2
 Shift: Ns7
 \: Ny
 Z: zayin
@@ -83,33 +76,13 @@ N: nun
 M: mem
 ',': Nz4
 '.': Ng
-/-2: Ny2
-Shift-2: Ns7
 ↑: arr-up
-End-2: '3'
-2-2: '2'
-PgDn-2: '1'
-Enter-2: Nz
-Enter-3: Nz
 Ctrl: Nk
 Win: Nf2
 Alt: Nl
-Alt-2: Nl
-Win-2: Nf2
 Menu: Nn
-Ctrl-2: Nk
 ←: arr-lft
 ↓: arr-dn
 →: arr-rgt
 Ins: '10'
 Del: word-space
-Ctrl-3: Nk
-Win-3: Nf2
-Menu-2: Nn
-Alt-3: Nl
-Alt-4: Nl
-Ctrl-4: Nk
-←-2: arr-lft
-↓-2: arr-dn
-→-2: arr-rgt
-Caps Lock-2: Nz5
