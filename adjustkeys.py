@@ -22,7 +22,7 @@ from glyphinf import glyph_inf
 from os import walk
 from os.path import exists, join
 from positions import resolve_positions
-from util import concat, dict_union, inner_join, rob_rem
+from util import concat, dict_union, inner_join, list_diff, rob_rem
 from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
 
@@ -39,10 +39,11 @@ def adjust_keys(verbosity: int, profile_file: str,
                                               global_x_offset, global_y_offset)
 
     for i in range(len(placed_glyphs)):
-        with open(placed_glyphs[i]['src'], 'r') as f:
+        with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
             placed_glyphs[i] = dict_union(
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
+        remove_guide_from_cap(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = ['<g transform="translate(%f %f)">' %(placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])] + list(map(lambda c: c.toxml(), (filter(lambda c: type(c) == Element, placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
@@ -55,6 +56,18 @@ def adjust_keys(verbosity: int, profile_file: str,
     ] + list(map(lambda p: '\n'.join(p['vector']) if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
     return svg
+
+
+def remove_guide_from_cap(cap:Element) -> Element:
+    def _remove_guide_from_cap(cap:Element) -> None:
+        badKids:[Element] = list(filter(lambda k: k.attributes and 'id' in k.attributes and k.attributes['id'].value == 'cap-guide', cap.childNodes))
+        goodKids:[Element] = list_diff(list(cap.childNodes), badKids)
+        for badKid in badKids:
+            cap.removeChild(badKid)
+        for goodKid in goodKids:
+            _remove_guide_from_cap(goodKid)
+    _remove_guide_from_cap(cap)
+    return cap
 
 
 def collect_data(profile_file: str, layout_row_profile_file: str,
