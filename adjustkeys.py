@@ -38,21 +38,21 @@ def adjust_keys(verbosity: int, profile_file: str,
     placed_glyphs: [dict] = resolve_positions(data, unit_length,
                                               global_x_offset, global_y_offset)
 
-    for i in range(len(positions)):
-        with open(positions[i]['src'], 'r') as f:
-            positions[i] = dict_union(
-                positions[i], {'svg': parseString(f.read()).documentElement})
-        positions[i]['svg'].setAttribute('x', str(positions[i]['pos-x']))
-        positions[i]['svg'].setAttribute('y', str(positions[i]['pos-y']))
+    for i in range(len(placed_glyphs)):
+        with open(placed_glyphs[i]['src'], 'r') as f:
+            placed_glyphs[i] = dict_union(
+                placed_glyphs[i],
+                {'svg': parseString(f.read()).documentElement})
+        placed_glyphs[i]['vector'] = ['<g transform="translate(%f %f)">' %(placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])] + list(map(lambda c: c.toxml(), (filter(lambda c: type(c) == Element, placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
 
-    svgWidth: int = max(list(map(lambda p: p['pos-x'],
-                                 positions)), default=0) + unit_length
-    svgHeight: int = max(list(map(lambda p: p['pos-y'],
-                                  positions)), default=0) + unit_length
-    svg: str = ''.join([
+    svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
+                        default=0) + unit_length
+    svgHeight: int = max(list(map(lambda p: p['pos-y'], placed_glyphs)),
+                         default=0) + unit_length
+    svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
-    ] + list(map(lambda p: p['svg'].toxml(), positions)) + ['</svg>'])
+    ] + list(map(lambda p: '\n'.join(p['vector']) if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
     return svg
 
@@ -109,9 +109,11 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
         die('Directory "%s" doesn\'t exist' % dname)
-    svgs:[str] = []
+    svgs: [str] = []
     for (root, _, fnames) in walk(dname):
-        svgs += list(map(lambda f: join(root, f), list(filter(lambda f: f.endswith('.svg'), fnames))))
+        svgs += list(
+            map(lambda f: join(root, f),
+                list(filter(lambda f: f.endswith('.svg'), fnames))))
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
