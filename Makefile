@@ -3,7 +3,6 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys_main.py)
-GLYPH_INF_KEYS_SRCS = $(shell ./deps glyphinf_main.py)
 
 all: adjustkeys
 .PHONY: all
@@ -14,7 +13,7 @@ define compilePython
 	mkdir bin
 	cp $^ bin
 	mv bin/$(@)_main.py bin/__main__.py
-	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py && cd ../
+	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py >/dev/null && cd ../
 	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
 	chmod 700 $@
 endef
