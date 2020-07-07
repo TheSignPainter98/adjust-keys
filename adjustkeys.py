@@ -29,15 +29,14 @@ from yaml_io import read_yaml
 
 def adjust_keys(verbosity: int, profile_file: str,
                 layout_row_profile_file: str, glyph_dir: str, layout_file: str,
-                glyph_map_file: str, unit_length: int, delta_x: int,
-                delta_y: int, global_x_offset: int,
+                glyph_map_file: str, unit_length: int, global_x_offset: int,
                 global_y_offset: int) -> [dict]:
     init_logging(verbosity)
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
                                 glyph_dir, layout_file, glyph_map_file)
 
-    positions: [dict] = resolve_positions(data, unit_length, delta_x, delta_y,
-                                          global_x_offset, global_y_offset)
+    placed_glyphs: [dict] = resolve_positions(data, unit_length,
+                                              global_x_offset, global_y_offset)
 
     for i in range(len(positions)):
         with open(positions[i]['src'], 'r') as f:
