@@ -23,11 +23,12 @@ from os import walk
 from os.path import exists, join
 from positions import resolve_positions
 from util import concat, dict_union, inner_join, list_diff, rob_rem
+from re import match
 from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
 
 
-def adjust_keys(verbosity: int, profile_file: str,
+def adjust_keys(verbosity: int, glyph_part_ignore_regex:str, profile_file: str,
                 layout_row_profile_file: str, glyph_dir: str, layout_file: str,
                 glyph_map_file: str, unit_length: int, global_x_offset: int,
                 global_y_offset: int) -> [dict]:
@@ -43,7 +44,7 @@ def adjust_keys(verbosity: int, profile_file: str,
             placed_glyphs[i] = dict_union(
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
-        remove_guide_from_cap(placed_glyphs[i]['svg'])
+        remove_guide_from_cap(placed_glyphs[i]['svg'], glyph_part_ignore_regex)
         placed_glyphs[i]['vector'] = ['<g transform="translate(%f %f)">' %(placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])] + list(map(lambda c: c.toxml(), (filter(lambda c: type(c) == Element, placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
@@ -58,15 +59,15 @@ def adjust_keys(verbosity: int, profile_file: str,
     return svg
 
 
-def remove_guide_from_cap(cap:Element) -> Element:
-    def _remove_guide_from_cap(cap:Element) -> None:
-        badKids:[Element] = list(filter(lambda k: k.attributes and 'id' in k.attributes and k.attributes['id'].value == 'cap-guide', cap.childNodes))
+def remove_guide_from_cap(cap:Element, glyph_part_ignore_regex) -> Element:
+    def _remove_guide_from_cap(cap:Element, glyph_part_ignore_regex) -> None:
+        badKids:[Element] = list(filter(lambda k: k.attributes and 'id' in k.attributes and match(glyph_part_ignore_regex, k.attributes['id'].value), cap.childNodes))
         goodKids:[Element] = list_diff(list(cap.childNodes), badKids)
         for badKid in badKids:
             cap.removeChild(badKid)
         for goodKid in goodKids:
-            _remove_guide_from_cap(goodKid)
-    _remove_guide_from_cap(cap)
+            _remove_guide_from_cap(goodKid, glyph_part_ignore_regex)
+    _remove_guide_from_cap(cap, glyph_part_ignore_regex)
     return cap
 
 
