@@ -96,14 +96,11 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
 
     parsed_layout: [dict] = []
     row: float = 0.0
-    numDeltaY: int = -1
     lineInd: int = 0
     for line in layout:
         col: float = 0.0
         prevCol: float = 0.0
-        numDeltaX: int = 0
         i: int = 0
-        numDeltaY += 1
         while i < len(line):
             # Parse for the next key
             printi('Handling layout, looking at pair "%s" and "%s"' %
@@ -112,24 +109,16 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
             (shift, line[i]) = parse_key(line[i], safe_get(line, i + 1))
             key: dict = line[i]
 
-            # Handle shifts and deltas
+            # Handle shifts
             if 'shift-y' in key:
                 row += key['shift-y']
-                numDeltaY += 1
                 col = 0
-            if 'dfudge-y' in key:
-                numDeltaY += key['dfudge-y']
             if 'shift-x' in key:
                 col += key['shift-x']
-            if 'dfudge-x' in key:
-                numDeltaX += key['dfudge-x']
-            numDeltaX += 1
 
             # Apply current position data
             key['row'] = row
             key['col'] = col
-            key['num-dx'] = numDeltaX
-            key['num-dy'] = numDeltaY
             key['profile-part'] = layout_row_profiles[lineInd]
 
             # Add to layout
