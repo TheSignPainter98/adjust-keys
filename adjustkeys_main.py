@@ -36,16 +36,25 @@ def main(args: [str]) -> int:
     pargs: Namespace = parse_args(args)
 
     if pargs.listKeys:
-        print('\n'.join(list(map(lambda k: k['key'], parse_layout(read_yaml(pargs.layout_row_profile_file), read_yaml(pargs.layout_file))))))
+        print('\n'.join(
+            list(
+                map(
+                    lambda k: k['key'],
+                    parse_layout(read_yaml(pargs.layout_row_profile_file),
+                                 read_yaml(pargs.layout_file))))))
         return 0
     if pargs.listGlyphs:
-        print('\n'.join(list(map(lambda p: p[0], read_yaml(pargs.glyph_offset_file).items()))))
+        print('\n'.join(
+            list(
+                map(lambda p: p[0],
+                    read_yaml(pargs.glyph_offset_file).items()))))
         return 0
 
-    svg: str = adjust_keys(
-        pargs.verbosity, pargs.glyph_part_ignore_regex, pargs.profile_file, pargs.layout_row_profile_file,
-        pargs.glyph_dir, pargs.layout_file, pargs.glyph_map_file,
-        pargs.unit_length, pargs.global_x_offset, pargs.global_y_offset)
+    svg: str = adjust_keys(pargs.verbosity, pargs.glyph_part_ignore_regex,
+                           pargs.profile_file, pargs.layout_row_profile_file,
+                           pargs.glyph_dir, pargs.layout_file,
+                           pargs.glyph_map_file, pargs.unit_length,
+                           pargs.global_x_offset, pargs.global_y_offset)
 
     if pargs.output_location == '-':
         print(svg)
