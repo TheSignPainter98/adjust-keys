@@ -17,7 +17,8 @@
 
 from sys import argv, stderr
 
-verbosity:int = 0
+verbosity: int = 0
+
 
 ##
 # @brief Initialise logging, should be called before any logging is to take place
@@ -26,9 +27,10 @@ verbosity:int = 0
 # @param quiet_in:bool Whether to output quietly
 #
 # @return Nothing
-def init_logging(verbosity_in:bool):
+def init_logging(verbosity_in: bool):
     global verbosity
     verbosity = verbosity_in
+
 
 ##
 # @brief Write a message to stderr and exit
@@ -41,6 +43,7 @@ def die(*args, **kwargs):
     printe(*args, **kwargs)
     exit(1)
 
+
 ##
 # @brief Output information to stderr
 #
@@ -52,6 +55,7 @@ def printi(*args, **kwargs):
     if verbosity >= 1:
         print(*args, file=stderr, **kwargs)
 
+
 ##
 # @brief Output an error to stderr
 #
@@ -61,6 +65,7 @@ def printi(*args, **kwargs):
 # @return Nothing
 def printe(*args, **kwargs):
     print(f'{argv[0]}:', *args, file=stderr, **kwargs)
+
 
 ##
 # @brief Output a warning on stderr
