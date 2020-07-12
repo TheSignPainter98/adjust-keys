@@ -28,9 +28,10 @@ from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
 
 
-def adjust_keys(verbosity: int, glyph_part_ignore_regex:str, profile_file: str,
-                layout_row_profile_file: str, glyph_dir: str, layout_file: str,
-                glyph_map_file: str, unit_length: int, global_x_offset: int,
+def adjust_keys(verbosity: int, glyph_part_ignore_regex: str,
+                profile_file: str, layout_row_profile_file: str,
+                glyph_dir: str, layout_file: str, glyph_map_file: str,
+                unit_length: int, global_x_offset: int,
                 global_y_offset: int) -> [dict]:
     init_logging(verbosity)
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
@@ -45,7 +46,13 @@ def adjust_keys(verbosity: int, glyph_part_ignore_regex:str, profile_file: str,
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
         remove_guide_from_cap(placed_glyphs[i]['svg'], glyph_part_ignore_regex)
-        placed_glyphs[i]['vector'] = ['<g transform="translate(%f %f)">' %(placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])] + list(map(lambda c: c.toxml(), (filter(lambda c: type(c) == Element, placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
+        placed_glyphs[i]['vector'] = [
+            '<g transform="translate(%f %f)">' %
+            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])
+        ] + list(
+            map(lambda c: c.toxml(),
+                (filter(lambda c: type(c) == Element,
+                        placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
                         default=0) + unit_length
@@ -54,19 +61,26 @@ def adjust_keys(verbosity: int, glyph_part_ignore_regex:str, profile_file: str,
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
-    ] + list(map(lambda p: '\n'.join(p['vector']) if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
+    ] + list(
+        map(lambda p: '\n'.join(p['vector'])
+            if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
     return svg
 
 
-def remove_guide_from_cap(cap:Element, glyph_part_ignore_regex) -> Element:
-    def _remove_guide_from_cap(cap:Element, glyph_part_ignore_regex) -> None:
-        badKids:[Element] = list(filter(lambda k: k.attributes and 'id' in k.attributes and match(glyph_part_ignore_regex, k.attributes['id'].value), cap.childNodes))
-        goodKids:[Element] = list_diff(list(cap.childNodes), badKids)
+def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
+    def _remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> None:
+        badKids: [Element] = list(
+            filter(
+                lambda k: k.attributes and 'id' in k.attributes and match(
+                    glyph_part_ignore_regex, k.attributes['id'].value),
+                cap.childNodes))
+        goodKids: [Element] = list_diff(list(cap.childNodes), badKids)
         for badKid in badKids:
             cap.removeChild(badKid)
         for goodKid in goodKids:
             _remove_guide_from_cap(goodKid, glyph_part_ignore_regex)
+
     _remove_guide_from_cap(cap, glyph_part_ignore_regex)
     return cap
 
