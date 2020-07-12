@@ -21,23 +21,23 @@ from log import die, init_logging
 from glyphinf import glyph_inf
 from os import walk
 from os.path import exists, join
-from positions import resolve_positions
+from positions import resolve_glyph_positions
 from util import concat, dict_union, inner_join, list_diff, rob_rem
 from re import match
 from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml
 
 
-def adjust_keys(verbosity: int, glyph_part_ignore_regex: str,
-                profile_file: str, layout_row_profile_file: str,
-                glyph_dir: str, layout_file: str, glyph_map_file: str,
-                unit_length: int, global_x_offset: int,
-                global_y_offset: int) -> [dict]:
+def adjust_glyphs(verbosity: int, glyph_part_ignore_regex: str,
+                  profile_file: str, layout_row_profile_file: str,
+                  glyph_dir: str, layout_file: str, glyph_map_file: str,
+                  unit_length: int, global_x_offset: int,
+                  global_y_offset: int) -> [dict]:
     init_logging(verbosity)
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
                                 glyph_dir, layout_file, glyph_map_file)
 
-    placed_glyphs: [dict] = resolve_positions(data, unit_length,
+    placed_glyphs: [dict] = resolve_glyph_positions(data, unit_length,
                                               global_x_offset, global_y_offset)
 
     for i in range(len(placed_glyphs)):

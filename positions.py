@@ -16,12 +16,12 @@
 #
 
 
-def resolve_positions(data: [dict], ulen: float, gx: float,
+def resolve_glyph_positions(data: [dict], ulen: float, gx: float,
                       gy: float) -> [dict]:
-    return list(map(lambda d: resolve_position(d, ulen, gx, gy), data))
+    return list(map(lambda d: resolve_glyph_position(d, ulen, gx, gy), data))
 
 
-def resolve_position(data: dict, ulen: float, gx: float, gy: float) -> dict:
+def resolve_glyph_position(data: dict, ulen: float, gx: float, gy: float) -> dict:
     ret: dict = dict(data)
     # Compute the centre of the keycap
     kx: float = gx + ulen * (ret['p-off-x'] + ret['col'])

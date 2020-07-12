@@ -2,29 +2,29 @@
 
 .DEFAULT_GOAL := all
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys_main.py)
+ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs_main.py)
+ADJUST_caps_SRCS = $(shell ./deps adjustcaps_main.py)
 
-all: adjustkeys
+all: adjustglyphs adjustcaps
 .PHONY: all
 
 define compilePython
-	$(RM) -r bin/
+	$(RM) -r bin_$@/
 	cython3 -X language_level=3 $^
-	mkdir bin
-	cp $^ bin
-	mv bin/$(@)_main.py bin/__main__.py
-	cd bin/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py >/dev/null && cd ../
-	echo '#!/usr/bin/python3' | cat - bin/$@.zip > $@
+	mkdir bin_$@
+	cp $^ bin_$@
+	mv bin_$@/$(@)_main.py bin_$@/__main__.py
+	cd bin_$@/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py >/dev/null && cd ../
+	echo '#!/usr/bin/python3' | cat - bin_$@/$@.zip > $@
 	chmod 700 $@
 endef
 
-adjustkeys: $(ADJUST_KEYS_SRCS)
+adjustglyphs: $(ADJUST_GLYPHS_SRCS)
+	$(compilePython)
+
+adjustcaps: $(ADJUST_caps_SRCS)
 	$(compilePython)
 
 clean:
-	$(RM) -r __pycache__/ adjustkeys adjustkeys.zip *.c
+	$(RM) -r __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c
 .PHONY: clean
-
-run: adjustkeys
-	python3 $<
-.PHONY: run
