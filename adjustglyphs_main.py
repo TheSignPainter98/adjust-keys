@@ -18,8 +18,8 @@
 # This was written on literally the hottest day of the year :(
 # This was written the very next day, also on the hottest day of the year D:
 
-from adjustkeys import adjust_keys
-from args import parse_args, Namespace
+from adjustglyphs import adjust_glyphs
+from adjustglyphs_args import parse_args, Namespace
 from layout import parse_layout
 from sys import argv, exit
 from util import concat
@@ -50,11 +50,11 @@ def main(args: [str]) -> int:
                     read_yaml(pargs.glyph_offset_file).items()))))
         return 0
 
-    svg: str = adjust_keys(pargs.verbosity, pargs.glyph_part_ignore_regex,
-                           pargs.profile_file, pargs.layout_row_profile_file,
-                           pargs.glyph_dir, pargs.layout_file,
-                           pargs.glyph_map_file, pargs.unit_length,
-                           pargs.global_x_offset, pargs.global_y_offset)
+    svg: str = adjust_glyphs(pargs.verbosity, pargs.glyph_part_ignore_regex,
+                             pargs.profile_file, pargs.layout_row_profile_file,
+                             pargs.glyph_dir, pargs.layout_file,
+                             pargs.glyph_map_file, pargs.unit_length,
+                             pargs.global_x_offset, pargs.global_y_offset)
 
     if pargs.output_location == '-':
         print(svg)
