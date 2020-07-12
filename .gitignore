@@ -1,8 +1,10 @@
 *.json
 __pycache__/
-adjustkeys
+adjustglyphs
+adjustcaps
 glyphinf
-bin/
+bin*/
 *.swp
 *.svg
 *.c
+*.obj
