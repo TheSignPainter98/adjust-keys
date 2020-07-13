@@ -1,0 +1,10 @@
+verbosity: 0
+output_location: "-"
+unit_length: 292.0
+global_x_offset: 0.0
+global_y_offset: 0.0
+profile_file: kat.yml
+cap_dir: .
+layout_file: layout.yml
+layout_row_profile_file: layout_row_profiles.yml
+glyph_map_file: glyph-map.yml
