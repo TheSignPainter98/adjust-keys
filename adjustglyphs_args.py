@@ -40,7 +40,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg (default: cap-guide)', metavar='id')
     ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', metavar='num')
     ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', metavar='num')
-    ap.add_argument('-P', '--profile', action='store', dest='profile_file', help='specify the profile YAML file to use (default: kat.yml)', metavar='file')
+    ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use (default: profiles/kat/centres.yml)', metavar='file')
     ap.add_argument('-G', '--glyph-loc', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs', metavar='file')
     ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', metavar='file')
     ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', metavar='file')
