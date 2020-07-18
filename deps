@@ -35,7 +35,7 @@ def get_deps(mod: str) -> [str]:
         filter(
             lambda l: safe_get(l, 0) == 'import' or safe_get(l, 2) == 'import',
             list(map(lambda l: l.split(' '), code))))
-    return list(map(lambda l: l[1] if l[0] == 'from' else l[3], import_lines))
+    return list(map(lambda l: l[1], import_lines))
 
 
 if __name__ == '__main__':
