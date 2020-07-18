@@ -66,4 +66,7 @@ def main(args: [str]) -> int:
 
 
 if __name__ == '__main__':
-    exit(main(argv))
+    try:
+        exit(main(argv))
+    except KeyboardInterrupt:
+        exit(1)
