@@ -15,10 +15,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-# Ensure blend location is on the python path
+from importlib.util import find_spec
+blender_available:bool = find_spec('bpy') is not None
+
 from adjustcaps_args import parse_args
 from argparse import Namespace
-from bpy import ops
+if  blender_available:
+    from bpy import ops
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
@@ -44,10 +47,7 @@ def main(*args: [[str]]) -> int:
     if type(args) == tuple:
         args = list(args)
 
-    print(args)
     pargs: Namespace = parse_args(args)
-    print(pargs)
-    return 0
     init_logging(pargs.verbosity)
     if pargs.move_to_origin:
         caps: [dict] = get_caps(pargs.cap_dir)
@@ -113,11 +113,17 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
     nprocs: int = 2 * cpu_count()
     printi('Adjusting and outputting caps on %d threads...' % nprocs)
     with ThreadPoolExecutor(nprocs) as ex:
-        ops: ['[dict,str]->()'] = [
+        cops: ['[dict,str]->()'] = [
             ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane)
             for cap in layout_with_caps
         ]
-        wait(ops)
+        wait(cops)
+
+    # Sequentially import the models (for thread-safety)
+    for cap in layout_with_caps:
+        if blender_available:
+            printi('Importing "%s" into blender...' % cap['oname'])
+            ops.import_scene.obj(filepath=cap['oname'])
 
 
 def de_spookify(cap: dict) -> dict:
@@ -134,8 +140,6 @@ def handle_cap(cap: dict, unit_length: float, x_offset: float, y_offset: float,
     cap = apply_cap_position(cap)
     printi('Outputting to "%s"' % cap['oname'])
     write_obj(cap['oname'], cap['cap-obj'])
-    printi('Importing "%s" into blender...' % cap['oname'])
-    ops.import_scene.obj(filepath=cap['oname'])
 
 
 def apply_cap_position(cap: dict) -> dict:

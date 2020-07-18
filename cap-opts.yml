@@ -3,7 +3,7 @@ output_dir: .
 unit_length: 19.05
 x_offset: 0.525
 y_offset: 0.525
-plane: z
+plane: y
 profile_file: kat.yml
 cap_dir: .
 layout_file: layout.yml

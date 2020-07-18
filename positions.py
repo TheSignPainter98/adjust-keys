@@ -41,32 +41,10 @@ def resolve_glyph_position(data: dict, ulen: float, gx: float,
 
 def resolve_cap_position(cap: dict, ulen: float, mx: float, my: float,
                          plane: str) -> dict:
-    plane_x_dir: str
-    plane_y_dir: str
-    plane_z_dir: str
 
-    if plane.lower() == 'z':
-        plane_x_dir = 'pos-x'
-        plane_y_dir = 'pos-y'
-        plane_z_dir = 'pos-z'
-    elif plane.lower() == 'y':
-        printw(
-            'Arranging along the plane whose normal is the positive y-axis is not yet supported, using the default'
-        )
-        plane_x_dir = 'pos-x'
-        plane_y_dir = 'pos-y'
-        plane_z_dir = 'pos-z'
-    elif plane.lower() == 'z':
-        printw(
-            'Arranging along the plane whose normal is the positive y-axis is not yet supported, using the default'
-        )
-        plane_x_dir = 'pos-x'
-        plane_y_dir = 'pos-y'
-        plane_z_dir = 'pos-z'
-
-    cap[plane_x_dir] = ulen * cap['col'] + mx
-    cap[plane_y_dir] = -1 * (ulen * cap['row'] + my)
-    cap[plane_z_dir] = 0.0
+    cap['pos-x'] = ulen * cap['col'] + mx
+    cap['pos-y'] = -1 * (ulen * cap['row'] + my)
+    cap['pos-z'] = 0.0
 
     return cap
 
@@ -75,16 +53,8 @@ def translate_to_origin(data: [[str, [[str, list]]]], plane: str):
     # Translate each group to the origin
     for _, _, _, gd in data:
         # Obtain minimum points in x, y and z
-        exts: [float] = [
-                inf * (1 if plane != 'x' else -1),
-                inf * (1 if plane != 'y' else -1),
-                inf * (1 if plane != 'z' else -1),
-            ]
-        funcs:['[float,float] -> float'] = [
-                min if plane != 'x' else max,
-                min if plane != 'y' else max,
-                min if plane != 'z' else max
-            ]
+        exts: [float] = [inf, -inf, inf]
+        funcs: ['[float,float] -> float'] = [min, max, min]
         for t, d in gd:
             if t == 'v':
                 for i in range(len(d)):
