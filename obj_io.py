@@ -55,17 +55,16 @@ def parse_cap(rawCap: [str]) -> [[str, int, int, [[str, list]]]]:
             # New group
             currGrpName = ' '.join(line[1:])
             currGrpData = []
-        elif line[0] in ['v', 'vt', 'vn']:
+        elif line[0] == 'v':
             # Parse vertex
             currGrpData.append((line[0], list(map(float, line[1:]))))
-            if line[0] == 'v':
-                currTotVertices += 1
-                groupTotVertices += 1
-        elif line[0] == 'f':
-            # Parse face
-            currGrpData.append(
-                (line[0],
-                 list(map(lambda p: list(map(int, p.split('/'))), line[1:]))))
+            currTotVertices += 1
+            groupTotVertices += 1
+        #  elif line[0] == 'f':
+            #  # Parse face
+            #  currGrpData.append(
+                #  (line[0],
+                 #  list(map(lambda p: list(map(int, p.split('/'))), line[1:]))))
         else:
             # Store text, don't handle
             currGrpData.append((line[0], line[1:]))
@@ -88,10 +87,10 @@ def write_obj_to_file(obj: [[str, int, int, [[str, list]]]], f: file) -> str:
         print('g %s' % gn, file=f)
         print('o %s' % gn, file=f)
         for t, d in gd:
-            if t == 'f':
-                print('f',
-                      ' '.join(
-                          list(map(lambda t: '/'.join(list(map(str, t))), d))),
-                      file=f)
-            else:
-                print(t, ' '.join(list(map(str, d))), file=f)
+            #  if t == 'f':
+                #  print('f',
+                      #  ' '.join(
+                          #  list(map(lambda t: '/'.join(list(map(str, t))), d))),
+                      #  file=f)
+            #  else:
+            print(t, ' '.join(list(map(str, d))), file=f)

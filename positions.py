@@ -75,11 +75,20 @@ def translate_to_origin(data: [[str, [[str, list]]]], plane: str):
     # Translate each group to the origin
     for _, _, _, gd in data:
         # Obtain minimum points in x, y and z
-        exts: [float] = [inf, inf, inf]
+        exts: [float] = [
+                inf * (1 if plane != 'x' else -1),
+                inf * (1 if plane != 'y' else -1),
+                inf * (1 if plane != 'z' else -1),
+            ]
+        funcs:['[float,float] -> float'] = [
+                min if plane != 'x' else max,
+                min if plane != 'y' else max,
+                min if plane != 'z' else max
+            ]
         for t, d in gd:
             if t == 'v':
                 for i in range(len(d)):
-                    exts[i] = min(exts[i], d[i])
+                    exts[i] = funcs[i](exts[i], d[i])
         # Translate by offset to origin
         for t, d in gd:
             if t == 'v':
