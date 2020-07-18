@@ -65,6 +65,8 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
             elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
                                                                      'h') == 2:
                 ret['key-type'] = 'num-enter'
+            elif ret_key and ret_key.lower() == 'caps lock' and safe_get(ret, 'w') == 1.25 and safe_get(ret, 'w2') == 1.75 and safe_get(ret, 'l') == True:
+                ret['key-type'] = 'stepped-caps'
 
         if 'a' in ret:
             ret = rem(ret, 'a')
