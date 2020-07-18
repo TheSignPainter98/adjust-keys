@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs_main.py)
-ADJUST_caps_SRCS = $(shell ./deps adjustcaps_main.py)
+ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
 
 all: adjustglyphs adjustcaps
 .PHONY: all
@@ -13,8 +13,8 @@ define compilePython
 	cython3 -X language_level=3 $^
 	mkdir bin_$@
 	cp $^ bin_$@
-	mv bin_$@/$(@)_main.py bin_$@/__main__.py
-	cd bin_$@/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@)_main) __main__.py >/dev/null && cd ../
+	mv bin_$@/$(@).py bin_$@/__main__.py
+	cd bin_$@/ && zip $@.zip $(shell echo $^ | tr ' ' '\n' |  grep -v $(@).py) __main__.py >/dev/null && cd ../
 	echo '#!/usr/bin/python3' | cat - bin_$@/$@.zip > $@
 	chmod 700 $@
 endef
@@ -22,7 +22,7 @@ endef
 adjustglyphs: $(ADJUST_GLYPHS_SRCS)
 	$(compilePython)
 
-adjustcaps: $(ADJUST_caps_SRCS)
+adjustcaps: $(ADJUST_CAPS_SRCS)
 	$(compilePython)
 
 clean:
