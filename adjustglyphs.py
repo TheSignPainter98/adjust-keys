@@ -15,6 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
+from adjustglyphs_args import parse_args, Namespace
 from functools import reduce
 from layout import parse_layout
 from log import die, init_logging
@@ -24,8 +25,48 @@ from os.path import exists, join
 from positions import resolve_glyph_positions
 from util import concat, dict_union, inner_join, list_diff, rob_rem
 from re import match
+from sys import argv, exit
 from xml.dom.minidom import Element, parseString
-from yaml_io import read_yaml
+from yaml_io import read_yaml, write_yaml
+
+
+##
+# @brief Entry point function, should be treated as the first thing called
+#
+# @param args:[str] Command line arguments
+#
+# @return Zero if and only if the program is to exit successfully
+def main(args: [str]) -> int:
+    pargs: Namespace = parse_args(args)
+
+    if pargs.listKeys:
+        print('\n'.join(
+            list(
+                map(
+                    lambda k: k['key'],
+                    parse_layout(read_yaml(pargs.layout_row_profile_file),
+                                 read_yaml(pargs.layout_file))))))
+        return 0
+    if pargs.listGlyphs:
+        print('\n'.join(
+            list(
+                map(lambda p: p[0],
+                    read_yaml(pargs.glyph_offset_file).items()))))
+        return 0
+
+    svg: str = adjust_glyphs(pargs.verbosity, pargs.glyph_part_ignore_regex,
+                             pargs.profile_file, pargs.layout_row_profile_file,
+                             pargs.glyph_dir, pargs.layout_file,
+                             pargs.glyph_map_file, pargs.unit_length,
+                             pargs.global_x_offset, pargs.global_y_offset)
+
+    if pargs.output_location == '-':
+        print(svg)
+    else:
+        with open(pargs.output_location, 'w+') as f:
+            print(svg, file=f)
+
+    return 0
 
 
 def adjust_glyphs(verbosity: int, glyph_part_ignore_regex: str,
@@ -145,3 +186,10 @@ def glyph_files(dname: str) -> [str]:
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
+
+
+if __name__ == '__main__':
+    try:
+        exit(main(argv))
+    except KeyboardInterrupt:
+        exit(1)

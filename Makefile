@@ -2,8 +2,8 @@
 
 .DEFAULT_GOAL := all
 
-ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs_main.py)
 ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
+ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
 
 all: adjustglyphs adjustcaps
 .PHONY: all
