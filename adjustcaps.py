@@ -30,7 +30,7 @@ from log import init_logging, printi
 from math import inf
 from multiprocessing import cpu_count
 from obj_io import read_obj, write_obj
-from os import makedirs, walk
+from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
 from util import concat, dict_union, flatten_list, inner_join, rem
@@ -125,6 +125,8 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
         if blender_available:
             printi('Importing "%s" into blender...' % cap['oname'])
             ops.import_scene.obj(filepath=cap['oname'])
+            printi('Deleting file "%s"' % cap['oname'])
+            remove(cap['oname'])
 
 
 def de_spookify(cap: dict) -> dict:
