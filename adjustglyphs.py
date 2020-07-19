@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # Copyright (C) Edward Jones
 #
 # This program is free software; you can redistribute it and/or
@@ -15,12 +16,17 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
+from importlib.util import find_spec
+blender_available: bool = find_spec('bpy') is not None
+if blender_available:
+    from bpy import ops
+
 from adjustglyphs_args import parse_args, Namespace
 from functools import reduce
 from layout import parse_layout
-from log import die, init_logging
+from log import die, init_logging, printi
 from glyphinf import glyph_inf
-from os import walk
+from os import remove, walk
 from os.path import exists, join
 from positions import resolve_glyph_positions
 from util import concat, dict_union, inner_join, list_diff, rob_rem
@@ -36,8 +42,19 @@ from yaml_io import read_yaml, write_yaml
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def main(args: [str]) -> int:
+def main(*args: [str]) -> int:
+    # Handle arguments; accept string, list of strings and list of lists of strings
+    if all(map(lambda a: type(a) == str, args)):
+        args = list(reduce(concat, map(lambda a: a.split(' '), args)))
+    args = flatten_list(args)
+    if type(args) == tuple:
+        args = list(args)
+    # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
+    if args[0] != argv[0]:
+        args = [argv[0]] + list(args)
+
     pargs: Namespace = parse_args(args)
+    init_logging(pargs.verbosity)
 
     if pargs.listKeys:
         print('\n'.join(
@@ -54,32 +71,37 @@ def main(args: [str]) -> int:
                     read_yaml(pargs.glyph_offset_file).items()))))
         return 0
 
-    svg: str = adjust_glyphs(pargs.verbosity, pargs.glyph_part_ignore_regex,
-                             pargs.profile_file, pargs.layout_row_profile_file,
-                             pargs.glyph_dir, pargs.layout_file,
-                             pargs.glyph_map_file, pargs.unit_length,
-                             pargs.global_x_offset, pargs.global_y_offset)
+    svg: str = adjust_glyphs(pargs.glyph_part_ignore_regex, pargs.profile_file,
+                             pargs.layout_row_profile_file, pargs.glyph_dir,
+                             pargs.layout_file, pargs.glyph_map_file,
+                             pargs.unit_length, pargs.global_x_offset,
+                             pargs.global_y_offset)
 
+    printi('Writing to file "%s"' % pargs.output_location)
     if pargs.output_location == '-':
         print(svg)
     else:
         with open(pargs.output_location, 'w+') as f:
             print(svg, file=f)
+        if blender_available:
+            ops.import_curve.svg(filepath=pargs.output_location)
+            if exists(pargs.output_location):
+                printi('Deleting file "%s"' % pargs.output_location)
+                remove(pargs.output_location)
 
     return 0
 
 
-def adjust_glyphs(verbosity: int, glyph_part_ignore_regex: str,
-                  profile_file: str, layout_row_profile_file: str,
-                  glyph_dir: str, layout_file: str, glyph_map_file: str,
-                  unit_length: int, global_x_offset: int,
-                  global_y_offset: int) -> [dict]:
-    init_logging(verbosity)
+def adjust_glyphs(glyph_part_ignore_regex: str, profile_file: str,
+                  layout_row_profile_file: str, glyph_dir: str,
+                  layout_file: str, glyph_map_file: str, unit_length: int,
+                  global_x_offset: int, global_y_offset: int) -> [dict]:
     data: [dict] = collect_data(profile_file, layout_row_profile_file,
                                 glyph_dir, layout_file, glyph_map_file)
 
     placed_glyphs: [dict] = resolve_glyph_positions(data, unit_length,
-                                              global_x_offset, global_y_offset)
+                                                    global_x_offset,
+                                                    global_y_offset)
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -186,6 +208,13 @@ def glyph_files(dname: str) -> [str]:
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
+
+
+def flatten_list(lst:list) -> list:
+    if type(lst) == str:
+        return [lst]
+    else:
+        return list(reduce(concat, map(flatten_list, lst)))
 
 
 if __name__ == '__main__':

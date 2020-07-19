@@ -32,7 +32,7 @@ def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
 
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely')
-    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout (default: -) ')
+    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout (default: adjusted-glyphs.svg) ')
     ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files')
     ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files')
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: glyph-opts.yml)', metavar='file', default='glyph-opts.yml')
