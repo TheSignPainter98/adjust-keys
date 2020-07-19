@@ -33,19 +33,21 @@ from obj_io import read_obj, write_obj
 from os import makedirs, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from util import concat, dict_union, inner_join, rem
+from util import concat, dict_union, flatten_list, inner_join, rem
 from sys import argv, exit
 from yaml_io import read_yaml
 
 
 def main(*args: [[str]]) -> int:
-    if len(args) >= 1:
-        if type(args[0]) == list:
-            args = list(reduce(concat, args))
-        elif type(args[0]) == str:
-            args = list(reduce(concat, map(lambda a: a.split(' '), args))) # NB: file names with spaces in them are not handled by this method, use a list instead please
+    # Handle arguments; accept string, list of strings and list of lists of strings
+    if all(map(lambda a: type(a) == str, args)):
+        args = list(reduce(concat, map(lambda a: a.split(' '), args)))
+    args = flatten_list(args)
     if type(args) == tuple:
         args = list(args)
+    # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
+    if args[0] != argv[0]:
+        args = [argv[0]] + list(args)
 
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
@@ -56,8 +58,7 @@ def main(*args: [[str]]) -> int:
             makedirs(pargs.output_dir, exist_ok=True)
         for cap in caps:
             translate_to_origin(cap['cap-obj'])
-            write_obj(join(pargs.output_dir, cap['cap-name'] + '.obj'),
-                      cap['cap-obj'])
+            write_obj(join(pargs.output_dir, cap['cap-name'] + '.obj'), cap['cap-obj'])
     else:
         if not exists(pargs.output_dir):
             printi('Making non-existent directory "%s"' % pargs.output_dir)
@@ -199,6 +200,7 @@ def gen_cap_file_name(cap_loc: str, cap: dict) -> str:
 #  if t == 'f':
 #  for i in range(len(d)):
 #  d[i] = list(map(lambda v: v - gtv - 1, d[i]))
+
 
 if __name__ == '__main__':
     try:

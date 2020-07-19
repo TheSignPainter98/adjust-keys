@@ -157,3 +157,10 @@ def safe_get(a: [object], i: object) -> object:
     else:
         die('Can\'t safely-get from unhandled type %s (more code is needed in %s)'
             % (type(a), __file__))
+
+
+def flatten_list(lst:list) -> list:
+    if type(lst) == str:
+        return [lst]
+    else:
+        return list(reduce(concat, map(flatten_list, lst)))
