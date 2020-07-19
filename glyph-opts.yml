@@ -1,5 +1,5 @@
 verbosity: 0
-output_location: "-"
+output_location: adjusted-glyphs.svg
 listGlyphs: 0
 listKeys: 0
 unit_length: 292.0
