@@ -16,11 +16,11 @@
 #
 
 from importlib.util import find_spec
-blender_available:bool = find_spec('bpy') is not None
+blender_available: bool = find_spec('bpy') is not None
 
 from adjustcaps_args import parse_args
 from argparse import Namespace
-if  blender_available:
+if blender_available:
     from bpy import ops
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
@@ -58,15 +58,15 @@ def main(*args: [[str]]) -> int:
             makedirs(pargs.output_dir, exist_ok=True)
         for cap in caps:
             translate_to_origin(cap['cap-obj'])
-            write_obj(join(pargs.output_dir, cap['cap-name'] + '.obj'), cap['cap-obj'])
+            write_obj(join(pargs.output_dir, cap['cap-name'] + '.obj'),
+                      cap['cap-obj'])
     else:
         if not exists(pargs.output_dir):
             printi('Making non-existent directory "%s"' % pargs.output_dir)
             makedirs(pargs.output_dir, exist_ok=True)
         adjust_caps(pargs.unit_length, pargs.x_offset, pargs.y_offset,
-                    pargs.plane, pargs.profile_file, pargs.cap_dir,
-                    pargs.output_dir, pargs.layout_file,
-                    pargs.layout_row_profile_file)
+                    pargs.plane, pargs.cap_dir, pargs.output_dir,
+                    pargs.layout_file, pargs.layout_row_profile_file)
 
         #  seens:dict = {}
         #  for n,m in models:
@@ -85,22 +85,13 @@ def main(*args: [[str]]) -> int:
 
 
 def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
-                plane: str, profile_file: str, cap_dir: str, output_dir: str,
-                layout_file: str, layout_row_profile_file: str):
-    printi('Reading layout information')
-    layout_row_profiles: [str] = read_yaml(layout_row_profile_file)
-    layout: [dict] = list(
-        map(add_cap_name,
-            parse_layout(layout_row_profiles, read_yaml(layout_file))))
-
-    printi('Finding and parsing cap models')
-    caps: [dict] = get_caps(cap_dir)
-    layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
-
+                plane: str, cap_dir: str, output_dir: str, layout_file: str,
+                layout_row_profile_file: str):
     # Resolve output unique output name
+    caps: [dict] = get_data(cap_dir, layout_file, layout_row_profile_file)
     seen: dict = {}
     printi('Resolving cap output names')
-    for cap in layout_with_caps:
+    for cap in caps:
         if cap['cap-name'] not in seen:
             seen[cap['cap-name']] = 1
         else:
@@ -114,19 +105,31 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
     nprocs: int = 2 * cpu_count()
     printi('Adjusting and outputting caps on %d threads...' % nprocs)
     with ThreadPoolExecutor(nprocs) as ex:
-        cops: ['[dict,str]->()'] = [
-            ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane)
-            for cap in layout_with_caps
-        ]
+        cops: ['[dict,str]->()'] = [ ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane) for cap in caps ]
         wait(cops)
 
     # Sequentially import the models (for thread-safety)
-    for cap in layout_with_caps:
+    for cap in caps:
         if blender_available:
             printi('Importing "%s" into blender...' % cap['oname'])
             ops.import_scene.obj(filepath=cap['oname'])
             printi('Deleting file "%s"' % cap['oname'])
             remove(cap['oname'])
+
+
+def get_data(cap_dir: str, layout_file: str,
+             layout_row_profile_file: str) -> [dict]:
+    printi('Reading layout information')
+    layout_row_profiles: [str] = read_yaml(layout_row_profile_file)
+    layout: [dict] = list(
+        map(add_cap_name,
+            parse_layout(layout_row_profiles, read_yaml(layout_file))))
+
+    printi('Finding and parsing cap models')
+    caps: [dict] = get_caps(cap_dir)
+    layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
+
+    return layout_with_caps
 
 
 def de_spookify(cap: dict) -> dict:
@@ -160,7 +163,7 @@ def apply_cap_position(cap: dict) -> dict:
 
 def add_cap_name(key: dict) -> dict:
     key['cap-name'] = key['key-type'] if 'key-type' in key else (
-        key['profile-part'] + '-' + str(key['width']).replace('.', '_') + 'u')
+        key['profile-part'] + '-' + str(float(key['width'])).replace('.', '_') + 'u')
     return key
 
 
@@ -202,7 +205,6 @@ def gen_cap_file_name(cap_loc: str, cap: dict) -> str:
 #  if t == 'f':
 #  for i in range(len(d)):
 #  d[i] = list(map(lambda v: v - gtv - 1, d[i]))
-
 
 if __name__ == '__main__':
     try:
