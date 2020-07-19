@@ -105,7 +105,10 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
     nprocs: int = 2 * cpu_count()
     printi('Adjusting and outputting caps on %d threads...' % nprocs)
     with ThreadPoolExecutor(nprocs) as ex:
-        cops: ['[dict,str]->()'] = [ ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane) for cap in caps ]
+        cops: ['[dict,str]->()'] = [
+            ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane)
+            for cap in caps
+        ]
         wait(cops)
 
     # Sequentially import the models (for thread-safety)
@@ -163,7 +166,8 @@ def apply_cap_position(cap: dict) -> dict:
 
 def add_cap_name(key: dict) -> dict:
     key['cap-name'] = key['key-type'] if 'key-type' in key else (
-        key['profile-part'] + '-' + str(float(key['width'])).replace('.', '_') + 'u')
+        key['profile-part'] + '-' +
+        str(float(key['width'])).replace('.', '_') + 'u') # I'm really hoping that python will behave reasonably with floating point precision
     return key
 
 
