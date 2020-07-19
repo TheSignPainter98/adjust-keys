@@ -29,7 +29,7 @@ from glyphinf import glyph_inf
 from os import remove, walk
 from os.path import exists, join
 from positions import resolve_glyph_positions
-from util import concat, dict_union, inner_join, list_diff, rob_rem
+from util import concat, dict_union, flatten_list, inner_join, list_diff, rob_rem
 from re import match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
@@ -208,13 +208,6 @@ def glyph_files(dname: str) -> [str]:
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
-
-
-def flatten_list(lst:list) -> list:
-    if type(lst) == str:
-        return [lst]
-    else:
-        return list(reduce(concat, map(flatten_list, lst)))
 
 
 if __name__ == '__main__':
