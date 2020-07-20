@@ -13,7 +13,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 ## Usage
 
 1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
-2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h`
+2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
 3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [setup](#setup))
 4. Run the code---replace `ARGS` with the command-line parameters from above in either of the following
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
