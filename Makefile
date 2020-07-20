@@ -8,9 +8,15 @@ ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
 all: adjustglyphs adjustcaps
 .PHONY: all
 
+ifndef NO_CYTHON
+define runCython
+	cython3 -X language_level=3 $^
+endef
+endif
+
 define compilePython
 	$(RM) -r bin_$@/
-	cython3 -X language_level=3 $^
+	$(runCython)
 	mkdir bin_$@
 	cp $^ bin_$@
 	# mv bin_$@/$(@).py bin_$@/__main__.py
