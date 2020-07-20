@@ -4,7 +4,7 @@
 
 ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
 ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
-DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) layout_row_profiles.yml layout.yml
+DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) layout_row_profiles.yml layout.yml README.md
 
 all: adjustglyphs adjustcaps
 .PHONY: all
@@ -36,12 +36,14 @@ adjustglyphs: $(ADJUST_GLYPHS_SRCS)
 adjustcaps: $(ADJUST_CAPS_SRCS)
 	$(compilePython)
 
-%.yml:
-	@# Do Nothing
-%.obj:
-	@# Do Nothing
-%.svg:
-	@# Do Nothing
+profiles/kat/%.yml %.yml:
+	@# Do nothing
+profiles/kat/%.obj:
+	@# Do nothing
+examples/%:
+	@# Do nothing
+%.md:
+	@# Do nothing
 
 clean:
 	$(RM) -r __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c
