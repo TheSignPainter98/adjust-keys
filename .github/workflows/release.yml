@@ -4,15 +4,15 @@ on:
       - created
 name: Distributable generator
 jobs:
-  generate:
-    name: Generates distributables
+  generate-distributables:
+    name: Generate distributables
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@master
-      - name: Generate the distributables
+      - name: Generate artifacts
         run: make dist NO_CYTHON=y
-      - name: Add distributables to release
+      - name: Attach artifacts to release
         uses: skx/github-action-publish-binaries@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
