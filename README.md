@@ -1,41 +1,76 @@
-# AdjustKeys
+# Adjustcaps and Adjustkeys
 
-A python script to provide a single source of truth for glyph alignment over arbitrary profiles and layouts.
-Takes input of:
+This is a python script which generates layouts of glyphs and keycaps for (automatic) import into blender!
+Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys---simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
 
-- A folder containing a bunch of `svg`s where each file contains a single centred glyph
+This script can also be used to create a _single source of truth_ for glyph alignment on caps, so changes and fixes can be easily propagated.
+
+Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases])
+
+## Usage
+
+1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
+2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(glyphs|caps) -h`
+3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [setup](#setup))
+4. Run the code---replace `ARGS` with the command-line parameters from above in either of the following
+	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
+	- Run from GUI _within_ Blender by opening a Python console and pasting `import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
+	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
+5. Wait (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is shorter
+6. (Possibly shrink-wrap glyphs onto caps if required)
+7. Enjoy free time
+
+## Setup
+
+Although they share some code, `adjustcaps` and `adjustglyphs` operate independently.
+They are setup as below.
+
+### Setting up `adjustcaps`
+
+This script takes input of:
+
+- A directory containing `.obj` files each with an individual keycap in an arbitrary location (but constant orientation!), named as `profile-size.obj` (e.g. `r1-1_0u.obj`)
+- A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
+- A `yaml` file which lists the profiles of each row in order top to bottom
+
+If called from blender, the arranged keycaps are imported, otherwise, the generated `.obj` files (one for each cap) are left on disk.
+
+It's important to note that _no other vertices should be present in the object files!_
+Some cleaned KAT profile models are provided, but for other models, please make sure that only the vertices of the keycap are present in the file as otherwise this can mess up alignment when the script translates models to be adjacent to the origin.
+
+### Setting up `adjustglyphs`
+
+This is a little more complicated, but the results should speak for themselves.
+
+This script takes input of:
+
+- A folder containing the glyphs to be placed, each in a separate `.svg` file
 - A `yaml` file which specifies the location of the centre of a key in a particular profile
-- A `yaml` file which specifies a layout to use (this can be taken directly from KLE!)
+- A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
 - A `yaml` file which specifies a mapping from key names to glyph names
-- Command-line arguments (which can be given in a `yaml` file) which detail the length of a single unit, the distance between consecutive rows without extra padding (such as a 0.5u space between the top two rows), and the margin between consecutive keycaps on the same row where extra padding is omitted
 
-The script then outputs an `svg` containing all the glyphs centred in each key in the layout according to the mapping used.
+If called from blender, the arranged glyphs are imported, otherwise, the generated `.svg` file is left on disk.
 
-I wrote this in Python so that anyone learning to code could have an example of some reasonably complicated code and some reasonably clean methods to deal with this.
-Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
-Haskell would have been a _far_ better option.
-Everyone has their regrets, eh?
+For the best results, all `.svg` files should be of an identical height and width which is then specified as the `--unit-length` parameter.
 
-## How to obtain &amp; use
+## Building from Source
 
-Assuming `git` is installed, you can build the code with the following commands.
+This section is only useful for contributors; if you want to use the script, see the [releases][releases] page and the [usage](#usage) section above.
+
+Assuming `git` is installed, then in a suitable directory, run the following from the command-line.
 
 ```bash
 git clone https://github.com/TheSignPainter98/adjust-keys
 cd adjust-keys
-make # (This step is optional to lint and collect into a single binary, so don't worry if it doesn't work, see below)
+make
 ```
 
-To run generate a laid-out `svg` of the glyphs present in the current folder, use:
+## Gripes
 
-```bash
-python3 ./adjustkeys_main.py
-```
+I wrote this in Python so that anyone learning to code could have an example of some reasonably complicated code and some reasonably clean methods to deal with this.
+Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
+Haskell would have been a _far_ better option for my sanity.
+Everyone has their regrets, eh?
 
-For example, `python3 ./adjustkeys_main.py -G /path/to/glyph/dir/ -o glyphs.svg`
-
-Find usage information with:
-
-```bash
-python3 ./adjustkeys_main.py -h
-```
+[kle]: https://www.keyboard-layout-editor.com "keyboard layout editor"
+[releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
