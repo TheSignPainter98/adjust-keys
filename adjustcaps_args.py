@@ -65,7 +65,6 @@ def parse_args(args:[str]) -> Namespace:
         }
 
     # Obtain yaml arguments
-    print(dargs, pargs)
     yargs:dict = {}
     if 'opt_file' in pargs and pargs['opt_file'] is not None:
         if exists(pargs['opt_file']):
