@@ -18,6 +18,7 @@
 from argparse import ArgumentParser, Namespace
 from log import printe
 from os.path import exists
+from sanitise_args import sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
@@ -34,7 +35,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely')
     ap.add_argument('-o', '--output-dir', action='store', dest='output_dir', help='Specify directory to write to output or (default: .) ')
     ap.add_argument('-O', '--move-to-origin', action='store_true', dest='move_to_origin', help='If set, translate the respective input files\' data to the origin')
-    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: cap-opts.yml)', metavar='file', default='cap-opts.yml')
+    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: cap-opts.yml)', metavar='file')
     ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap (default: 276.0)', metavar='num')
     ap.add_argument('-x', '--x-offset', action='store', type=float, dest='x_offset', help='global offset which moves every element to the right (default: 0.0)', metavar='num')
     ap.add_argument('-y', '--y-offset', action='store', type=float, dest='y_offset', help='global offset which moves every element downwards (default: 0.0)', metavar='num')
@@ -44,18 +45,38 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', metavar='file')
     ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', metavar='file')
 
-    # Obtain parsed arguments
+    # Sanitise and obtain parsed arguments
+    args = sanitise_args('adjustcaps', args)
     pargs:dict = ap.parse_args(args[1:]).__dict__
 
-    # Obtain yaml arguments
-    yargs:dict = {}
-    if exists(pargs['opt_file']):
-        yargs = read_yaml(pargs['opt_file'])
-    elif pargs['opt_file'] != 'cap-opts.yml':
-        printe('Failed to find options file %s' % pargs['opt_file'])
-        exit(1)
+    # Default arguments
+    dargs:dict = {
+            'opt_file': 'cap-opts.yml',
+            'verbosity': 0,
+            'output_dir': '.',
+            'unit_length': 19.05,
+            'x_offset': 0.525,
+            'y_offset': 0.525,
+            'plane': 'y',
+            'cap_dir': '.',
+            'layout_file': 'layout.yml',
+            'layout_row_profile_file': 'layout_row_profiles.yml',
+            'glyph_map_file': 'glyph-map.yml',
+        }
 
-    return Namespace(**dict_union_ignore_none(yargs, pargs))
+    # Obtain yaml arguments
+    print(dargs, pargs)
+    yargs:dict = {}
+    if 'opt_file' in pargs and pargs['opt_file'] is not None:
+        if exists(pargs['opt_file']):
+            yargs = read_yaml(pargs['opt_file'])
+        else:
+            printe('Failed to find options file %s' % pargs['opt_file'])
+            exit(1)
+    elif exists(dargs['opt_file']):
+        yargs = read_yaml(dargs['opt_file'])
+
+    return Namespace(**dict_union_ignore_none(dict_union_ignore_none(dargs, yargs), pargs))
 
 def dict_union_ignore_none(a:dict, b:dict) -> dict:
     return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))

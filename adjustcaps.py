@@ -39,17 +39,9 @@ from yaml_io import read_yaml
 
 
 def main(*args: [[str]]) -> int:
-    # Handle arguments; accept string, list of strings and list of lists of strings
-    if all(map(lambda a: type(a) == str, args)):
-        args = list(reduce(concat, map(lambda a: a.split(' '), args)))
-    args = flatten_list(args)
-    if type(args) == tuple:
-        args = list(args)
-    # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
-    if args[0] != argv[0]:
-        args = [argv[0]] + list(args)
-
     pargs: Namespace = parse_args(args)
+    print('=' * 50)
+    print(pargs)
     init_logging(pargs.verbosity)
     if pargs.move_to_origin:
         caps: [dict] = get_caps(pargs.cap_dir)
