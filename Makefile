@@ -4,7 +4,7 @@
 
 ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
 ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
-DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml)
+DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) layout_row_profiles.yml layout.yml
 
 all: adjustglyphs adjustcaps
 .PHONY: all
@@ -39,6 +39,8 @@ adjustcaps: $(ADJUST_CAPS_SRCS)
 %.yml:
 	@# Do Nothing
 %.obj:
+	@# Do Nothing
+%.svg:
 	@# Do Nothing
 
 clean:
