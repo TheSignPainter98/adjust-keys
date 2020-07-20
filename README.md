@@ -7,7 +7,8 @@ Gone will be the days of manually placing caps into the correct locations and sp
 
 This script can also be used to create a _single source of truth_ for glyph alignment on caps, so changes and fixes can be easily propagated.
 
-Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases])
+Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases]).
+Also, command-line options can be saved and automatically read from the file `(cap|glyph)-opts.yml` for later use.
 
 ## Usage
 
