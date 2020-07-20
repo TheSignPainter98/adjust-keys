@@ -29,7 +29,7 @@ from glyphinf import glyph_inf
 from os import remove, walk
 from os.path import exists, join
 from positions import resolve_glyph_positions
-from util import concat, dict_union, flatten_list, inner_join, list_diff, rob_rem
+from util import concat, dict_union, inner_join, list_diff, rob_rem
 from re import match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
@@ -43,16 +43,6 @@ from yaml_io import read_yaml, write_yaml
 #
 # @return Zero if and only if the program is to exit successfully
 def main(*args: [str]) -> int:
-    # Handle arguments; accept string, list of strings and list of lists of strings
-    if all(map(lambda a: type(a) == str, args)):
-        args = list(reduce(concat, map(lambda a: a.split(' '), args)))
-    args = flatten_list(args)
-    if type(args) == tuple:
-        args = list(args)
-    # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
-    if args[0] != argv[0]:
-        args = [argv[0]] + list(args)
-
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
