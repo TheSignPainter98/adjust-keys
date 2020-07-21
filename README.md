@@ -1,6 +1,7 @@
 # Adjustcaps and Adjustglyphs
 
 ![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/placed-caps.png)
+![An example adjustglyphs layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/menacing-glyphs.png)
 
 This is a [python][python] script which generates layouts of glyphs and keycaps for (automatic) import into [Blender!][blender]
 Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys—simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
@@ -19,7 +20,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
-5. Wait (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is shorter
+5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is faster.)
 6. (Possibly shrink-wrap glyphs onto caps if required)
 7. Enjoy free time
 
