@@ -75,7 +75,7 @@ Of course, using Python was an absolutely terrible idea due to it's basically us
 [Haskell][haskell] would have been a _far_ better option for my sanity.
 Everyone has their regrets, eh?
 
-# Author and Acknowledgements
+## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 I'm not particularly proud of it, but it gets the job done.
