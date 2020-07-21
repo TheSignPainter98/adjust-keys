@@ -75,5 +75,14 @@ Of course, using Python was an absolutely terrible idea due to it's basically us
 Haskell would have been a _far_ better option for my sanity.
 Everyone has their regrets, eh?
 
-[kle]: https://www.keyboard-layout-editor.com "keyboard layout editor"
+# Author and Acknowledgements
+
+This code was written by Ed Jones (Discord `@kcza#4691`).
+I'm not particularly proud of it, but it gets the job done.
+
+KAT Keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers'][keycap-designers-discord] Discord.
+
+[keycap-designers-discord]: https://discord.gg/93WN2uF
+[kle]: http://www.keyboard-layout-editor.com "keyboard layout editor"
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
+[zfrontier]: https://en.zfrontier.com
