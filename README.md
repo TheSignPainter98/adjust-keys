@@ -32,7 +32,7 @@ They are setup as below.
 
 This script takes input of:
 
-- A directory containing `.obj` files each with an individual keycap in an arbitrary location (but constant orientation!), named as `profile-size.obj` (e.g. `r1-1_0u.obj`)
+- A directory containing `.obj` files each with an individual keycap in an arbitrary location (_but consistent orientation_), named as `profile-size.obj` (e.g. `r1-1_0u.obj`)
 - A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
 - A `yaml` file which lists the profiles of each row in order top to bottom
 
