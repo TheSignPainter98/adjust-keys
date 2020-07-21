@@ -13,8 +13,11 @@ Also, command-line options can be saved and automatically read from the file `(c
 
 ## Usage
 
+You'll need an installation of [`python3`][python] and its package manager, [`pip3`][pip].
+
 1. Go to the [releases page][releases], download and unzip the code where you’ll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
+	- If python complains of a missing module, you can install it with `pip3 install MODULE_NAME`
 3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [custom setup](#custom-setup))
 4. Run the code—replace `ARGS` with the command-line parameters from above and `adjust(caps|glyphs)` as appropriate in either of the following
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
@@ -24,7 +27,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 6. (Possibly shrink-wrap glyphs onto caps if required)
 7. Enjoy free time
 
-## Examples
+## Example
 
 In the zip on the [releases page][releases], some example data files are present and generate the layouts in the images above.
 Assuming the zip is in `Downloads`, to generate a standard exposé of keycap models, run the following, and be prepared to wait a little while—there’s a lot of data to process.
@@ -99,6 +102,7 @@ KAT keycap models present in the repo were derived from a model kindly provided 
 [haskell]: https://wiki.haskell.org/Introduction
 [keycap-designers-discord]: https://discord.gg/93WN2uF
 [kle]: http://www.keyboard-layout-editor.com "keyboard layout editor"
+[pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
 [zfrontier]: https://en.zfrontier.com
