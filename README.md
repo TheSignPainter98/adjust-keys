@@ -19,7 +19,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
-5. Wait (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is shorter
+5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is faster.)
 6. (Possibly shrink-wrap glyphs onto caps if required)
 7. Enjoy free time
 
