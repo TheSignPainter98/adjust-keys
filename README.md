@@ -24,6 +24,17 @@ Also, command-line options can be saved and automatically read from the file `(c
 6. (Possibly shrink-wrap glyphs onto caps if required)
 7. Enjoy free time
 
+## Examples
+
+In the zip on the [releases page][releases], some example data files are present and generate the layouts in the images above.
+Assuming the zip is in `Downloads`, to generate a standard exposé of keycap models, run the following, and be prepared to wait a little while—there's a lot of data to process.
+
+```bash
+cd Downloads
+unzip adjust-keycaps.zip # Or equivalent; name includes release version
+blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3') sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustglyphs')); import adjustglyphs; adjustglyphs.main('-v3')"
+```
+
 ## Setup
 
 Although they share some code, `adjustcaps` and `adjustglyphs` operate independently.
