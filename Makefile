@@ -20,8 +20,8 @@ define compilePython
 	$(runCython)
 	mkdir bin_$@
 	cp $^ bin_$@
-	# mv bin_$@/$(@).py bin_$@/__main__.py
-	echo -e 'if __name__ == "__main__":\n    with open("$@", "r") as f:\n        exec(f.read())' > bin_$@/__main__.py
+	cp bin_$@/$(@).py bin_$@/__main__.py
+	# echo -e 'if __name__ == "__main__":\n    with open("$@", "r") as f:\n        exec(f.read())' > bin_$@/__main__.py
 	cd bin_$@/ && zip $@.zip $(shell echo $^ | tr ' ' '\n') __main__.py >/dev/null && cd ../
 	echo '#!/usr/bin/python3' | cat - bin_$@/$@.zip > $@
 	chmod 700 $@
