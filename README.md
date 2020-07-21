@@ -15,9 +15,9 @@ Also, command-line options can be saved and automatically read from the file `(c
 1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
 3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [setup](#setup))
-4. Run the code—replace `ARGS` with the command-line parameters from above in either of the following
-	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.dirname(bpy.data.filepath)); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
-	- Run from GUI _within_ Blender by opening a Python console and pasting `import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
+4. Run the code—replace `ARGS` with the command-line parameters from above and `adjust(caps|glyphs)` as appropriate in either of the following
+	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
+	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
 5. Wait (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout, glyph placement is shorter
 6. (Possibly shrink-wrap glyphs onto caps if required)
