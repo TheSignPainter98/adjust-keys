@@ -70,7 +70,7 @@ make
 
 ## Gripes
 
-I wrote this in Python so that anyone learning to code could have an example of some reasonably complicated code and some reasonably clean methods to deal with this.
+I wrote this in Python so that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges.
 Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 Haskell would have been a _far_ better option for my sanity.
 Everyone has their regrets, eh?
