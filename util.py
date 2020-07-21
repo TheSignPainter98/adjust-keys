@@ -163,4 +163,4 @@ def flatten_list(lst:list) -> list:
     if type(lst) == str:
         return [lst]
     else:
-        return list(reduce(concat, map(flatten_list, lst)))
+        return list(reduce(concat, map(flatten_list, lst), []))

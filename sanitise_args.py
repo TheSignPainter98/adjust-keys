@@ -16,19 +16,29 @@
 #
 
 from functools import reduce
+from log import die
 from sys import argv
 from util import concat, flatten_list
 
 def sanitise_args(pname:str, args) -> list:
-    # Handle arguments; accept string, list of strings and list of lists of strings
-    if all(map(lambda a: type(a) == str, args)):
-        args = list(reduce(concat, map(lambda a: a.split(' '), args)))
-    args = flatten_list(args)
     if type(args) == tuple:
         args = list(args)
+    if args == ['']:
+        args = []
+    if type(args) == list and all(map(lambda a: type(a) == str, args)):
+        print('asdf')
+        args = list(reduce(concat, map(lambda a: a.split(' '), args), []))
+    elif type(args) == str:
+        print('fdsa')
+        args = args.split(' ')
+    else:
+        die('Unknown argument type, %s received, please use a list of (lists of) strings or just a single string' % str(type(args)))
+    args = flatten_list(args)
     # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
-    if args[0] != argv[0]:
-        if not argv[0].startswith('blender'):
+    if len(args) == 0 or args[0] != argv[0]:
+        if len(args) == 0:
+            argv.append(pname)
+        elif not argv[0].startswith('blender'):
             argv[0] = pname
         args = [argv[0]] + list(args)
 
