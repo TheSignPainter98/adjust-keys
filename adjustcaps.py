@@ -113,7 +113,7 @@ def get_data(cap_dir: str, layout_file: str,
     # Warn about missing models
     missing_models:[str] = list_diff(set(map(lambda cap: cap['cap-name'], layout)), set(map(lambda cap: cap['cap-name'], caps)))
     if missing_models != []:
-        printw('Missing the following keycap models:\n\t' + '\n\t'.join(missing_models))
+        printw('Missing the following keycap models:\n\t' + '\n\t'.join(sorted(missing_models)))
 
     return layout_with_caps
 
