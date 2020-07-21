@@ -2,7 +2,7 @@
 
 ![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/placed-caps.png)
 
-This is a [python][python] script which generates layouts of glyphs and keycaps for (automatic) import into [blender][blender]!
+This is a [python][python] script which generates layouts of glyphs and keycaps for (automatic) import into [blender!][blender]
 Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys---simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
 
 This script can also be used to create a _single source of truth_ for glyph alignment on caps, so changes and fixes can be easily propagated.
