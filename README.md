@@ -13,7 +13,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 
 ## Usage
 
-You'll need an installation of [`python3`][python] and its package manager, [`pip3`][pip].
+You’ll need an installation of [`python3`][python] and its package manager, [`pip3`][pip].
 
 1. Go to the [releases page][releases], download and unzip the code where you’ll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
@@ -80,8 +80,8 @@ For the best results, all `.svg` files should be of an identical height and widt
 This section is only useful for contributors; if you want to use the script, see the [releases][releases] page and the [usage](#usage) section above.
 
 Assuming `git` is installed, then in a suitable directory, run the following from the command-line.
-For an easier experience, install [`cython3`][cython] first—it's used here as a static checker and can find some bugs without needing to explicitly run all code-paths.
-It's optional, if you don't want to install it, just pass the `NO_CYTHON=y` option on the `make` line.
+For an easier experience, install [`cython3`][cython] first—it’s used here as a static checker and can find some bugs without needing to explicitly run all code-paths.
+It’s optional, if you don’t want to install it, just pass the `NO_CYTHON=y` option on the `make` line.
 
 ```bash
 git clone https://github.com/TheSignPainter98/adjust-keys
