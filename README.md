@@ -13,7 +13,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 
 ## Usage
 
-1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
+1. Go to the [releases page][releases], download and unzip the code where you’ll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
 3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [custom setup](#custom-setup))
 4. Run the code—replace `ARGS` with the command-line parameters from above and `adjust(caps|glyphs)` as appropriate in either of the following
@@ -27,7 +27,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 ## Examples
 
 In the zip on the [releases page][releases], some example data files are present and generate the layouts in the images above.
-Assuming the zip is in `Downloads`, to generate a standard exposé of keycap models, run the following, and be prepared to wait a little while—there's a lot of data to process.
+Assuming the zip is in `Downloads`, to generate a standard exposé of keycap models, run the following, and be prepared to wait a little while—there’s a lot of data to process.
 
 ```bash
 cd Downloads
@@ -50,7 +50,7 @@ This script takes input of:
 
 If called from blender, the arranged keycaps are imported, otherwise, the generated `.obj` files (one for each cap) are left on disk.
 
-It's important to note that _no other vertices should be present in the object files!_
+It’s important to note that _no other vertices should be present in the object files!_
 Some cleaned KAT profile models are provided, but for other models, please make sure that only the vertices of the keycap are present in the file as otherwise this can mess up alignment when the script translates models to be adjacent to the origin.
 
 ### Setting up `adjustglyphs`
@@ -83,16 +83,16 @@ make
 ## Gripes
 
 I wrote this in Python so that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges.
-Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
+Of course, using Python was an absolutely terrible idea due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 [Haskell][haskell] would have been a _far_ better option for my sanity.
 Everyone has their regrets, eh?
 
 ## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
-I'm not particularly proud of it, but it gets the job done.
+I’m not particularly proud of it, but it gets the job done.
 
-KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers'][keycap-designers-discord] Discord.
+KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers’][keycap-designers-discord] Discord.
 
 [blender]: https://www.blender.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
