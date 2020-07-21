@@ -34,7 +34,7 @@ Assuming the zip is in `Downloads`, to generate a standard exposé of keycap mod
 
 ```bash
 cd Downloads
-unzip adjust-keycaps.zip # Or equivalent; name includes release version
+unzip adjust-keycaps.zip
 blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3') sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustglyphs')); import adjustglyphs; adjustglyphs.main('-v3')"
 ```
 
