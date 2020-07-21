@@ -3,7 +3,7 @@
 ![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/placed-caps.png)
 
 This is a [python][python] script which generates layouts of glyphs and keycaps for (automatic) import into [blender!][blender]
-Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys---simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
+Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys—simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
 
 This script can also be used to create a _single source of truth_ for glyph alignment on caps, so changes and fixes can be easily propagated.
 
@@ -15,7 +15,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
 3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [setup](#setup))
-4. Run the code---replace `ARGS` with the command-line parameters from above in either of the following
+4. Run the code—replace `ARGS` with the command-line parameters from above in either of the following
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import sys; sys.path.append('.'); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
