@@ -2,7 +2,7 @@
 
 ![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/placed-caps.png)
 
-This is a python script which generates layouts of glyphs and keycaps for (automatic) import into blender!
+This is a [python][python] script which generates layouts of glyphs and keycaps for (automatic) import into [blender][blender]!
 Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys---simply use the layout you want using the JSON output of the [KLE][kle] to guide the caps into the mathematically-correct location using the perfection of a computer.
 
 This script can also be used to create a _single source of truth_ for glyph alignment on caps, so changes and fixes can be easily propagated.
@@ -72,17 +72,21 @@ make
 
 I wrote this in Python so that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges.
 Of course, using Python was an absolutely terrible idea due to it's basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
-Haskell would have been a _far_ better option for my sanity.
+[Haskell][haskell] would have been a _far_ better option for my sanity.
 Everyone has their regrets, eh?
 
 # Author and Acknowledgements
 
-This code was written by Ed Jones (Discord `@kcza#4691`).
+This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 I'm not particularly proud of it, but it gets the job done.
 
 KAT Keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers'][keycap-designers-discord] Discord.
 
+[blender]: https://www.blender.org
+[github]: https://www.github.com/TheSignPainter98/adjust-keys
+[haskell]: https://wiki.haskell.org/Introduction
 [keycap-designers-discord]: https://discord.gg/93WN2uF
 [kle]: http://www.keyboard-layout-editor.com "keyboard layout editor"
+[python]: https://www.python.org
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
 [zfrontier]: https://en.zfrontier.com
