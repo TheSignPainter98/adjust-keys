@@ -38,8 +38,8 @@ unzip adjust-keycaps.zip # Or equivalent; name includes release version
 blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3') sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustglyphs')); import adjustglyphs; adjustglyphs.main('-v3')"
 ```
 
-**Notice how the gray outlines around the glyph are removed!**
-This is because they have the id `cap-guide` in the `svg`, which is detected and removed by `adjustglyphs`.
+**Notice how the gray outlines around the glyph are automatically removed!**
+This is because they have the id `cap-guide` in the `svg`, which is detected and discarded by `adjustglyphs`.
 As such, you can keep a guide to help with the glyph alignment without affecting the output layout.
 
 ## Custom Setup
