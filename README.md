@@ -80,6 +80,8 @@ For the best results, all `.svg` files should be of an identical height and widt
 This section is only useful for contributors; if you want to use the script, see the [releases][releases] page and the [usage](#usage) section above.
 
 Assuming `git` is installed, then in a suitable directory, run the following from the command-line.
+For an easier experience, install [`cython3`][cython] first—it's used here as a static checker and can find some bugs without needing to explicitly run all code-paths.
+It's optional, if you don't want to install it, just pass the `NO_CYTHON=y` option on the `make` line.
 
 ```bash
 git clone https://github.com/TheSignPainter98/adjust-keys
@@ -102,6 +104,7 @@ I’m not particularly proud of it, but it gets the job done.
 KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers’][keycap-designers-discord] Discord.
 
 [blender]: https://www.blender.org
+[cython]: https://cython.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
 [haskell]: https://wiki.haskell.org/Introduction
 [keycap-designers-discord]: https://discord.gg/93WN2uF
