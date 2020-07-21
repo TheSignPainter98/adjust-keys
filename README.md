@@ -15,7 +15,7 @@ Also, command-line options can be saved and automatically read from the file `(c
 
 1. Go to the [releases page][releases], download and unzip the code where you'll have your `.blend` file
 2. Check everything is working, in a terminal `cd` into the directory above then run `python3 ./adjust(caps|glyphs) -h` (or for macOS &amp; Linux, `./adjust(caps|glyphs) -h` is equivalent and shorter)
-3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [setup](#setup))
+3. Adjust command-line arguments (where the `-h` is from step 2); adjust data files appropriately (see [custom setup](#custom-setup))
 4. Run the code—replace `ARGS` with the command-line parameters from above and `adjust(caps|glyphs)` as appropriate in either of the following
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjust(caps|glyphs)')); import adjust(caps|glyphs); adjust(caps|glyphs).main('ARGS')`
@@ -35,7 +35,7 @@ unzip adjust-keycaps.zip # Or equivalent; name includes release version
 blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3') sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustglyphs')); import adjustglyphs; adjustglyphs.main('-v3')"
 ```
 
-## Setup
+## Custom Setup
 
 Although they share some code, `adjustcaps` and `adjustglyphs` operate independently.
 They are setup as below.
