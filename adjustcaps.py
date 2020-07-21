@@ -26,22 +26,20 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
 from layout import parse_layout
-from log import init_logging, printi
+from log import init_logging, printi, printw
 from math import inf
 from multiprocessing import cpu_count
 from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from util import concat, dict_union, flatten_list, inner_join, rem
+from util import concat, dict_union, flatten_list, list_diff, inner_join, rem
 from sys import argv, exit
 from yaml_io import read_yaml
 
 
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
-    print('=' * 50)
-    print(pargs)
     init_logging(pargs.verbosity)
     if pargs.move_to_origin:
         caps: [dict] = get_caps(pargs.cap_dir)
@@ -60,19 +58,6 @@ def main(*args: [[str]]) -> int:
                     pargs.plane, pargs.cap_dir, pargs.output_dir,
                     pargs.layout_file, pargs.layout_row_profile_file)
 
-        #  seens:dict = {}
-        #  for n,m in models:
-        #  if n not in seens.keys():
-        #  seens[n] = 1
-        #  else:
-        #  seens[n] += 1
-        #  oname:str = join(pargs.output_dir, 'capmodel-' + n + ('-' + str(seens[n]) if seens[n] > 1 else '') + '.obj')
-        #  printi('Outputting to "%s"' % oname)
-        #  write_obj(oname, m)
-        #  print(mfnames)
-        #  for mfname in mfnames:
-        #  bpy.ops.import_scene.obj(filepath=mfname)
-
     return 0
 
 
@@ -81,6 +66,7 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
                 layout_row_profile_file: str):
     # Resolve output unique output name
     caps: [dict] = get_data(cap_dir, layout_file, layout_row_profile_file)
+
     seen: dict = {}
     printi('Resolving cap output names')
     for cap in caps:
@@ -123,6 +109,11 @@ def get_data(cap_dir: str, layout_file: str,
     printi('Finding and parsing cap models')
     caps: [dict] = get_caps(cap_dir)
     layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
+
+    # Warn about missing models
+    missing_models:[str] = list_diff(set(map(lambda cap: cap['cap-name'], layout)), set(map(lambda cap: cap['cap-name'], caps)))
+    if missing_models != []:
+        printw('Missing the following keycap models:\n\t' + '\n\t'.join(missing_models))
 
     return layout_with_caps
 
