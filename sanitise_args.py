@@ -23,17 +23,16 @@ from util import concat, flatten_list
 def sanitise_args(pname:str, args) -> list:
     if type(args) == tuple:
         args = list(args)
+    print(type(args), ':', ' '.join(map(str, map(type, args))))
     if args == ['']:
         args = []
+    args = flatten_list(args)
     if type(args) == list and all(map(lambda a: type(a) == str, args)):
-        print('asdf')
         args = list(reduce(concat, map(lambda a: a.split(' '), args), []))
     elif type(args) == str:
-        print('fdsa')
         args = args.split(' ')
     else:
         die('Unknown argument type, %s received, please use a list of (lists of) strings or just a single string' % str(type(args)))
-    args = flatten_list(args)
     # Put executable name on the front if it is absent (e.g. if called from python with only the arguments specified)
     if len(args) == 0 or args[0] != argv[0]:
         if len(args) == 0:
@@ -44,3 +43,5 @@ def sanitise_args(pname:str, args) -> list:
 
     return args
 
+def arg_inf(dargs:dict, key:str) -> str:
+    return ' (default: %s, yaml-option-file-key: %s)' % (dargs[key], key)
