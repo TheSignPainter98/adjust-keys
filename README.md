@@ -80,7 +80,7 @@ Everyone has their regrets, eh?
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 I'm not particularly proud of it, but it gets the job done.
 
-KAT Keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers'][keycap-designers-discord] Discord.
+KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers'][keycap-designers-discord] Discord.
 
 [blender]: https://www.blender.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
