@@ -59,9 +59,8 @@ def parse_args(args:[str]) -> Namespace:
             'y_offset': 0.525,
             'plane': 'y',
             'cap_dir': '.',
-            'layout_file': 'layout.yml',
-            'layout_row_profile_file': 'layout_row_profiles.yml',
-            'glyph_map_file': 'glyph-map.yml',
+            'layout_file': 'examples/layout.yml',
+            'layout_row_profile_file': 'examples/layout_row_profiles.yml',
         }
 
     # Obtain yaml arguments

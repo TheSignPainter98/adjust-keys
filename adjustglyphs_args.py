@@ -64,9 +64,9 @@ def parse_args(args:[str]) -> Namespace:
             'global_y_offset': 0.0,
             'profile_file': 'profiles/kat/centres.yml',
             'glyph_dir': '.',
-            'layout_file': 'layout.yml',
-            'layout_row_profile_file': 'layout_row_profiles.yml',
-            'glyph_map_file': 'glyph-map.yml'
+            'layout_file': 'examples/layout.yml',
+            'layout_row_profile_file': 'examples/layout_row_profiles.yml',
+            'glyph_map_file': 'examples/menacing-map.yml',
         }
 
     # Obtain yaml arguments
