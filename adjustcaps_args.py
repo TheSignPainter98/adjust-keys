@@ -18,7 +18,7 @@
 from argparse import ArgumentParser, Namespace
 from log import printe
 from os.path import exists
-from sanitise_args import sanitise_args
+from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
@@ -32,23 +32,6 @@ from yaml_io import read_yaml, write_yaml
 def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
 
-    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely')
-    ap.add_argument('-o', '--output-dir', action='store', dest='output_dir', help='Specify directory to write to output or (default: .) ')
-    ap.add_argument('-O', '--move-to-origin', action='store_true', dest='move_to_origin', help='If set, translate the respective input files\' data to the origin')
-    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: cap-opts.yml)', metavar='file')
-    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap (default: 276.0)', metavar='num')
-    ap.add_argument('-x', '--x-offset', action='store', type=float, dest='x_offset', help='global offset which moves every element to the right (default: 0.0)', metavar='num')
-    ap.add_argument('-y', '--y-offset', action='store', type=float, dest='y_offset', help='global offset which moves every element downwards (default: 0.0)', metavar='num')
-    ap.add_argument('-p', '--plane', action='store', type=str, dest='plane', help='specify the canonical basis vector along which normal-plane the layout will be arranged (choices: x, y, z, default: z)', metavar='num')
-    ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use (default: profiles/kat/centres.yml)', metavar='file')
-    ap.add_argument('-K', '--key-cap-loc', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files', metavar='file')
-    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', metavar='file')
-    ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', metavar='file')
-
-    # Sanitise and obtain parsed arguments
-    args = sanitise_args('adjustcaps', args)
-    pargs:dict = ap.parse_args(args[1:]).__dict__
-
     # Default arguments
     dargs:dict = {
             'opt_file': 'cap-opts.yml',
@@ -61,7 +44,24 @@ def parse_args(args:[str]) -> Namespace:
             'cap_dir': '.',
             'layout_file': 'examples/layout.yml',
             'layout_row_profile_file': 'examples/layout_row_profiles.yml',
+            'move_to_origin': False
         }
+
+    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
+    ap.add_argument('-o', '--output-dir', action='store', dest='output_dir', help='Specify directory to write to output or' + arg_inf(dargs, 'output_dir'))
+    ap.add_argument('-O', '--move-to-origin', action='store_true', dest='move_to_origin', help='If set, translate the respective input files\' data to the origin' + arg_inf(dargs, 'move_to_origin'))
+    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
+    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap' + arg_inf(dargs, 'unit_length'), metavar='num')
+    ap.add_argument('-x', '--x-offset', action='store', type=float, dest='x_offset', help='global offset which moves every element to the right' + arg_inf(dargs, 'x_offset'), metavar='num')
+    ap.add_argument('-y', '--y-offset', action='store', type=float, dest='y_offset', help='global offset which moves every element downwards' + arg_inf(dargs, 'y_offset'), metavar='num')
+    #  ap.add_argument('-p', '--plane', action='store', type=str, dest='plane', help='specify the canonical basis vector along which normal-plane the layout will be arranged (choices: x, y, z, default: z)', metavar='num')
+    ap.add_argument('-K', '--key-cap-dir', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files' + arg_inf(dargs, 'cap_dir'), metavar='file')
+    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use' + arg_inf(dargs, 'layout_file'), metavar='file')
+    ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
+
+    # Sanitise and obtain parsed arguments
+    args = sanitise_args('adjustcaps', args)
+    pargs:dict = ap.parse_args(args[1:]).__dict__
 
     # Obtain yaml arguments
     yargs:dict = {}

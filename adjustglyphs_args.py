@@ -18,7 +18,7 @@
 from argparse import ArgumentParser, Namespace
 from log import printe
 from os.path import exists
-from sanitise_args import sanitise_args
+from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
@@ -31,25 +31,6 @@ from yaml_io import read_yaml, write_yaml
 # @return A namespace of options
 def parse_args(args:[str]) -> Namespace:
     ap:ArgumentParser = ArgumentParser()
-
-    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely')
-    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout (default: adjusted-glyphs.svg) ')
-    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files')
-    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files')
-    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: glyph-opts.yml)', metavar='file')
-    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap (default: 276.0)', metavar='num')
-    ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg (default: cap-guide)', metavar='id')
-    ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right (default: 0.0)', metavar='num')
-    ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards (default: 0.0)', metavar='num')
-    ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use (default: profiles/kat/centres.yml)', metavar='file')
-    ap.add_argument('-G', '--glyph-loc', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs', metavar='file')
-    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use (default: layout.yaml)', metavar='file')
-    ap.add_argument('-R', '--profile-row-list', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row', metavar='file')
-    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon (default: glyph-map.yml)', metavar='file')
-
-    # Sanitise and obtain parsed arguments
-    args = sanitise_args('adjustglyphs', args)
-    pargs:dict = ap.parse_args(args[1:]).__dict__
 
     # Default values
     dargs:dict = {
@@ -68,6 +49,26 @@ def parse_args(args:[str]) -> Namespace:
             'layout_row_profile_file': 'examples/layout_row_profiles.yml',
             'glyph_map_file': 'examples/menacing-map.yml',
         }
+
+
+    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
+    ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout' + arg_inf(dargs, 'output_location'))
+    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'listGlyphs'))
+    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files' + arg_inf(dargs, 'listKeys'))
+    ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
+    ap.add_argument('-u', '--unit-length', action='store', type=float, dest='unit_length', help='Specify the length of one unit, that is, the width of a 1u keycap' + arg_inf(dargs, 'unit_length'), metavar='num')
+    ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
+    ap.add_argument('-X', '--global-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every element to the right' + arg_inf(dargs, 'global_x_offset'), metavar='num')
+    ap.add_argument('-Y', '--global-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every element downwards' + arg_inf(dargs, 'global_y_offset'), metavar='num')
+    ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use' + arg_inf(dargs, 'profile_file'), metavar='file')
+    ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
+    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use' + arg_inf(dargs, 'layout_file'), metavar='file')
+    ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
+    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon' + arg_inf(dargs, 'glyph_map_file'), metavar='file')
+
+    # Sanitise and obtain parsed arguments
+    args = sanitise_args('adjustglyphs', args)
+    pargs:dict = ap.parse_args(args[1:]).__dict__
 
     # Obtain yaml arguments
     yargs:dict = {}
