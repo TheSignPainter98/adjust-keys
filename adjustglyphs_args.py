@@ -22,6 +22,8 @@ from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
+version:str = '0.1.0'
+
 ##
 # @brief Parse commandline arguments
 # If an error occurs, the program immediately exits.
@@ -50,7 +52,7 @@ def parse_args(args:[str]) -> Namespace:
             'glyph_map_file': 'examples/menacing-map.yml',
         }
 
-
+    ap.add_argument('-V', '--version', action='version', version=version)
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
     ap.add_argument('-o', '--output', action='store', dest='output_location', help='Specify file to write to output or `-` for stdeout' + arg_inf(dargs, 'output_location'))
     ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'listGlyphs'))

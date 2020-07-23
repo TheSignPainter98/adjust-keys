@@ -22,6 +22,8 @@ from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
+version:str = '0.1.0'
+
 ##
 # @brief Parse commandline arguments
 # If an error occurs, the program immediately exits.
@@ -47,6 +49,7 @@ def parse_args(args:[str]) -> Namespace:
             'move_to_origin': False
         }
 
+    ap.add_argument('-V', '--version', action='version', version=version)
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
     ap.add_argument('-o', '--output-dir', action='store', dest='output_dir', help='Specify directory to write to output or' + arg_inf(dargs, 'output_dir'))
     ap.add_argument('-O', '--move-to-origin', action='store_true', dest='move_to_origin', help='If set, translate the respective input files\' data to the origin' + arg_inf(dargs, 'move_to_origin'))
