@@ -27,7 +27,11 @@ define compilePython
 endef
 
 %.1.gz: %
+ifndef NO_HELP2MAN
 	(help2man -N --no-discard-stderr ./$< | gzip - -) > $@
+else
+	echo 'Disctributable compiled without help2man' > $@
+endif
 
 dist: $(DIST_CONTENT)
 	zip -q -o adjust-keys.zip $^
