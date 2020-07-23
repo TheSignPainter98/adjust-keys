@@ -12,3 +12,4 @@ bin*/
 *.zip
 temp/
 pkgs.txt
+*.1.gz

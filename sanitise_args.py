@@ -21,9 +21,9 @@ from sys import argv
 from util import concat, flatten_list
 
 def sanitise_args(pname:str, args) -> list:
+    global argv
     if type(args) == tuple:
         args = list(args)
-    print(type(args), ':', ' '.join(map(str, map(type, args))))
     if args == ['']:
         args = []
     args = flatten_list(args)

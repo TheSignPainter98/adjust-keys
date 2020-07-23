@@ -4,7 +4,7 @@
 
 ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
 ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
-DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE pkgs.txt
+DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE pkgs.txt adjustcaps.1.gz adjustglyphs.1.gz
 
 all: adjustglyphs adjustcaps
 .PHONY: all
@@ -26,8 +26,11 @@ define compilePython
 	chmod 700 $@
 endef
 
+%.1.gz: %
+	(help2man -N --no-discard-stderr ./$< | gzip - -) > $@
+
 dist: $(DIST_CONTENT)
-	zip -o adjust-keys.zip $^
+	zip -q -o adjust-keys.zip $^
 
 adjustglyphs: $(ADJUST_GLYPHS_SRCS)
 	$(compilePython)
@@ -52,5 +55,5 @@ LICENSE:
 	@# Do nothing
 
 clean:
-	$(RM) -r __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c
+	$(RM) -r __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c *.zip
 .PHONY: clean
