@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # Copyright (C) Edward Jones
 #
 # This program is free software; you can redistribute it and/or
@@ -15,13 +16,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from importlib.util import find_spec
-blender_available: bool = find_spec('bpy') is not None
+from blender_available import blender_available
 
 from adjustcaps_args import parse_args
 from argparse import Namespace
-if blender_available:
-    from bpy import ops
+if blender_available():
+    from bpy import context, data, ops
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
@@ -33,7 +33,7 @@ from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from util import concat, dict_union, flatten_list, list_diff, inner_join, rem
+from util import concat, dict_union, flatten_list, get_only, list_diff, inner_join, rem
 from sys import argv, exit
 from yaml_io import read_yaml
 
@@ -63,7 +63,7 @@ def main(*args: [[str]]) -> int:
 
 def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
                 plane: str, cap_dir: str, output_dir: str, layout_file: str,
-                layout_row_profile_file: str):
+                layout_row_profile_file: str) -> str:
     # Resolve output unique output name
     caps: [dict] = get_data(cap_dir, layout_file, layout_row_profile_file)
 
@@ -90,12 +90,41 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
         wait(cops)
 
     # Sequentially import the models (for thread-safety)
-    for cap in caps:
-        if blender_available:
+    if blender_available():
+        objectsPreImport:[str] = data.objects.keys()
+        for cap in caps:
             printi('Importing "%s" into blender...' % cap['oname'])
-            ops.import_scene.obj(filepath=cap['oname'])
+            ops.import_scene.obj(filepath=cap['oname']) # TODO Make the forward direction work
             printi('Deleting file "%s"' % cap['oname'])
             remove(cap['oname'])
+        objectsPostImport:[str] = data.objects.keys()
+        importedCapObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
+        importedCapObjects:[Object] = [ o for o in data.objects if o.name in importedCapObjectNames ]
+        printi('Successfully imported keycap objects named:', importedCapObjectNames)
+
+        importedModelName:str = None
+        if len(importedCapObjectNames) != 0:
+            printi('Joining keycap models into a single object')
+            ctx:dict = context.copy()
+
+            #  for o in ctx['scene'].objects:
+            #  for impCap in importedCapObjectNames:
+                #  data.objects[impCap].select = True
+            #  ctx['object'] = importedCapObjectNames[0]
+            #  ctx['active_object'] = importedCapObjectNames[0]
+            ctx['object'] = ctx['active_object'] = importedCapObjects[0]
+            ctx['selected_objects'] = ctx['selected_editable_objects'] = importedCapObjects
+            ops.object.join(ctx)
+
+            printi('Renaming keycap model')
+            objectsPreRename:[str] = data.objects.keys()
+            importedCapObjects[0].name = importedCapObjects[0].data.name = 'capmodel'
+            objectsPostRename:[str] = data.objects.keys()
+            importedModelName = get_only(list_diff(objectsPostRename, objectsPreRename))
+            printi('Keycap model renamed to "%s"' % importedModelName)
+        return importedModelName
+    else:
+        return None
 
 
 def get_data(cap_dir: str, layout_file: str,
