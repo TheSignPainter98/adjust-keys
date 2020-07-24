@@ -16,4 +16,5 @@
 #
 
 def get_scale(cap_unit_length: float, glyph_unit_length: float) -> float:
+    # TODO: Get the right scaling factor!
     return 1.0

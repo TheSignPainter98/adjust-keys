@@ -19,5 +19,6 @@ from log import printi
 
 def shrink_wrap_glyphs_to_keys(glyph_names:[str], keycap_model_name:str) -> None:
     # Shrink-wrap glyphs onto the keycaps
+    # TODO: shrink-wrap once scaled!
     printi('Shrink-wrapping glyphs onto "%s"' % keycap_model_name)
     pass
