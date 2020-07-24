@@ -2,11 +2,10 @@
 
 .DEFAULT_GOAL := all
 
-ADJUST_CAPS_SRCS = $(shell ./deps adjustcaps.py)
-ADJUST_GLYPHS_SRCS = $(shell ./deps adjustglyphs.py)
-DIST_CONTENT = adjustcaps adjustglyphs $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE pkgs.txt adjustcaps.1.gz adjustglyphs.1.gz
+ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py)
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE pkgs.txt adjustkeys.1.gz
 
-all: adjustglyphs adjustcaps
+all: adjustkeys
 .PHONY: all
 
 ifndef NO_CYTHON
@@ -36,14 +35,11 @@ endif
 dist: $(DIST_CONTENT)
 	zip -q -o adjust-keys.zip $^
 
-adjustglyphs: $(ADJUST_GLYPHS_SRCS)
-	$(compilePython)
-
-adjustcaps: $(ADJUST_CAPS_SRCS)
+adjustkeys: $(ADJUST_KEYS_SRCS)
 	$(compilePython)
 
 pkgs.txt: %.py
-	pip freeze > $@
+	pip3 freeze > $@
 
 %.py:
 	@# Do nothing
@@ -59,5 +55,5 @@ LICENSE:
 	@# Do nothing
 
 clean:
-	$(RM) -r __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c *.zip
+	$(RM) -r bin_*/ __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c *.zip *.1.gz
 .PHONY: clean

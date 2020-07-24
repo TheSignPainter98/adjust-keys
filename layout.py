@@ -18,9 +18,15 @@
 from log import die, printi, printw
 from re import match
 from util import dict_union, key_subst, rem, safe_get
+from yaml_io import read_yaml
+
+
+def get_layout(layout_file:str, layout_row_profile_file:str) -> [dict]:
+    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file))
 
 
 def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
+    printi('Reading layout information')
     if len(layout_row_profiles) < len(layout):
         printw(
             'Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but should have at least %d'
@@ -136,4 +142,11 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
             row += 1
         lineInd = min([lineInd + 1, len(layout_row_profiles) - 1])
 
-    return parsed_layout
+    return list(map(add_cap_name, parsed_layout))
+
+def add_cap_name(key:dict) -> dict:
+    key['cap-name'] = key['key-type'] if 'key-type' in key else (
+        key ['profile-part'] + '-' +
+        str(float(key ['width'])).replace('.', '_') + 'u') # I'm really hoping that python will behave reasonably w.r.t. floating point precision
+    return key
+
