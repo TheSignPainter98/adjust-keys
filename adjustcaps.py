@@ -88,8 +88,7 @@ def adjust_caps(layout: [dict], unit_length: float, x_offset: float,
         objectsPreImport: [str] = data.objects.keys()
         for cap in caps:
             printi('Importing "%s" into blender...' % cap['oname'])
-            ops.import_scene.obj(
-                filepath=cap['oname'])  # TODO Make the forward direction work
+            ops.import_scene.obj(filepath=cap['oname'], axis_up='Z', axis_forward='Y')
             printi('Deleting file "%s"' % cap['oname'])
             remove(cap['oname'])
         objectsPostImport: [str] = data.objects.keys()
