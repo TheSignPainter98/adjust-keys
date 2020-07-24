@@ -39,9 +39,7 @@ def resolve_glyph_position(data: dict, ulen: float, gx: float,
     return ret
 
 
-def resolve_cap_position(cap: dict, ulen: float, mx: float, my: float,
-                         plane: str) -> dict:
-
+def resolve_cap_position(cap: dict, ulen: float, mx: float, my: float) -> dict:
     cap['pos-x'] = ulen * cap['col'] + mx
     cap['pos-y'] = -1 * (ulen * cap['row'] + my)
     cap['pos-z'] = 0.0
@@ -49,7 +47,7 @@ def resolve_cap_position(cap: dict, ulen: float, mx: float, my: float,
     return cap
 
 
-def translate_to_origin(data: [[str, [[str, list]]]], plane: str):
+def translate_to_origin(data: [[str, [[str, list]]]]):
     # Translate each group to the origin
     for _, _, _, gd in data:
         # Obtain minimum points in x, y and z

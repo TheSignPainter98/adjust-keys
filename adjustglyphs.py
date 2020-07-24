@@ -16,14 +16,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from importlib.util import find_spec
-blender_available: bool = find_spec('bpy') is not None
-if blender_available:
+from blender_available import blender_available
+if blender_available():
     from bpy import data, ops
 
-from adjustglyphs_args import parse_args, Namespace
+from args import parse_args, Namespace
 from functools import reduce
-from layout import parse_layout
+from layout import get_layout, parse_layout
 from log import die, init_logging, printi
 from glyphinf import glyph_inf
 from os import remove, walk
@@ -31,6 +30,7 @@ from os.path import exists, join
 from positions import resolve_glyph_positions
 from util import concat, dict_union, inner_join, list_diff, rob_rem
 from re import match
+from scale import get_scale
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
 from yaml_io import read_yaml, write_yaml
@@ -61,21 +61,21 @@ def main(*args: [str]) -> int:
                     read_yaml(pargs.glyph_offset_file).items()))))
         return 0
 
-    svgObjNames: [str] = adjust_glyphs(pargs.glyph_part_ignore_regex, pargs.profile_file,
-                             pargs.layout_row_profile_file, pargs.glyph_dir,
-                             pargs.layout_file, pargs.glyph_map_file,
-                             pargs.unit_length, pargs.global_x_offset,
-                             pargs.global_y_offset, pargs.output_location, 17)
+    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
+    svgObjNames: [str] = adjust_glyphs(layout,
+        pargs.glyph_part_ignore_regex, pargs.profile_file, pargs.glyph_dir,
+        pargs.glyph_map_file, pargs.glyph_unit_length, pargs.global_x_offset,
+        pargs.global_y_offset, pargs.output_prefix,
+        get_scale(pargs.cap_unit_length, pargs.glyph_unit_length))
 
     return 0
 
 
-def adjust_glyphs(glyph_part_ignore_regex: str, profile_file: str,
-                  layout_row_profile_file: str, glyph_dir: str,
-                  layout_file: str, glyph_map_file: str, unit_length: int,
-                  global_x_offset: int, global_y_offset: int, output_location:str, scale:float) -> [str]:
-    glyph_data: [dict] = collect_data(profile_file, layout_row_profile_file,
-                                glyph_dir, layout_file, glyph_map_file)
+def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str,
+                  glyph_dir: str, glyph_map_file: str, unit_length: int,
+                  global_x_offset: int, global_y_offset: int,
+                  output_prefix: str, scale: float) -> [str]:
+    glyph_data: [dict] = collect_data(layout, profile_file, glyph_dir, glyph_map_file)
 
     placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, unit_length,
                                                     global_x_offset,
@@ -106,32 +106,29 @@ def adjust_glyphs(glyph_part_ignore_regex: str, profile_file: str,
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
+    output_location: str = output_prefix + '.svg'
     printi('Writing to file "%s"' % output_location)
-    svgObjectNames:str = None
-    if output_location == '-':
-        print(svg)
-    else:
-        with open(output_location, 'w+') as f:
-            print(svg, file=f)
-        if blender_available:
-            printi('Importing svg into blender')
-            objectsPreImport:[str] = data.objects.keys()
-            ops.import_curve.svg(filepath=output_location)
-            objectsPostImport:[str] = data.objects.keys()
+    svgObjectNames: str = None
+    with open(output_location, 'w+') as f:
+        print(svg, file=f)
+    if blender_available():
+        printi('Importing svg into blender')
+        objectsPreImport: [str] = data.objects.keys()
+        ops.import_curve.svg(filepath=output_location)
+        objectsPostImport: [str] = data.objects.keys()
 
-            # Rename the svg
-            svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
+        # Rename the svg
+        svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
 
-            # Apprpriately scale the objects
-            for svgObjectName in svgObjectNames:
-                data.objects[svgObjectName].scale *= scale
+        # Apprpriately scale the objects
+        for svgObjectName in svgObjectNames:
+            data.objects[svgObjectName].scale *= scale
 
-            # Clean output
-            if exists(output_location):
-                printi('Deleting file "%s"' % output_location)
-                remove(output_location)
-
-    printi('Successfully imported svg objects with names:', svgObjectNames)
+        # Clean output
+        if exists(output_location):
+            printi('Deleting file "%s"' % output_location)
+            remove(output_location)
+        printi('Successfully imported svg objects with names:', svgObjectNames)
 
     return svgObjectNames
 
@@ -153,8 +150,7 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     return cap
 
 
-def collect_data(profile_file: str, layout_row_profile_file: str,
-                 glyph_dir: str, layout_file: str,
+def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
                  glyph_map_file: str) -> [dict]:
     profile: dict = read_yaml(profile_file)
     profile_x_offsets_rel: [dict] = list(
@@ -174,9 +170,7 @@ def collect_data(profile_file: str, layout_row_profile_file: str,
                 'p-off-x': m[1]['x'] if 'x' in m[1] else 0.0,
                 'p-off-y': m[1]['y'] if 'y' in m[1] else 0.0
             }, profile['special-offsets'].items()))
-    layout_row_profiles: [str] = read_yaml(layout_row_profile_file)
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
-    layout: [dict] = parse_layout(layout_row_profiles, read_yaml(layout_file))
     glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
         map(lambda m: {

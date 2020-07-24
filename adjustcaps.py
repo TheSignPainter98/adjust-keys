@@ -18,17 +18,16 @@
 
 from blender_available import blender_available
 
-from adjustcaps_args import parse_args
+from args import parse_args
 from argparse import Namespace
 if blender_available():
     from bpy import context, data, ops
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
-from layout import parse_layout
+from layout import get_layout, parse_layout
 from log import init_logging, printi, printw
 from math import inf
-from multiprocessing import cpu_count
 from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
@@ -41,31 +40,22 @@ from yaml_io import read_yaml
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
-    if pargs.move_to_origin:
-        caps: [dict] = get_caps(pargs.cap_dir)
-        if not exists(pargs.output_dir):
-            printi('Making non-existent directory "%s"' % pargs.output_dir)
-            makedirs(pargs.output_dir, exist_ok=True)
-        for cap in caps:
-            translate_to_origin(cap['cap-obj'])
-            write_obj(join(pargs.output_dir, cap['cap-name'] + '.obj'),
-                      cap['cap-obj'])
-    else:
-        if not exists(pargs.output_dir):
-            printi('Making non-existent directory "%s"' % pargs.output_dir)
-            makedirs(pargs.output_dir, exist_ok=True)
-        adjust_caps(pargs.unit_length, pargs.x_offset, pargs.y_offset,
-                    pargs.plane, pargs.cap_dir, pargs.output_dir,
-                    pargs.layout_file, pargs.layout_row_profile_file)
+    if not exists(pargs.output_dir):
+        printi('Making non-existent directory "%s"' % pargs.output_dir)
+        makedirs(pargs.output_dir, exist_ok=True)
+    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
+    adjust_caps(layout, pargs.cap_unit_length, pargs.cap_x_offset,
+                pargs.cap_y_offset, pargs.cap_dir, pargs.output_dir,
+                pargs.output_prefix, pargs.nprocs)
 
     return 0
 
 
-def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
-                plane: str, cap_dir: str, output_dir: str, layout_file: str,
-                layout_row_profile_file: str) -> str:
+def adjust_caps(layout: [dict], unit_length: float, x_offset: float,
+                y_offset: float, cap_dir: str, output_dir: str,
+                output_prefix: str, nprocs: int) -> str:
     # Resolve output unique output name
-    caps: [dict] = get_data(cap_dir, layout_file, layout_row_profile_file)
+    caps: [dict] = get_data(layout, cap_dir)
 
     seen: dict = {}
     printi('Resolving cap output names')
@@ -75,74 +65,82 @@ def adjust_caps(unit_length: float, x_offset: float, y_offset: float,
         else:
             seen[cap['cap-name']] += 1
         cap['oname'] = join(
-            output_dir, 'capmodel-' + cap['cap-name'] +
+            output_dir, output_prefix + '-' + cap['cap-name'] +
             ('-' +
              str(seen[cap['cap-name']]) if seen[cap['cap-name']] > 1 else '') +
             '.obj')
 
-    nprocs: int = 2 * cpu_count()
     printi('Adjusting and outputting caps on %d threads...' % nprocs)
-    with ThreadPoolExecutor(nprocs) as ex:
-        cops: ['[dict,str]->()'] = [
-            ex.submit(handle_cap, cap, unit_length, x_offset, y_offset, plane)
-            for cap in caps
-        ]
-        wait(cops)
+    if nprocs == 1:
+        # Run as usual, seems to help with the error reporting because reasons
+        for cap in caps:
+            handle_cap(cap, unit_length, x_offset, y_offset)
+    else:
+        with ThreadPoolExecutor(nprocs) as ex:
+            cops: ['[dict,str]->()'] = [
+                ex.submit(handle_cap, cap, unit_length, x_offset, y_offset)
+                for cap in caps
+            ]
+            wait(cops)
 
     # Sequentially import the models (for thread-safety)
     if blender_available():
-        objectsPreImport:[str] = data.objects.keys()
+        objectsPreImport: [str] = data.objects.keys()
         for cap in caps:
             printi('Importing "%s" into blender...' % cap['oname'])
-            ops.import_scene.obj(filepath=cap['oname']) # TODO Make the forward direction work
+            ops.import_scene.obj(
+                filepath=cap['oname'])  # TODO Make the forward direction work
             printi('Deleting file "%s"' % cap['oname'])
             remove(cap['oname'])
-        objectsPostImport:[str] = data.objects.keys()
-        importedCapObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
-        importedCapObjects:[Object] = [ o for o in data.objects if o.name in importedCapObjectNames ]
-        printi('Successfully imported keycap objects named:', importedCapObjectNames)
+        objectsPostImport: [str] = data.objects.keys()
+        importedCapObjectNames: [str] = list_diff(objectsPostImport,
+                                                  objectsPreImport)
+        importedCapObjects: [Object] = [
+            o for o in data.objects if o.name in importedCapObjectNames
+        ]
+        printi('Successfully imported keycap objects named:',
+               importedCapObjectNames)
 
-        importedModelName:str = None
+        importedModelName: str = None
         if len(importedCapObjectNames) != 0:
             printi('Joining keycap models into a single object')
-            ctx:dict = context.copy()
+            ctx: dict = context.copy()
 
             #  for o in ctx['scene'].objects:
             #  for impCap in importedCapObjectNames:
-                #  data.objects[impCap].select = True
+            #  data.objects[impCap].select = True
             #  ctx['object'] = importedCapObjectNames[0]
             #  ctx['active_object'] = importedCapObjectNames[0]
             ctx['object'] = ctx['active_object'] = importedCapObjects[0]
-            ctx['selected_objects'] = ctx['selected_editable_objects'] = importedCapObjects
+            ctx['selected_objects'] = ctx[
+                'selected_editable_objects'] = importedCapObjects
             ops.object.join(ctx)
 
             printi('Renaming keycap model')
-            objectsPreRename:[str] = data.objects.keys()
-            importedCapObjects[0].name = importedCapObjects[0].data.name = 'capmodel'
-            objectsPostRename:[str] = data.objects.keys()
-            importedModelName = get_only(list_diff(objectsPostRename, objectsPreRename))
+            objectsPreRename: [str] = data.objects.keys()
+            importedCapObjects[0].name = importedCapObjects[
+                0].data.name = 'capmodel'
+            objectsPostRename: [str] = data.objects.keys()
+            importedModelName = get_only(
+                list_diff(objectsPostRename, objectsPreRename))
             printi('Keycap model renamed to "%s"' % importedModelName)
         return importedModelName
     else:
         return None
 
 
-def get_data(cap_dir: str, layout_file: str,
-             layout_row_profile_file: str) -> [dict]:
-    printi('Reading layout information')
-    layout_row_profiles: [str] = read_yaml(layout_row_profile_file)
-    layout: [dict] = list(
-        map(add_cap_name,
-            parse_layout(layout_row_profiles, read_yaml(layout_file))))
-
+def get_data(layout: [dict], cap_dir: str) -> [dict]:
     printi('Finding and parsing cap models')
     caps: [dict] = get_caps(cap_dir)
     layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
 
     # Warn about missing models
-    missing_models:[str] = list_diff(set(map(lambda cap: cap['cap-name'], layout)), set(map(lambda cap: cap['cap-name'], caps)))
+    missing_models: [str] = list_diff(
+        set(map(lambda cap: cap['cap-name'], layout)),
+        set(map(lambda cap: cap['cap-name'], caps)))
     if missing_models != []:
-        printw('Missing the following keycap models:\n\t' + '\n\t'.join(sorted(missing_models)))
+        printw('Missing the following keycap models:\n\t' +
+               '\n\t'.join(sorted(missing_models)))
 
     return layout_with_caps
 
@@ -152,12 +150,12 @@ def de_spookify(cap: dict) -> dict:
                       {'cap-obj': deepcopy(cap['cap-obj'])})
 
 
-def handle_cap(cap: dict, unit_length: float, x_offset: float, y_offset: float,
-               plane: str):
+def handle_cap(cap: dict, unit_length: float, x_offset: float,
+               y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
     cap = de_spookify(cap)
-    translate_to_origin(cap['cap-obj'], plane)
-    cap = resolve_cap_position(cap, unit_length, x_offset, y_offset, plane)
+    translate_to_origin(cap['cap-obj'])
+    cap = resolve_cap_position(cap, unit_length, x_offset, y_offset)
     cap = apply_cap_position(cap)
     printi('Outputting to "%s"' % cap['oname'])
     write_obj(cap['oname'], cap['cap-obj'])
@@ -174,13 +172,6 @@ def apply_cap_position(cap: dict) -> dict:
                 d[1] += pos_y
                 d[2] += pos_z
     return cap
-
-
-def add_cap_name(key: dict) -> dict:
-    key['cap-name'] = key['key-type'] if 'key-type' in key else (
-        key['profile-part'] + '-' +
-        str(float(key['width'])).replace('.', '_') + 'u') # I'm really hoping that python will behave reasonably with floating point precision
-    return key
 
 
 def get_caps(cap_dir: str) -> [dict]:
@@ -200,27 +191,6 @@ def gen_cap_file_name(cap_loc: str, cap: dict) -> str:
     return (join(cap_loc, cap['profile-part'] + '_' + cap['width'])
             if 'key-type' not in cap else cap['key-type']) + '.obj'
 
-
-#  def normalise_vertex_references(data: [[str, [[str, list]]]]):
-#  for _, etv, gtv, gd in data:
-#  for t, d in gd:
-#  if t == 'f':
-#  for i in range(len(d)):
-#  d[i] = list(map(lambda v: v - etv + gtv + 1, d[i]))
-
-#  def make_abs_points(data: [[str, [[str, list]]]]):
-#  for _, etv, gtv, gd in data:
-#  for t, d in gd:
-#  if t == 'f':
-#  for i in range(len(d)):
-#  d[i] = list(map(lambda v: v + gtv - 1, d[i]))
-
-#  def make_rel_points(data:[[str, [[str, list]]]]):
-#  for _,etv,gtv,gd in data:
-#  for t,d in gd:
-#  if t == 'f':
-#  for i in range(len(d)):
-#  d[i] = list(map(lambda v: v - gtv - 1, d[i]))
 
 if __name__ == '__main__':
     try:
