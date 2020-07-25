@@ -43,5 +43,5 @@ def sanitise_args(pname:str, args) -> list:
 
     return args
 
-def arg_inf(dargs:dict, key:str) -> str:
-    return ' (default: %s, yaml-option-file-key: %s)' % (dargs[key], key)
+def arg_inf(dargs:dict, key:str, msg:str=None) -> str:
+    return ' (default: %s%s, yaml-option-file-key: %s)' % (dargs[key], ' ' + msg if msg else '', key)
