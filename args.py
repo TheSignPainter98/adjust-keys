@@ -58,7 +58,9 @@ def parse_args(args:[str]) -> Namespace:
             'profile_file': 'profiles/kat/centres.yml',
             'glyph_dir': '.',
             'glyph_map_file': 'examples/menacing-map.yml',
-            'nprocs': 2 * cpu_count()
+            'nprocs': 2 * cpu_count(),
+            'shrink_wrap_offset': 0.0001,
+            'svg_dpi': 90.0 / 25.4
         }
 
     ap.add_argument('-V', '--version', action='version', version=version)
@@ -82,6 +84,8 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
     ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon' + arg_inf(dargs, 'glyph_map_file'), metavar='file')
     ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'))
+    ap.add_argument('-d', '--shrink-wrap-offset', action='store', dest='shrink_wrap_offset', type=float, help='Specify the offset above the surfave used by the shrink wrap' + arg_inf(dargs, 'shrink_wrap_offset'))
+    ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_dpi', type=float, help='Specify the dpi used in the svg images' + arg_inf(dargs, 'svg_dpi'))
 
     # Sanitise and obtain parsed arguments
     args = sanitise_args('adjustglyphs', args)

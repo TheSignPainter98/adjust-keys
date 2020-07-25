@@ -66,7 +66,7 @@ def main(*args: [str]) -> int:
         pargs.glyph_part_ignore_regex, pargs.profile_file, pargs.glyph_dir,
         pargs.glyph_map_file, pargs.glyph_unit_length, pargs.global_x_offset,
         pargs.global_y_offset, pargs.output_prefix,
-        get_scale(pargs.cap_unit_length, pargs.glyph_unit_length))
+        get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_dpi))
 
     return 0
 

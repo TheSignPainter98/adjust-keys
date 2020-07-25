@@ -15,6 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-def get_scale(cap_unit_length: float, glyph_unit_length: float) -> float:
+def get_scale(cap_unit_length: float, glyph_unit_length: float, dpi:float) -> float:
     # TODO: Get the right scaling factor!
-    return 1.0
+    # Assuming 90 dpi Blender default
+    return (cap_unit_length / glyph_unit_length) * (1000.0 * dpi)

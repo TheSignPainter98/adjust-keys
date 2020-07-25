@@ -68,7 +68,7 @@ def main(*args: [[str]]) -> int:
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if blender_available():
-        shrink_wrap_glyphs_to_keys(glyphs_name, model_name)
+        shrink_wrap_glyphs_to_keys(glyphs_name, model_name, pargs.cap_unit_length, pargs.shrink_wrap_offset)
 
     return 0
 
