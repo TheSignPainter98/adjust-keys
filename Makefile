@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py)
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE pkgs.txt adjustkeys.1.gz
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz
 
 all: adjustkeys
 .PHONY: all
@@ -20,7 +20,7 @@ define compilePython
 	mkdir bin_$@
 	cp $^ bin_$@
 	cp bin_$@/$(@).py bin_$@/__main__.py
-	cd bin_$@/ && zip $@.zip $(shell echo $^ | tr ' ' '\n') __main__.py >/dev/null && cd ../
+	cd bin_$@/ && zip -q $@.zip $(shell echo $^ | tr ' ' '\n') __main__.py && cd ../
 	echo '#!/usr/bin/python3' | cat - bin_$@/$@.zip > $@
 	chmod 700 $@
 endef
@@ -41,8 +41,8 @@ adjust-keys.zip: $(DIST_CONTENT)
 adjustkeys: $(ADJUST_KEYS_SRCS)
 	$(compilePython)
 
-pkgs.txt: $(ADJUST_KEYS_SRCS)
-	pip3 freeze > $@
+requirements.txt: $(ADJUST_KEYS_SRCS)
+	pipreqs --force --print 2>/dev/null > $@
 
 %.py:
 	@# Do nothing
@@ -58,5 +58,5 @@ LICENSE:
 	@# Do nothing
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt
 .PHONY: clean
