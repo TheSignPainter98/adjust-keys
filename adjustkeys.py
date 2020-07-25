@@ -64,7 +64,7 @@ def main(*args: [[str]]) -> int:
     glyphs_name: str = adjust_glyphs(layout,
         pargs.glyph_part_ignore_regex, pargs.profile_file,
         pargs.glyph_dir, pargs.glyph_map_file, pargs.glyph_unit_length, pargs.global_x_offset,
-        pargs.global_y_offset, pargs.output_prefix, get_scale(pargs.cap_unit_length, pargs.glyph_unit_length))
+        pargs.global_y_offset, pargs.output_prefix, get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm))
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if blender_available():
