@@ -10,5 +10,5 @@ bin*/
 *.mtl
 *.zip
 temp/
-pkgs.txt
+requirements.txt
 *.1.gz
