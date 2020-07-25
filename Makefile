@@ -32,13 +32,16 @@ else
 	echo 'Disctributable compiled without help2man' > $@
 endif
 
-dist: $(DIST_CONTENT)
-	zip -q -o adjust-keys.zip $^
+dist: adjust-keys.zip
+.PHONY: dist
+
+adjust-keys.zip: $(DIST_CONTENT)
+	zip -q -o $@ $^
 
 adjustkeys: $(ADJUST_KEYS_SRCS)
 	$(compilePython)
 
-pkgs.txt: %.py
+pkgs.txt: $(ADJUST_KEYS_SRCS)
 	pip3 freeze > $@
 
 %.py:
@@ -55,5 +58,5 @@ LICENSE:
 	@# Do nothing
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustglyphs bin_adjustglyphs adjustglyphs.zip adjustcaps bin_adjustcaps adjustcaps.zip *.c *.zip *.1.gz
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz
 .PHONY: clean
