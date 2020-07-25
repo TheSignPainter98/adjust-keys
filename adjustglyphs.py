@@ -121,6 +121,7 @@ def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str
         svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
 
         # Apprpriately scale the objects
+        printi('Scaling glyphs')
         for svgObjectName in svgObjectNames:
             data.objects[svgObjectName].scale *= scale
 
@@ -128,7 +129,7 @@ def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str
         if exists(output_location):
             printi('Deleting file "%s"' % output_location)
             remove(output_location)
-        printi('Successfully imported svg objects with names:', svgObjectNames)
+        printi('Successfully imported svg objects')
 
     return svgObjectNames
 

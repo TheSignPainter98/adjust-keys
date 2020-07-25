@@ -97,19 +97,13 @@ def adjust_caps(layout: [dict], unit_length: float, x_offset: float,
         importedCapObjects: [Object] = [
             o for o in data.objects if o.name in importedCapObjectNames
         ]
-        printi('Successfully imported keycap objects named:',
-               importedCapObjectNames)
+        printi('Successfully imported keycap objects')
 
         importedModelName: str = None
         if len(importedCapObjectNames) != 0:
             printi('Joining keycap models into a single object')
             ctx: dict = context.copy()
 
-            #  for o in ctx['scene'].objects:
-            #  for impCap in importedCapObjectNames:
-            #  data.objects[impCap].select = True
-            #  ctx['object'] = importedCapObjectNames[0]
-            #  ctx['active_object'] = importedCapObjectNames[0]
             ctx['object'] = ctx['active_object'] = importedCapObjects[0]
             ctx['selected_objects'] = ctx[
                 'selected_editable_objects'] = importedCapObjects
