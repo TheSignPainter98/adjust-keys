@@ -83,7 +83,7 @@ See [`Makefile`][makefile] for more information.
 
 I wrote this in Python for two reasons:
 
-1. There exists a large, well-documented Python API for Blender.
+1. There exists a large, well-documented Python API for Blender
 2. Anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges
 
 Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
@@ -94,7 +94,7 @@ My sanity would have been better-off had I instead done this in [Haskell][haskel
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
 KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers’][keycap-designers-discord] Discord.
-If there are any artifacts not present in the originals, please blame AutoCAD's `obj` conversion.
+If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion.
 
 [blender]: https://www.blender.org
 [cython]: https://cython.org
