@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# Copyright (C) Edward Jones
 
 from os.path import basename
 from xml.dom.minidom import Document, parse
