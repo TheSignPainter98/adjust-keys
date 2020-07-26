@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py)
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html
 
 all: adjustkeys
 .PHONY: all
@@ -25,11 +25,21 @@ define compilePython
 	chmod 700 $@
 endef
 
-%.1.gz: %
-ifndef NO_HELP2MAN
-	(help2man -N --no-discard-stderr ./$< | gzip - -) > $@
+%.1.gz: %.1
+	gzip -k $<
+
+adjustkeys.html: adjustkeys.1
+ifndef NO_PANDOC
+	pandoc -f man -t html < $< > $@
 else
-	echo 'Disctributable compiled without help2man' > $@
+	echo 'Distributable compiled without pandoc' > $@
+endif
+
+%.1: %
+ifndef NO_HELP2MAN
+	help2man -N --no-discard-stderr ./$< > $@
+else
+	echo 'Distributable compiled without help2man' > $@
 endif
 
 dist: adjust-keys.zip
@@ -58,5 +68,5 @@ LICENSE:
 	@# Do nothing
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html
 .PHONY: clean

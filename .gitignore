@@ -12,3 +12,5 @@ bin*/
 temp/
 requirements.txt
 *.1.gz
+*.1
+*.html
