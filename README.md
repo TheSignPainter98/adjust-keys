@@ -1,4 +1,4 @@
-# Adjustcaps and Adjustglyphs
+# Adjustkeys
 
 ![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/menacing-60.png)
 ![An example adjustglyphs layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/menacing-layout.png)
