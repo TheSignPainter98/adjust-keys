@@ -91,7 +91,7 @@ Please see the [contribution note,][contrib-note] abide by the [code of conduct]
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code you’ve written!
 
 Above all, please abide by the licenses of the relevant works!
-For example, the license for Gotham, a de-facto standard license for KAT and KAM sets, would prohibit it’s inclusion in this repo.
+For example, the license for Gotham, a de-facto standard type family for KAT and KAM sets, would prohibit it’s inclusion in this repo.
 
 The [licensing section](#author-and-acknowledgements) section below should be updated to acknowledge the original source of the material.
 
