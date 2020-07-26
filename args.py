@@ -8,7 +8,7 @@ from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from yaml_io import read_yaml, write_yaml
 
-version:str = 'v1.0.0'
+version:str = 'v1.0.1'
 
 
 ##
