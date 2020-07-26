@@ -59,7 +59,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
     else:
         with ThreadPoolExecutor(pargs.nprocs) as ex:
             cops: ['[dict,str]->()'] = [
-                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.global_x_offset, pargs.global_y_offset)
+                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
                 for cap in caps
             ]
             wait(cops)
@@ -124,12 +124,12 @@ def de_spookify(cap: dict) -> dict:
                       {'cap-obj': deepcopy(cap['cap-obj'])})
 
 
-def handle_cap(cap: dict, unit_length: float, x_offset: float,
-               y_offset: float):
+def handle_cap(cap: dict, unit_length: float, cap_x_offset: float,
+               cap_y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
     cap = de_spookify(cap)
     translate_to_origin(cap['cap-obj'])
-    cap = resolve_cap_position(cap, unit_length, x_offset, y_offset)
+    cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
     cap = apply_cap_position(cap)
     printi('Outputting to "%s"' % cap['oname'])
     write_obj(cap['oname'], cap['cap-obj'])

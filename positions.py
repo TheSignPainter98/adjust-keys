@@ -24,9 +24,9 @@ def resolve_glyph_position(data: dict, ulen: float, gx: float,
     return ret
 
 
-def resolve_cap_position(cap: dict, ulen: float, mx: float, my: float) -> dict:
-    cap['pos-x'] = ulen * cap['col'] + mx
-    cap['pos-y'] = -1 * (ulen * cap['row'] + my)
+def resolve_cap_position(cap: dict, ulen: float, ox: float, oy: float) -> dict:
+    cap['pos-x'] = ulen * cap['col'] + ox
+    cap['pos-y'] = -1 * (ulen * cap['row'] + oy)
     cap['pos-z'] = 0.0
 
     return cap

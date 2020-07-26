@@ -38,7 +38,7 @@ def main(*args: [str]) -> int:
 
 
 def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file)
+    glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length,
@@ -116,7 +116,7 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
 
 
 def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
-                 glyph_map_file: str) -> [dict]:
+        glyph_map_file: str, iso_enter_glyph_pos:str) -> [dict]:
     profile: dict = read_yaml(profile_file)
     profile_x_offsets_rel: [dict] = list(
         map(lambda m: {
@@ -128,13 +128,7 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
             'profile-part': m[0],
             'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets_rel: [dict] = list(
-        map(
-            lambda m: {
-                'key-type': m[0],
-                'p-off-x': m[1]['x'] if 'x' in m[1] else 0.0,
-                'p-off-y': m[1]['y'] if 'y' in m[1] else 0.0
-            }, profile['special-offsets'].items()))
+    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
@@ -160,6 +154,21 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
 
     return data
 
+def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
+    if special_offset[0] == 'iso-enter':
+        if iso_enter_glyph_pos not in special_offset[1].keys():
+            die('Could not find key %s in iso-enter offset spec' % iso_enter_glyph_pos)
+        return {
+                'key-type': special_offset[0],
+                'p-off-x': special_offset[1][iso_enter_glyph_pos]['x'],
+                'p-off-y': special_offset[1][iso_enter_glyph_pos]['y'],
+            }
+    else:
+        return {
+                'key-type': special_offset[0],
+                'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else 0.5,
+                'p-off-y': special_offset[1]['y'] if 'y' in special_offset[1] else 0.5
+            }
 
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
