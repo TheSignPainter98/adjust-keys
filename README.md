@@ -81,7 +81,7 @@ See [`Makefile`][makefile] for more information.
 ## Contributing
 
 Contributions are welcome!
-Please see the [contribution note][contrib-note] and abide by [code of conduct][code-of-conduct] and the following:
+Please see the [contribution note,][contrib-note] abide by the [code of conduct][code-of-conduct] and the note following:
 
 - To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root
 - To add keycap models for a profile _y,_
