@@ -22,7 +22,7 @@ You’ll need a working installation of [`python3`][python] and its package mana
 4. Run the code—replace `ARGS` with what you found in step 3 in one of the following methods of running the script:
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')`
-	- Run from the command-line _without_ blender as in step 2 before manually importing the file left on disk
+	- Run from the command-line _without_ blender as in step 2 before manually importing the files left on disk
 5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout)
 6. Enjoy free time
 
