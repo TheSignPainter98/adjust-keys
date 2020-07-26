@@ -31,47 +31,26 @@ def main(*args: [str]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
-    if pargs.listKeys:
-        print('\n'.join(
-            list(
-                map(
-                    lambda k: k['key'],
-                    parse_layout(read_yaml(pargs.layout_row_profile_file),
-                                 read_yaml(pargs.layout_file))))))
-        return 0
-    if pargs.listGlyphs:
-        print('\n'.join(
-            list(
-                map(lambda p: p[0],
-                    read_yaml(pargs.glyph_offset_file).items()))))
-        return 0
-
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
-    svgObjNames: [str] = adjust_glyphs(layout,
-        pargs.glyph_part_ignore_regex, pargs.profile_file, pargs.glyph_dir,
-        pargs.glyph_map_file, pargs.glyph_unit_length, pargs.global_x_offset,
-        pargs.global_y_offset, pargs.output_prefix,
-        get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm))
+    svgObjNames: [str] = adjust_glyphs(layout, pargs)
 
     return 0
 
 
-def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str,
-                  glyph_dir: str, glyph_map_file: str, unit_length: int,
-                  global_x_offset: int, global_y_offset: int,
-                  output_prefix: str, scale: float) -> [str]:
-    glyph_data: [dict] = collect_data(layout, profile_file, glyph_dir, glyph_map_file)
+def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
+    glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file)
+    scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, unit_length,
-                                                    global_x_offset,
-                                                    global_y_offset)
+    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length,
+                                                    pargs.global_x_offset,
+                                                    pargs.global_y_offset)
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
             placed_glyphs[i] = dict_union(
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
-        remove_guide_from_cap(placed_glyphs[i]['svg'], glyph_part_ignore_regex)
+        remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
         placed_glyphs[i]['vector'] = [
             '<g transform="translate(%f %f)">' %
             (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])
@@ -81,9 +60,9 @@ def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str
                         placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
-                        default=0) + unit_length
+                        default=0) + pargs.glyph_unit_length
     svgHeight: int = max(list(map(lambda p: p['pos-y'], placed_glyphs)),
-                         default=0) + unit_length
+                         default=0) + pargs.glyph_unit_length
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
@@ -91,7 +70,7 @@ def adjust_glyphs(layout:[dict], glyph_part_ignore_regex: str, profile_file: str
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
-    output_location: str = output_prefix + '.svg'
+    output_location: str = pargs.output_prefix + '.svg'
     printi('Writing to file "%s"' % output_location)
     svgObjectNames: str = None
     with open(output_location, 'w+') as f:

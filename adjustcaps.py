@@ -29,18 +29,14 @@ def main(*args: [[str]]) -> int:
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
-    adjust_caps(layout, pargs.cap_unit_length, pargs.cap_x_offset,
-                pargs.cap_y_offset, pargs.cap_dir, pargs.output_dir,
-                pargs.output_prefix, pargs.nprocs)
+    adjust_caps(layout, pargs)
 
     return 0
 
 
-def adjust_caps(layout: [dict], unit_length: float, x_offset: float,
-                y_offset: float, cap_dir: str, output_dir: str,
-                output_prefix: str, nprocs: int) -> str:
+def adjust_caps(layout: [dict], pargs:Namespace) -> str:
     # Resolve output unique output name
-    caps: [dict] = get_data(layout, cap_dir)
+    caps: [dict] = get_data(layout, pargs.cap_dir)
 
     seen: dict = {}
     printi('Resolving cap output names')
@@ -50,20 +46,20 @@ def adjust_caps(layout: [dict], unit_length: float, x_offset: float,
         else:
             seen[cap['cap-name']] += 1
         cap['oname'] = join(
-            output_dir, output_prefix + '-' + cap['cap-name'] +
+            pargs.output_dir, pargs.output_prefix + '-' + cap['cap-name'] +
             ('-' +
              str(seen[cap['cap-name']]) if seen[cap['cap-name']] > 1 else '') +
             '.obj')
 
-    printi('Adjusting and outputting caps on %d threads...' % nprocs)
-    if nprocs == 1:
+    printi('Adjusting and outputting caps on %d threads...' % pargs.nprocs)
+    if pargs.nprocs == 1:
         # Run as usual, seems to help with the error reporting because reasons
         for cap in caps:
-            handle_cap(cap, unit_length, x_offset, y_offset)
+            handle_cap(cap, pargs.cap_unit_length, pargs.x_offset, pargs.y_offset)
     else:
-        with ThreadPoolExecutor(nprocs) as ex:
+        with ThreadPoolExecutor(pargs.nprocs) as ex:
             cops: ['[dict,str]->()'] = [
-                ex.submit(handle_cap, cap, unit_length, x_offset, y_offset)
+                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.global_x_offset, pargs.global_y_offset)
                 for cap in caps
             ]
             wait(cops)

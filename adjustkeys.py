@@ -56,17 +56,12 @@ def main(*args: [[str]]) -> int:
     # Adjust model positions
     model_name:str
     if not pargs.no_adjust_caps:
-        model_name = adjust_caps(layout, pargs.cap_unit_length, pargs.cap_x_offset,
-                                      pargs.cap_y_offset, pargs.cap_dir,
-                                      pargs.output_dir, pargs.output_prefix, pargs.nprocs)
+        model_name = adjust_caps(layout, pargs)
 
     # Adjust glyph positions
     glyph_names:[str]
     if not pargs.no_adjust_glyphs:
-        glyph_names = adjust_glyphs(layout,
-            pargs.glyph_part_ignore_regex, pargs.profile_file,
-            pargs.glyph_dir, pargs.glyph_map_file, pargs.glyph_unit_length, pargs.global_x_offset,
-            pargs.global_y_offset, pargs.output_prefix, get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm))
+        glyph_names = adjust_glyphs(layout, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs and blender_available():
