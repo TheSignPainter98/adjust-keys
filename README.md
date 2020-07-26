@@ -44,7 +44,6 @@ As such, you can keep a guide to help with the glyph alignment without affecting
 
 ## Custom Setup
 
-
 This script takes input of:
 
 - A directory containing `.obj` files each with an individual keycap in an arbitrary location (_but consistent orientation_), named as `profile-size.obj` (e.g. `r1-1_0u.obj`)
@@ -79,6 +78,23 @@ make
 Non-essential parts of the process which require programs which might not easily be found on all platforms can be removed from the build process by defining the appropriate `NO_x` variable.
 See [`Makefile`][makefile] for more information.
 
+## Contributing
+
+Contributions are welcome!
+Please abide by [code of conduct][code-of-conduct] and the following:
+
+- To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root
+- To add keycap models for a profile _y,_
+	1. Place the related `obj` files in `./profiles/y/` relative to the project root
+	2. List the order of row profiles in a file `./profiles/y/layout_row_profiles.yml`
+	3. (The annoying one) Compute the centres of the faces of the each keycap in units relative to the top left corner of the area occupied by the keycap, see [standard 1u keycap size diagram][keycap-info] for reference, and place the result in `./profiles/y/centres.yml`
+- When adding code, please use include type-annotations—they make it much easier to interface with the Python code you’ve written!
+
+Above all, please abide by the licenses of the relevant works!
+For example, the license for Gotham, a de-facto standard license for KAT and KAM sets, would prohibit it’s inclusion in this repo.
+
+The [licensing section](#author-and-acknowledgements) section below should be updated to acknowledge the original source of the material.
+
 ## Gripes
 
 I wrote this in Python for two reasons:
@@ -107,6 +123,7 @@ Please ensure that credit is given where it is due.
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
 [haskell]: https://wiki.haskell.org/Introduction
 [keycap-designers-discord]: https://discord.gg/93WN2uF
+[keycap-info]: https://matt3o.com/anatomy-of-a-keyboard/
 [kle]: http://www.keyboard-layout-editor.com "Keyboard layout editor"
 [kle-ansi-104]: https://github.com/ijprest/keyboard-layout-editor/blob/master/layouts.json
 [makefile]: https://github.com/TheSignPainter98/adjust-keys/blob/master/Makefile
