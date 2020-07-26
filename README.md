@@ -81,7 +81,7 @@ See [`Makefile`][makefile] for more information.
 ## Contributing
 
 Contributions are welcome!
-Please abide by [code of conduct][code-of-conduct] and the following:
+Please see the [contribution note][contrib-note] and abide by [code of conduct][code-of-conduct] and the following:
 
 - To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root
 - To add keycap models for a profile _y,_
@@ -119,6 +119,8 @@ All files written by contributors to this project are covered under the GNU Less
 Please ensure that credit is given where it is due.
 
 [blender]: https://www.blender.org
+[contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md
+[code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
 [cython]: https://cython.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
 [haskell]: https://wiki.haskell.org/Introduction
