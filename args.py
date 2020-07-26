@@ -49,7 +49,8 @@ def parse_args(args:[str]) -> Namespace:
             'svg_units_per_mm': 90.0 / 25.4,
             'no_adjust_caps': False,
             'no_adjust_glyphs': False,
-            'no_shrink_wrap': False
+            'no_shrink_wrap': False,
+            'iso_enter_glyph_pos': 'body-centre'
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
@@ -58,6 +59,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_units_per_mm', type=float, help='Specify the number of units per mm used in the svg images' + arg_inf(dargs, 'svg_units_per_mm', msg='(90dpi)'), metavar='float')
     ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
     ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
+    ap.add_argument('-I', '--iso-enter-glyph-pos', action='store', choices=['centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre', 'body-centre'], dest='iso_enter_glyph_pos', help='Specify the glyph location on an ISO enter key' + arg_inf(dargs, 'iso_enter_glyph_pos'), metavar='pos')
     ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'), metavar='n')
     ap.add_argument('-K', '--key-cap-dir', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files' + arg_inf(dargs, 'cap_dir'), metavar='file')
     ap.add_argument('-Sg', '--list-glyph-names', action='store_true', dest='list_glyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'list_glyphs'))
