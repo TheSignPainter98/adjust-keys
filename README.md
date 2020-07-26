@@ -92,9 +92,15 @@ My sanity would have been better-off had I instead done this in [Haskell][haskel
 ## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
+All files written by contributors to this project are covered under the GNU Lesser General Public License v3.0, **with the following exceptions:**
 
-KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers’][keycap-designers-discord] Discord.
-If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion.
+- KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which I found on the [Keycap Designers’][keycap-designers-discord] Discord.
+  If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
+- The typeface used in `examples/menacing.svg` is [Noto Serif JP][noto-serif-jp] which uses the [Open Font License][ofl]
+- The keycap representation used in `examples/menacing.svg` is derived from
+- The example layouts, `examples/layout.yml` is derived from the `ANSI 104` layout example on [KLE][kle]
+
+Please ensure that credit is given where it is due.
 
 [blender]: https://www.blender.org
 [cython]: https://cython.org
@@ -104,6 +110,8 @@ If there are any artifacts not present in the originals, please blame AutoCAD’
 [kle]: http://www.keyboard-layout-editor.com "Keyboard layout editor"
 [makefile]: https://github.com/TheSignPainter98/adjust-keys/blob/master/Makefile
 [menacing]: https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/examples/menacing.svg
+[noto-serif-jp]: https://fonts.google.com/specimen/Noto+Serif+JP
+[ofl]: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
