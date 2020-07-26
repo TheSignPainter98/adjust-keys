@@ -176,6 +176,7 @@ def get_caps(cap_dir: str) -> [dict]:
     return list(
         map(lambda c: {
             'cap-name': basename(c)[:-4],
+            'cap-source': c,
             'cap-obj': read_obj(c)
         }, capFiles))
 

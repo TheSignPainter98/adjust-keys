@@ -5,7 +5,7 @@ from xml.dom.minidom import Document, parse
 
 
 def glyph_inf(gpath: str) -> dict:
-    gname: str = basename(gpath)[:-4]
+    gname: str = glyph_name(gpath)
     gfile: Document = parse(gpath).documentElement
     svg_width: float = float(gfile.attributes['width'].value)
     svg_height: float = float(gfile.attributes['height'].value)
@@ -15,3 +15,6 @@ def glyph_inf(gpath: str) -> dict:
         'glyph-src-height': float(svg_height),
         'src': gpath
     }
+
+def glyph_name(gpath:str) -> str:
+    return basename(gpath)[:-4]

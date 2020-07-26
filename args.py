@@ -49,8 +49,9 @@ def parse_args(args:[str]) -> Namespace:
             'layout_file': 'examples/layout.yml',
             'layout_row_profile_file': 'examples/layout_row_profiles.yml',
             #  'output_location': 'adjusted-glyphs.svg',
-            'listGlyphs': 0,
-            'listKeys': 0,
+            'list_glyphs': False,
+            'list_cap_names': False,
+            'list_cap_models': False,
             'glyph_unit_length': 292.0,
             'glyph_part_ignore_regex': 'cap-guide',
             'global_x_offset': 0.0,
@@ -60,32 +61,39 @@ def parse_args(args:[str]) -> Namespace:
             'glyph_map_file': 'examples/menacing-map.yml',
             'nprocs': 2 * cpu_count(),
             'shrink_wrap_offset': 0.0001,
-            'svg_units_per_mm': 90.0 / 25.4
+            'svg_units_per_mm': 90.0 / 25.4,
+            'no_adjust_caps': False,
+            'no_adjust_glyphs': False,
+            'no_shrink_wrap': False
         }
 
-    ap.add_argument('-V', '--version', action='version', version=version)
-    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
-    ap.add_argument('-o', '--output', action='store', dest='output_dir', help='Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes' + arg_inf(dargs, 'output_dir'))
-    ap.add_argument('-O', '--output-prefix', action='store', dest='output_prefix', help='Specify a prefix to be applied to all output names' + arg_inf(dargs, 'output_prefix'))
-    ap.add_argument('-g', '--list-glyphs', action='store_true', dest='listGlyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'listGlyphs'))
-    ap.add_argument('-k', '--list-keys', action='store_true', dest='listKeys', help='Output a list of known key names read form the input files' + arg_inf(dargs, 'listKeys'))
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
-    ap.add_argument('-u', '--cap-unit-length', action='store', type=float, dest='cap_unit_length', help='Specify the length of one unit (in mm) for use when placing keycap models' + arg_inf(dargs, 'cap_unit_length'), metavar='num')
-    ap.add_argument('-U', '--glyph-unit-length', action='store', type=float, dest='glyph_unit_length', help='Specify the length of one unit (in svg units) for use when placing glyphs' + arg_inf(dargs, 'glyph_unit_length'), metavar='num')
-    ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
-    ap.add_argument('-X', '--glyph-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every glyph to the right' + arg_inf(dargs, 'global_x_offset'), metavar='num')
-    ap.add_argument('-Y', '--glyph-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every glyph downwards' + arg_inf(dargs, 'global_y_offset'), metavar='num')
-    ap.add_argument('-x', '--cap-x-offset', action='store', type=float, dest='cap_x_offset', help='global offset which moves every keycap to the right' + arg_inf(dargs, 'cap_x_offset'), metavar='num')
-    ap.add_argument('-y', '--cap-y-offset', action='store', type=float, dest='cap_y_offset', help='global offset which moves every keycap downwards' + arg_inf(dargs, 'cap_y_offset'), metavar='num')
     ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use' + arg_inf(dargs, 'profile_file'), metavar='file')
-    ap.add_argument('-K', '--key-cap-dir', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files' + arg_inf(dargs, 'cap_dir'), metavar='file')
-    ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
-    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use' + arg_inf(dargs, 'layout_file'), metavar='file')
-    ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
-    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon' + arg_inf(dargs, 'glyph_map_file'), metavar='file')
-    ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'))
     ap.add_argument('-d', '--shrink-wrap-offset', action='store', dest='shrink_wrap_offset', type=float, help='Specify the offset above the surfave used by the shrink wrap' + arg_inf(dargs, 'shrink_wrap_offset'))
     ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_units_per_mm', type=float, help='Specify the number of units per mm used in the svg images' + arg_inf(dargs, 'svg_units_per_mm', msg='(90dpi)'))
+    ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
+    ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
+    ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'))
+    ap.add_argument('-K', '--key-cap-dir', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files' + arg_inf(dargs, 'cap_dir'), metavar='file')
+    ap.add_argument('-Sg', '--list-glyph-names', action='store_true', dest='list_glyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'list_glyphs'))
+    ap.add_argument('-Sn', '--list-cap-names', action='store_true', dest='list_cap_names', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_names'))
+    ap.add_argument('-Sc', '--list-cap-models', action='store_true', dest='list_cap_models', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_models'))
+    ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use' + arg_inf(dargs, 'layout_file'), metavar='file')
+    ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon' + arg_inf(dargs, 'glyph_map_file'), metavar='file')
+    ap.add_argument('-Nc', '--no-adjust-caps', action='store_true', dest='no_adjust_caps', help="Don't perform cap adjustment" + arg_inf(dargs, 'no_adjust_caps'))
+    ap.add_argument('-Ng', '--no-adjust-glyphs', action='store_true', dest='no_adjust_glyphs', help="Don't perform glyph adjustment" + arg_inf(dargs, 'no_adjust_glyphs'))
+    ap.add_argument('-Ns', '--no-shrink-wrap', action='store_true', dest='no_shrink_wrap', help="Don't shrink wrap the adjusted glyphs and to the adjusted caps" + arg_inf(dargs, 'no_shrink_wrap'))
+    ap.add_argument('-o', '--output', action='store', dest='output_dir', help='Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes' + arg_inf(dargs, 'output_dir'))
+    ap.add_argument('-O', '--output-prefix', action='store', dest='output_prefix', help='Specify a prefix to be applied to all output names' + arg_inf(dargs, 'output_prefix'))
+    ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
+    ap.add_argument('-u', '--cap-unit-length', action='store', type=float, dest='cap_unit_length', help='Specify the length of one unit (in mm) for use when placing keycap models' + arg_inf(dargs, 'cap_unit_length'), metavar='num')
+    ap.add_argument('-U', '--glyph-unit-length', action='store', type=float, dest='glyph_unit_length', help='Specify the length of one unit (in svg units) for use when placing glyphs' + arg_inf(dargs, 'glyph_unit_length'), metavar='num')
+    ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'))
+    ap.add_argument('-V', '--version', action='version', version=version)
+    ap.add_argument('-x', '--cap-x-offset', action='store', type=float, dest='cap_x_offset', help='global offset which moves every keycap to the right' + arg_inf(dargs, 'cap_x_offset'), metavar='num')
+    ap.add_argument('-X', '--glyph-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every glyph to the right' + arg_inf(dargs, 'global_x_offset'), metavar='num')
+    ap.add_argument('-y', '--cap-y-offset', action='store', type=float, dest='cap_y_offset', help='global offset which moves every keycap downwards' + arg_inf(dargs, 'cap_y_offset'), metavar='num')
+    ap.add_argument('-Y', '--glyph-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every glyph downwards' + arg_inf(dargs, 'global_y_offset'), metavar='num')
 
     # Sanitise and obtain parsed arguments
     args = sanitise_args('adjustglyphs', args)
