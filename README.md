@@ -23,7 +23,7 @@ You’ll need a working installation of [`python3`][python] and its package mana
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')"`
 	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the files left on disk
-5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a TKL layout)
+5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a complete layout)
 6. Enjoy free time
 
 ## Example
@@ -40,7 +40,7 @@ blender --python-expr "import bpy; import os.path; import sys; sys.path.append(o
 Perhaps while it's running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
 **Notice how the gray construction lines around the glyph are automatically removed!**
 This is because they have the id `cap-guide` in the `svg`, which is automatically detected and discarded by `adjustcaps`.
-As such, you can keep a guide to help with the glyph alignment without affecting the output layout.
+As such, you can keep a guide to help with the glyph alignment without affecting the output.
 
 ## Custom Setup
 
@@ -100,7 +100,7 @@ The [licensing section](#author-and-acknowledgements) section below should be up
 I wrote this in Python for two reasons:
 
 1. There exists a large, well-documented Python API for Blender
-2. Anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges
+2. So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges
 
 Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 My sanity would have been better-off had I instead done this in [Haskell][haskell], but I guess everyone has their regrets, eh?
