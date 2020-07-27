@@ -17,7 +17,7 @@ You’ll need a working installation of [`python3`][python] and its package mana
 
 1. Go to the [releases page][releases], download and unzip the code so the `adjustkeys` binary is next to where you’ll have your `.blend` file
 2. Check everything is working—in a terminal, `cd` into the directory above then run `python3 ./adjustkeys -h` (or for macOS &amp; Linux, `./adjustkeys -h` is both equivalent and shorter)
-	- If python complains of a missing module, install missing dependencies by calling `pip3 install -r pkgs.txt`
+	- If python complains of a missing module, install missing dependencies by calling `pip3 install -r requirements.txt`
 3. Configure the command-line arguments (see output with `-h` from step 2) and adjust data files appropriately (see [custom setup](#custom-setup))
 4. Run the code—replace `ARGS` with what you found in step 3 in one of the following methods of running the script:
 	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')"`
