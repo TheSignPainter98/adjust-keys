@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts
+name: Generate artifacts v1
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -16,7 +16,7 @@ jobs:
         uses: olegtarasov/get-tag@v2
         id: tag_name
       - name: Install dependencies
-        run: sudo apt-get install -y pandoc help2man cython3
+        run: sudo apt-get install -y pandoc help2man cython3 python3-setuptools
       - name: Install pip-only dependencies
         run: pip3 install pipreqs
       - name: Generate artifacts
