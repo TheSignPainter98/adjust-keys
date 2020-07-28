@@ -12,7 +12,8 @@ jobs:
         uses: actions/checkout@master
         with:
           ref: master
-      - uses: olegtarasov/get-tag@v2
+      - name: Get current tag
+        uses: olegtarasov/get-tag@v2
         id: tag_name
       - name: Install dependencies
         run: sudo apt-get install -y pandoc help2man cython3
