@@ -6,9 +6,8 @@ from multiprocessing import cpu_count
 from os.path import exists
 from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
+from version import version
 from yaml_io import read_yaml, write_yaml
-
-version:str = 'v1.0.1'
 
 
 ##
@@ -50,7 +49,10 @@ def parse_args(args:[str]) -> Namespace:
             'no_adjust_caps': False,
             'no_adjust_glyphs': False,
             'no_shrink_wrap': False,
-            'iso_enter_glyph_pos': 'body-centre'
+            'iso_enter_glyph_pos': 'body-centre',
+            'do_check_update': False,
+            'no_check_update': False,
+            'suppress_update_checking': False,
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
@@ -62,9 +64,6 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-I', '--iso-enter-glyph-pos', action='store', choices=['centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre', 'body-centre'], dest='iso_enter_glyph_pos', help='Specify the glyph location on an ISO enter key' + arg_inf(dargs, 'iso_enter_glyph_pos'), metavar='pos')
     ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'), metavar='n')
     ap.add_argument('-K', '--key-cap-dir', action='store', dest='cap_dir', help='specify the directory containing the keycap obj files' + arg_inf(dargs, 'cap_dir'), metavar='file')
-    ap.add_argument('-Sg', '--list-glyph-names', action='store_true', dest='list_glyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'list_glyphs'))
-    ap.add_argument('-Sn', '--list-cap-names', action='store_true', dest='list_cap_names', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_names'))
-    ap.add_argument('-Sc', '--list-cap-models', action='store_true', dest='list_cap_models', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_models'))
     ap.add_argument('-L', '--layout', action='store', dest='layout_file', help='specify the file containing the layout to use' + arg_inf(dargs, 'layout_file'), metavar='file')
     ap.add_argument('-M', '--glyph-map', action='store', dest='glyph_map_file', help='specify the file containing the mapping from glyphs to the key ids they will appear upon' + arg_inf(dargs, 'glyph_map_file'), metavar='file')
     ap.add_argument('-Nc', '--no-adjust-caps', action='store_true', dest='no_adjust_caps', help="Don't perform cap adjustment" + arg_inf(dargs, 'no_adjust_caps'))
@@ -73,10 +72,16 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-o', '--output', action='store', dest='output_dir', help='Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes' + arg_inf(dargs, 'output_dir'), metavar='dir')
     ap.add_argument('-O', '--output-prefix', action='store', dest='output_prefix', help='Specify a prefix to be applied to all output names' + arg_inf(dargs, 'output_prefix'), metavar='str')
     ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
+    ap.add_argument('-Sg', '--show-glyph-names', action='store_true', dest='list_glyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'list_glyphs'))
+    ap.add_argument('-Sn', '--show-cap-names', action='store_true', dest='list_cap_names', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_names'))
+    ap.add_argument('-Sc', '--show-cap-models', action='store_true', dest='list_cap_models', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_models'))
     ap.add_argument('-u', '--cap-unit-length', action='store', type=float, dest='cap_unit_length', help='Specify the length of one unit (in mm) for use when placing keycap models' + arg_inf(dargs, 'cap_unit_length'), metavar='float')
     ap.add_argument('-U', '--glyph-unit-length', action='store', type=float, dest='glyph_unit_length', help='Specify the length of one unit (in svg units) for use when placing glyphs' + arg_inf(dargs, 'glyph_unit_length'), metavar='float')
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'), metavar='int')
     ap.add_argument('-V', '--version', action='version', version=version)
+    ap.add_argument('-Vu', '--check-updates', action='store_true', dest='do_check_update', help='Forcibly for updates' + arg_inf(dargs, 'do_check_update'))
+    ap.add_argument('-Vn', '--no-check-updates-version', action='store_true', dest='no_check_update', help='Forcibly for updates' + arg_inf(dargs, 'no_check_update'))
+    ap.add_argument('-Vs', '--suppress-update-checking', action='store_true', dest='suppress_update_checking', help='Forcibly for updates' + arg_inf(dargs, 'suppress_update_checking'))
     ap.add_argument('-x', '--cap-x-offset', action='store', type=float, dest='cap_x_offset', help='global offset which moves every keycap to the right' + arg_inf(dargs, 'cap_x_offset'), metavar='float')
     ap.add_argument('-X', '--glyph-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every glyph to the right' + arg_inf(dargs, 'global_x_offset'), metavar='float')
     ap.add_argument('-y', '--cap-y-offset', action='store', type=float, dest='cap_y_offset', help='global offset which moves every keycap downwards' + arg_inf(dargs, 'cap_y_offset'), metavar='float')

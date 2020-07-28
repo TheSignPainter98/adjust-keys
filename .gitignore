@@ -14,3 +14,5 @@ requirements.txt
 *.1.gz
 *.1
 *.html
+.no_adjustkeys_update
+version.py
