@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := all
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py)
+ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
 DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md
 
 all: adjustkeys
@@ -41,6 +41,9 @@ ifndef NO_HELP2MAN
 else
 	echo 'Distributable compiled without help2man' > $@
 endif
+
+version.py:
+	echo -e '# Copyright (C) Edward Jones\nversion: str = "$(VERSION)"' > $@
 
 dist: adjust-keys.zip
 .PHONY: dist

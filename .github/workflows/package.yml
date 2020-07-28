@@ -2,16 +2,22 @@ on:
   release:
     types:
       - created
-name: Distributable generator
+name: Generate distributables
 jobs:
-  generate-distributables:
-    name: Generate distributables
+  generate-artifacts:
+    name: Generate artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@master
+      - uses: olegtarasov/get-tag@v2
+        id: tag_name
+      - name: Install dependencies
+        run: sudo apt-get install -y pandoc help2man cython3
+      - name: Install pip-only dependencies
+        run: pip3 install pipreqs
       - name: Generate artifacts
-        run: make dist NO_CYTHON=y
+        run: make dist VERSION=${{ steps.tag_name.outputs.tag }}
       - name: Attach artifacts to release
         uses: skx/github-action-publish-binaries@master
         env:

@@ -10,12 +10,13 @@ from adjustglyphs import adjust_glyphs, glyph_files
 from args import parse_args, Namespace
 from glyphinf import glyph_name
 from layout import get_layout, parse_layout
-from log import init_logging, printi
+from log import init_logging, printi, printw
 from os import makedirs
 from os.path import exists
 from scale import get_scale
 from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
+from update_checker import update_available
 from yaml_io import read_yaml
 
 
@@ -23,6 +24,8 @@ def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
+    if update_available(pargs):
+        printw('A new version is available, please download it by going to https://github.com/TheSignPainter98/adjust-keys/releases/latest. You can suppress update-checking with the -Vn or -Vs flags')
     if pargs.list_cap_names:
         print('\n'.join(
             list(sorted(set(
