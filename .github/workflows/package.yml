@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate distributables
+name: Generate artifacts
 jobs:
   generate-artifacts:
     name: Generate artifacts
