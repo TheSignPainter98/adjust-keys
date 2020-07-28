@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v1
+name: Generate artifacts v2
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -20,7 +20,7 @@ jobs:
       - name: Install pip-only dependencies
         run: pip3 install pipreqs
       - name: Generate artifacts
-        run: make dist VERSION=${{ steps.tag_name.outputs.tag }}
+        run: make dist NO_CYTHON=y VERSION=${{ steps.tag_name.outputs.tag }}
       - name: Attach artifacts to release
         uses: skx/github-action-publish-binaries@master
         env:
