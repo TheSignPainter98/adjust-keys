@@ -16,3 +16,4 @@ requirements.txt
 *.html
 .no_adjustkeys_update
 version.py
+ChangeLog.md

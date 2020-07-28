@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md
 
 all: adjustkeys
 .PHONY: all
@@ -26,7 +26,7 @@ define compilePython
 endef
 
 %.1.gz: %.1
-	gzip -k $<
+	gzip -kf $<
 
 adjustkeys.html: adjustkeys.1
 ifndef NO_PANDOC
@@ -56,6 +56,9 @@ adjustkeys: $(ADJUST_KEYS_SRCS)
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
 	pipreqs --force --print 2>/dev/null > $@
+
+ChangeLog.md: change-log.sh change-log-format.awk
+	./$< > $@
 
 %.py:
 	@# Do nothing
