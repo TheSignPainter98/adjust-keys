@@ -30,7 +30,7 @@ noUpdateMsg: str = '\n'.join([
 def update_available(pargs: Namespace) -> bool:
     if pargs.do_check_update:
         printi('Checking for updates...')
-        return check_update()
+        return check_update(True)
     elif pargs.no_check_update:
         printi('Not checking for updates')
         return False
@@ -41,9 +41,9 @@ def update_available(pargs: Namespace) -> bool:
         printi('Update checking has been suppressed')
         return False
     elif not exists(updateSuppressorFile):
-        return check_update()
+        return check_update(False)
 
-def check_update() -> bool:
+def check_update(pedanticCheck:bool) -> bool:
     from grequests import get as gget, map as gmap
     from version import version
     from yaml import safe_load, FullLoader
@@ -51,7 +51,15 @@ def check_update() -> bool:
     if resp:
         parsedResp:dict = safe_load(resp.text)
         if 'tag_name' in parsedResp:
-            return parsedResp['tag_name'] != version
+            printi('Latest version is %s, current version is %s' %(parsedResp['tag_name'], version))
+            if pedanticCheck:
+                print('asdf')
+                return version != parsedResp['tag_name']
+            else:
+                print('fdsa')
+                return version_is_outdated(version, parsedResp['tag_name'])
     printw('Failed to find out the name of the latest version from github')
     return False
 
+def version_is_outdated(vc:str, vu:str) -> bool:
+    return tuple(map(int, vc[1:].split('.')))[:-1] < tuple(map(int, vu[1:].split('.')))[:-1]
