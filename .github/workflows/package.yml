@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v8
+name: Generate artifacts v9
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -11,6 +11,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@master
         with:
+          fetch-depth: 0
           ref: master
       - name: Get current tag
         uses: olegtarasov/get-tag@v2
