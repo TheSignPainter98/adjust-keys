@@ -3,7 +3,7 @@
 from log import printe, printi
 from os.path import exists
 from sys import stdin
-from yaml import dump, FullLoader, safe_load
+from yaml import dump, safe_load
 
 
 ##
@@ -17,7 +17,7 @@ def read_yaml(fname: str) -> dict:
         printi(
             'Reading %s from stdin, please either type something or redirect a file in here'
             % fname)
-        return safe_load(stdin, Loader=FullLoader)
+        return safe_load(stdin)
     else:
         if exists(fname):
             with open(fname, 'r', encoding='utf-8') as f:
