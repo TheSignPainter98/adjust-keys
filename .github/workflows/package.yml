@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v5
+name: Generate artifacts v6
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -15,8 +15,10 @@ jobs:
       - name: Get current tag
         uses: olegtarasov/get-tag@v2
         id: tag_name
-      - name: Remove ancient version of pandoc
-        run: sudo apt-get remove pandoc
+      - name: Ensure up-to-date apt packages and lists
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade
       - name: Install dependencies
         run: sudo apt-get install -y pandoc help2man python3-setuptools
       - name: Install Python wheel package
