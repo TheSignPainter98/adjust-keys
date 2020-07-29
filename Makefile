@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys.pdf
 
 all: adjustkeys
 .PHONY: all
@@ -27,6 +27,9 @@ endef
 
 %.1.gz: %.1
 	gzip -kf $<
+
+adjustkeys.pdf: adjustkeys.1
+	groff -man -Tpdf -fH < $< > $@
 
 adjustkeys.html: adjustkeys.1
 	groff -man -Thtml < $< > $@
