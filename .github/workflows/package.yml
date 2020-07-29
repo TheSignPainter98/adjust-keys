@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v6
+name: Generate artifacts v7
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -20,7 +20,7 @@ jobs:
           sudo apt-get update
           sudo apt-get upgrade
       - name: Install dependencies
-        run: sudo apt-get install -y pandoc help2man python3-setuptools
+        run: sudo apt-get install -y help2man python3-setuptools
       - name: Install Python wheel package
         run: pip3 install wheel
       - name: Install pip-only dependencies

@@ -29,11 +29,7 @@ endef
 	gzip -kf $<
 
 adjustkeys.html: adjustkeys.1
-ifndef NO_PANDOC
-	pandoc -f man -t html < $< > $@
-else
-	echo 'Distributable compiled without pandoc' > $@
-endif
+	groff -man -Thtml < $< > $@
 
 %.1: %
 ifndef NO_HELP2MAN
