@@ -39,7 +39,7 @@ else
 endif
 
 version.py:
-	echo -e '# Copyright (C) Edward Jones\nversion: str = "$(VERSION)"' > $@
+	echo '# Copyright (C) Edward Jones\nversion: str = "$(VERSION)"' > $@
 
 dist: adjust-keys.zip
 .PHONY: dist
