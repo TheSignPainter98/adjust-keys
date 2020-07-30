@@ -6,8 +6,9 @@ from util import dict_union, key_subst, rem, safe_get
 from yaml_io import read_yaml
 
 
-def get_layout(layout_file:str, layout_row_profile_file:str) -> [dict]:
-    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file))
+def get_layout(layout_file: str, layout_row_profile_file: str) -> [dict]:
+    return parse_layout(read_yaml(layout_row_profile_file),
+                        read_yaml(layout_file))
 
 
 def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
@@ -16,71 +17,6 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
         printw(
             'Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but should have at least %d'
             % (len(layout_row_profiles), len(layout)))
-
-    def parse_key(key: 'either str dict',
-                  nextKey: 'maybe (either str dict)') -> [int, dict]:
-        ret: dict
-        shift: int = 1
-
-        def parse_name(txt: str) -> str:
-            parts: [str] = list(reversed(txt.split('\n')))
-            alphaNums: [str] = list(
-                filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
-            return str(alphaNums[0] if alphaNums != [] else str(
-                max(parts, default=0, key=len)))
-
-        if type(key) == str:
-            ret = {'key': parse_name(key)}
-        elif type(key) == dict:
-            if nextKey is not None and type(nextKey) == str:
-                ret = dict_union(key, {'key': parse_name(nextKey)})
-                shift = 2
-            else:
-                ret = dict(key)
-        else:
-            die('Malformed data when reading %s and %s' %
-                (str(key), str(layout)))
-
-        if 'key-type' not in ret:
-            ret_key: str = safe_get(ret, 'key')
-            if safe_get(ret, 'x') == 0.25 \
-                and safe_get(ret, 'a') == 7 \
-                and safe_get(ret, 'w') == 1.25 \
-                and safe_get(ret, 'h') == 2 \
-                and safe_get(ret, 'w2') == 1.5 \
-                and safe_get(ret, 'h2') == 1 \
-                and safe_get(ret, 'x2') == -0.25:
-                ret['key-type'] = 'iso-enter'
-            elif ret_key == '+' and safe_get(ret, 'h') == 2:
-                ret['key-type'] = 'num-plus'
-            elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
-                                                                     'h') == 2:
-                ret['key-type'] = 'num-enter'
-            elif ret_key and ret_key.lower() == 'caps lock' and safe_get(ret, 'w') == 1.25 and safe_get(ret, 'w2') == 1.75 and safe_get(ret, 'l') == True:
-                ret['key-type'] = 'stepped-caps'
-
-        if 'a' in ret:
-            ret = rem(ret, 'a')
-
-        if 'x' in ret:
-            ret = key_subst(ret, 'x', 'shift-x')
-        if 'y' in ret:
-            ret = key_subst(ret, 'y', 'shift-y')
-        if 'w' in ret:
-            ret = key_subst(ret, 'w', 'width')
-        else:
-            ret['width'] = 1.0
-        if 'h' in ret:
-            ret = key_subst(ret, 'h', 'height')
-        else:
-            ret['height'] = 1.0
-
-        if 'key' not in ret:
-            printw("Key \"%s\" %s 'key' field, please put one in" %
-                   (str(key), 'missing' if key != '' else 'has empty'))
-            ret['key'] = 'SOME_ID@' + hex(id(key))
-
-        return (shift, ret)
 
     if type(layout) != list and any(
             list(map(lambda l: type(l) != list, layout))):
@@ -129,9 +65,74 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
 
     return list(map(add_cap_name, parsed_layout))
 
-def add_cap_name(key:dict) -> dict:
+
+def add_cap_name(key: dict) -> dict:
     key['cap-name'] = key['key-type'] if 'key-type' in key else (
-        key ['profile-part'] + '-' +
-        str(float(key ['width'])).replace('.', '_') + 'u') # I'm really hoping that python will behave reasonably w.r.t. floating point precision
+        key['profile-part'] + '-' +
+        str(float(key['width'])).replace('.', '_') + 'u'
+    )  # I'm really hoping that python will behave reasonably w.r.t. floating point precision
     return key
 
+
+def parse_key(key: 'either str dict',
+              nextKey: 'maybe (either str dict)') -> [int, dict]:
+    ret: dict
+    shift: int = 1
+
+    if type(key) == str:
+        ret = {'key': parse_name(key)}
+    elif type(key) == dict:
+        if nextKey is not None and type(nextKey) == str:
+            ret = dict_union(key, {'key': parse_name(nextKey)})
+            shift = 2
+        else:
+            ret = dict(key)
+    else:
+        die('Malformed data when reading %s and %s' % (str(key), str(nextKey)))
+
+    if 'key-type' not in ret:
+        ret_key: str = safe_get(ret, 'key')
+        if safe_get(ret, 'x') == 0.25 \
+            and safe_get(ret, 'a') == 7 \
+            and safe_get(ret, 'w') == 1.25 \
+            and safe_get(ret, 'h') == 2 \
+            and safe_get(ret, 'w2') == 1.5 \
+            and safe_get(ret, 'h2') == 1 \
+            and safe_get(ret, 'x2') == -0.25:
+            ret['key-type'] = 'iso-enter'
+        elif ret_key == '+' and safe_get(ret, 'h') == 2:
+            ret['key-type'] = 'num-plus'
+        elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
+                                                                 'h') == 2:
+            ret['key-type'] = 'num-enter'
+        elif ret_key and ret_key.lower() == 'caps lock' and safe_get(
+                ret, 'w') == 1.25 and safe_get(ret, 'w2') == 1.75 and safe_get(
+                    ret, 'l') == True:
+            ret['key-type'] = 'stepped-caps'
+
+    if 'a' in ret:
+        ret = rem(ret, 'a')
+
+    if 'x' in ret:
+        ret = key_subst(ret, 'x', 'shift-x')
+    if 'y' in ret:
+        ret = key_subst(ret, 'y', 'shift-y')
+    if 'w' in ret:
+        ret = key_subst(ret, 'w', 'width')
+    else:
+        ret['width'] = 1.0
+    if 'h' in ret:
+        ret = key_subst(ret, 'h', 'height')
+    else:
+        ret['height'] = 1.0
+
+    if 'key' not in ret:
+        printw("Key \"%s\" %s 'key' field, please put one in" %
+               (str(key), 'missing' if key != '' else 'has empty'))
+        ret['key'] = 'SOME_ID@' + hex(id(key))
+
+    return (shift, ret)
+
+
+def parse_name(txt: str) -> str:
+    return '-'.join(txt.split('\n'))
