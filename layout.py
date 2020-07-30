@@ -135,8 +135,4 @@ def parse_key(key: 'either str dict',
 
 
 def parse_name(txt: str) -> str:
-    parts: [str] = list(reversed(txt.split('\n')))
-    alphaNums: [str
-                ] = list(filter(lambda p: match(r'[A-Za-z0-9]+\Z', p), parts))
-    return str(alphaNums[0] if alphaNums != [] else str(
-        max(parts, default=0, key=len)))
+    return '-'.join(txt.split('\n'))
