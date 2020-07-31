@@ -31,7 +31,7 @@ def main(*args: [str]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
-    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
+    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
     svgObjNames: [str] = adjust_glyphs(layout, pargs)
 
     return 0

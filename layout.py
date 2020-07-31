@@ -6,12 +6,11 @@ from util import dict_union, key_subst, rem, safe_get
 from yaml_io import read_yaml
 
 
-def get_layout(layout_file: str, layout_row_profile_file: str) -> [dict]:
-    return parse_layout(read_yaml(layout_row_profile_file),
-                        read_yaml(layout_file))
+def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:[str]) -> [dict]:
+    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys)
 
 
-def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
+def parse_layout(layout_row_profiles: [str], layout: [[dict]], homing_keys:[str]) -> [dict]:
     printi('Reading layout information')
     if len(layout_row_profiles) < len(layout):
         printw(
@@ -63,16 +62,7 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]]) -> [dict]:
             row += 1
         lineInd = min([lineInd + 1, len(layout_row_profiles) - 1])
 
-    return list(map(add_cap_name, parsed_layout))
-
-
-def add_cap_name(key: dict) -> dict:
-    key['cap-name'] = key['key-type'] if 'key-type' in key else (
-        key['profile-part'] + '-' +
-        str(float(key['width'])).replace('.', '_') + 'u'
-    )  # I'm really hoping that python will behave reasonably w.r.t. floating point precision
-    return key
-
+    return list(map(lambda c: add_cap_name(c, homing_keys), parsed_layout))
 
 def parse_key(key: 'either str dict',
               nextKey: 'maybe (either str dict)') -> [int, dict]:
@@ -136,3 +126,23 @@ def parse_key(key: 'either str dict',
 
 def parse_name(txt: str) -> str:
     return '-'.join(txt.split('\n'))
+
+
+def add_cap_name(key:dict, homing_keys:[str]) -> dict:
+    key['cap-name'] = gen_cap_name(key, homing_keys)
+    return key
+    #  key['cap-name'] = key['key-type'] if 'key-type' in key else (
+        #  key ['profile-part'] + '-' +
+        #  str(float(key ['width'])).replace('.', '_') + 'u')
+    #  return key
+
+def gen_cap_name(key:dict, homing_keys:[str]) -> str:
+    if 'key-type' in key:
+        return key['key-type']
+    else:
+        name:str = '%s-%su' %(key['profile-part'], str(float(key['width'])).replace('.', '_')) # I'm really hoping that python will behave reasonably w.r.t. floating point precision
+        if key['key'].lower() in homing_keys:
+            name += '-homing'
+        return name
+
+

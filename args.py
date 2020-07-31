@@ -53,6 +53,7 @@ def parse_args(args:[str]) -> Namespace:
             'do_check_update': False,
             'no_check_update': False,
             'suppress_update_checking': False,
+            'homing_keys': [ 'f', 'j' ]
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
@@ -60,6 +61,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-d', '--shrink-wrap-offset', action='store', dest='shrink_wrap_offset', type=float, help='Specify the offset above the surfave used by the shrink wrap' + arg_inf(dargs, 'shrink_wrap_offset'), metavar='mm')
     ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_units_per_mm', type=float, help='Specify the number of units per mm used in the svg images' + arg_inf(dargs, 'svg_units_per_mm', msg='(90dpi)'), metavar='float')
     ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
+    ap.add_argument('-H', '--homing', nargs='+', dest='homing_keys', metavar='key', help='Specify which keys are homing keys' + arg_inf(dargs, 'homing_keys'))
     ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
     ap.add_argument('-I', '--iso-enter-glyph-pos', action='store', choices=['centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre', 'body-centre'], dest='iso_enter_glyph_pos', help='Specify the glyph location on an ISO enter key' + arg_inf(dargs, 'iso_enter_glyph_pos'), metavar='pos')
     ap.add_argument('-j', '--jobs', action='store', dest='nprocs', type=int, help='Specify the number of threads which are used in concurrent sections to improve performance' + arg_inf(dargs, 'nprocs'), metavar='n')

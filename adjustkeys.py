@@ -32,7 +32,7 @@ def main(*args: [[str]]) -> int:
                 map(
                     lambda k: k['key'],
                     parse_layout(read_yaml(pargs.layout_row_profile_file),
-                                 read_yaml(pargs.layout_file))))))))
+                                 read_yaml(pargs.layout_file), pargs.homing_keys)))))))
         return 0
     if pargs.list_glyphs:
         knownGlyphs:[[str,str]] = list(map(lambda g: [glyph_name(g), g], glyph_files(pargs.glyph_dir)))
@@ -54,7 +54,7 @@ def main(*args: [[str]]) -> int:
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
 
-    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
+    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
 
     # Adjust model positions
     model_name:str
