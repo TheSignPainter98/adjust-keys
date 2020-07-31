@@ -28,7 +28,7 @@ def main(*args: [[str]]) -> int:
     if not exists(pargs.output_dir):
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
-    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file)
+    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
     adjust_caps(layout, pargs)
 
     return 0
@@ -51,11 +51,11 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
              str(seen[cap['cap-name']]) if seen[cap['cap-name']] > 1 else '') +
             '.obj')
 
-    printi('Adjusting and outputting caps on %d threads...' % pargs.nprocs)
+    printi('Adjusting and outputting caps on %d thread%s...' %(pargs.nprocs, 's' if pargs.nprocs != 1 else ''))
     if pargs.nprocs == 1:
         # Run as usual, seems to help with the error reporting because reasons
         for cap in caps:
-            handle_cap(cap, pargs.cap_unit_length, pargs.x_offset, pargs.y_offset)
+            handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
     else:
         with ThreadPoolExecutor(pargs.nprocs) as ex:
             cops: ['[dict,str]->()'] = [
@@ -160,11 +160,6 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-source': c,
             'cap-obj': read_obj(c)
         }, capFiles))
-
-
-def gen_cap_file_name(cap_loc: str, cap: dict) -> str:
-    return (join(cap_loc, cap['profile-part'] + '_' + cap['width'])
-            if 'key-type' not in cap else cap['key-type']) + '.obj'
 
 
 if __name__ == '__main__':
