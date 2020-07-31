@@ -36,7 +36,7 @@ adjustkeys.html: adjustkeys.1
 
 %.1: %
 ifndef NO_HELP2MAN
-	help2man -N --no-discard-stderr ./$< > $@
+	(echo '.ad l' && help2man -N --no-discard-stderr ./$<) > $@
 else
 	echo 'Distributable compiled without help2man' > $@
 endif
