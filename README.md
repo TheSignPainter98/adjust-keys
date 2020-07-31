@@ -11,6 +11,17 @@ This script can be used to create a _single source of truth_ for glyph alignment
 Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases]).
 Also, command-line options can be saved and automatically read from the file `opts.yml` for later use.
 
+## Why Bother?
+
+Alignment is important.
+Whereas good alignment can lend your set a kind of refined perfection, bad alignment can unnecessarily draw the eye and distract from the rest of your hard work.
+The only problem is that to perfect alignment requires a non-negligable amount of effort to be spent on each key—it’s not as simple as just putting the glyph in the centre by how the computer sees it:
+
+![An explanation for why computers aren’t natively good at aligning characters](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/alignment-reasoning.png)
+
+Without an in-depth study into emulation of the human eye, the best way to align glyphs is to use your own, but to do this for each time a glyph and keycap appears in every layout/kit would be extremely time-consuming, especially if one were to find something later which would require fixing very early-on in the process.
+Therefore, `adjustkeys` exists—to help banish the duplication of tedious alignment work from the task of preparing renders for ICs and GBs, allowing its’ users to focus on the more fun bits of rendering, like watching your set come to life.
+
 ## Usage
 
 You’ll need a working installation of [`python3`][python] and its package manager, [`pip3`][pip].
@@ -37,7 +48,7 @@ unzip adjust-keycaps.zip
 blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3')"
 ```
 
-Perhaps while it's running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
+Perhaps while it’s running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
 **Notice how the gray construction lines around the glyph are automatically removed!**
 This is because they have the id `cap-guide` in the `svg`, which is automatically detected and discarded by `adjustcaps`.
 As such, you can keep a guide to help with the glyph alignment without affecting the output.
@@ -113,7 +124,7 @@ All files written by contributors to this project are covered under the GNU Less
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
 - The typeface used in `examples/menacing.svg` is [Noto Serif JP][noto-serif-jp] which uses the [Open Font License][ofl]
-- The keycap representation used in `examples/menacing.svg` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers'][keycap-designers-discord] Discord
+- The keycap representation used in `examples/menacing.svg` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The example layouts, `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
 
 Please ensure that credit is given where it is due.
