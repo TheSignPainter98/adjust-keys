@@ -119,7 +119,7 @@ My sanity would have been better-off had I instead done this in [Haskell][haskel
 ## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
-All files written by contributors to this project are covered under the GNU Lesser General Public License v3.0, **with the following exceptions:**
+All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
@@ -134,6 +134,7 @@ Please ensure that credit is given where it is due.
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
 [cython]: https://cython.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
+[lgpl3]: https://choosealicense.com/licenses/lgpl-3.0/
 [haskell]: https://wiki.haskell.org/Introduction
 [keycap-designers-discord]: https://discord.gg/93WN2uF
 [keycap-info]: https://matt3o.com/anatomy-of-a-keyboard/
