@@ -49,7 +49,7 @@ blender --python-expr "import bpy; import os.path; import sys; sys.path.append(o
 ```
 
 Perhaps while it’s running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
-**Notice how the gray construction lines around the glyph are automatically removed!**
+Notice how the gray construction lines around the glyph are automatically removed!
 This is because they have the id `cap-guide` in the `svg`, which is automatically detected and discarded by `adjustcaps`.
 As such, you can keep a guide to help with the glyph alignment without affecting the output.
 
