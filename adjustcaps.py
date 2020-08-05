@@ -17,8 +17,9 @@ from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
+from re import match
 from sys import argv, exit
+from util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from yaml_io import read_yaml
 
 
@@ -51,15 +52,17 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
              str(seen[cap['cap-name']]) if seen[cap['cap-name']] > 1 else '') +
             '.obj')
 
+    colour_map:[dict] = read_yaml(pargs.colour_map_file)
+
     printi('Adjusting and outputting caps on %d thread%s...' %(pargs.nprocs, 's' if pargs.nprocs != 1 else ''))
     if pargs.nprocs == 1:
         # Run as usual, seems to help with the error reporting because reasons
         for cap in caps:
-            handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
+            handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
     else:
         with ThreadPoolExecutor(pargs.nprocs) as ex:
             cops: ['[dict,str]->()'] = [
-                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
+                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
                 for cap in caps
             ]
             wait(cops)
@@ -123,18 +126,30 @@ def get_data(layout: [dict], cap_dir: str) -> [dict]:
     return layout_with_caps
 
 
+def apply_colour(cap:dict, colour_map:[dict]) -> dict:
+    cap_name:str = cap['cap-name']
+    for mapping in colour_map:
+        if any(list(map(lambda r: match(r, cap_name) is not None, mapping['keys']))):
+            cap['cap-colour'] = str(mapping['colour'])
+            return cap
+    cap['cap-colour'] = 'ffffff'
+    return cap
+
+
 def de_spookify(cap: dict) -> dict:
     return dict_union(rem(cap, 'cap-obj'),
                       {'cap-obj': deepcopy(cap['cap-obj'])})
 
 
 def handle_cap(cap: dict, unit_length: float, cap_x_offset: float,
-               cap_y_offset: float):
+        cap_y_offset: float, colour_map:[dict]):
     printi('Adjusting cap %s' % cap['cap-name'])
     cap = de_spookify(cap)
     translate_to_origin(cap['cap-obj'])
     cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
     cap = apply_cap_position(cap)
+    printi('Resolving colour of cap %s' % cap['oname'])
+    apply_colour(cap, colour_map)
     printi('Outputting to "%s"' % cap['oname'])
     write_obj(cap['oname'], cap['cap-obj'])
 

@@ -55,10 +55,12 @@ def parse_args(args:[str]) -> Namespace:
             'do_check_update': False,
             'no_check_update': False,
             'suppress_update_checking': False,
-            'homing_keys': [ 'f', 'j' ]
+            'homing_keys': [ 'f', 'j' ],
+            'colour_map_file': './examples/colour-map.yml'
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
+    ap.add_argument('-c', '--colour-map', action='store', dest='colour_map_file', help='specify the location of the colour map file' + arg_inf(dargs, 'colour_map_file'))
     ap.add_argument('-C', '--centres', action='store', dest='profile_file', help='specify the profile-centres YAML file to use' + arg_inf(dargs, 'profile_file'), metavar='file')
     ap.add_argument('-d', '--shrink-wrap-offset', action='store', dest='shrink_wrap_offset', type=float, help='Specify the offset above the surfave used by the shrink wrap' + arg_inf(dargs, 'shrink_wrap_offset'), metavar='mm')
     ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_units_per_mm', type=float, help='Specify the number of units per mm used in the svg images' + arg_inf(dargs, 'svg_units_per_mm', msg='(90dpi)'), metavar='float')
