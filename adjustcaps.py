@@ -17,7 +17,7 @@ from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from util import concat, dict_union, flatten_list, get_only, list_diff, inner_join, rem
+from util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from sys import argv, exit
 from yaml_io import read_yaml
 
@@ -105,7 +105,11 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
 
 def get_data(layout: [dict], cap_dir: str) -> [dict]:
     printi('Finding and parsing cap models')
+    # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
+    duplicate_cap_names:[str] = list(map(lambda c: c[1][0]['cap-name'] + ' @ ' + ', '.join(list(map(lambda c2: c2['cap-source'], c[1]))), get_dicts_with_duplicate_field_values(caps, 'cap-name').items()))
+    if duplicate_cap_names != []:
+        printw('Duplicate keycap names detected:\n\t' + '\n\t'.join(duplicate_cap_names))
     layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
 
     # Warn about missing models

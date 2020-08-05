@@ -8,12 +8,12 @@ if blender_available():
 from args import parse_args, Namespace
 from functools import reduce
 from layout import get_layout, parse_layout
-from log import die, init_logging, printi
+from log import die, init_logging, printi, printw
 from glyphinf import glyph_inf
 from os import remove, walk
 from os.path import exists, join
 from positions import resolve_glyph_positions
-from util import concat, dict_union, inner_join, list_diff, rob_rem
+from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
 from scale import get_scale
 from sys import argv, exit
@@ -130,6 +130,10 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
         }, profile['y-offsets'].items()))
     profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
+    duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
+    if duplicate_glyphs != []:
+        printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
+    exit(0)
     glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
         map(lambda m: {
