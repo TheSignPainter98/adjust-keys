@@ -157,3 +157,13 @@ def get_only(lst:[object]) -> object:
         die('Attempted to get "only" element in a list of size %d (expected exactly one element)' % len(lst))
     else:
         return lst[0]
+
+def get_dicts_with_duplicate_field_values(data:[dict], key:object) -> dict:
+    seens:dict = {}
+    for datum in data:
+        value:object = datum[key]
+        if value in seens:
+            seens[value].append(datum)
+        else:
+            seens[value] = [datum]
+    return { p:seens[p] for p in seens if len(seens[p]) > 1 }
