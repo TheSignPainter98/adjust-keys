@@ -95,7 +95,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
             remove(output_location)
         printi('Successfully imported svg objects')
 
-    return svgObjectNames
+    return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
 
 
 def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:

@@ -35,7 +35,7 @@ def main(*args: [[str]]) -> int:
     return 0
 
 
-def adjust_caps(layout: [dict], pargs:Namespace) -> str:
+def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
     # Resolve output unique output name
     caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file)
 
@@ -118,9 +118,9 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
             importedModelName = get_only(
                 list_diff(objectsPostRename, objectsPreRename))
             printi('Keycap model renamed to "%s"' % importedModelName)
-        return importedModelName
+        return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
     else:
-        return None
+        return {}
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
