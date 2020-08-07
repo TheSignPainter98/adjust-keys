@@ -17,7 +17,7 @@ from obj_io import read_obj, write_obj
 from os import makedirs, remove, walk
 from os.path import basename, exists, join
 from positions import resolve_cap_position, translate_to_origin
-from re import match
+from re import IGNORECASE, match
 from sys import argv, exit
 from util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from yaml_io import read_yaml
@@ -37,7 +37,7 @@ def main(*args: [[str]]) -> int:
 
 def adjust_caps(layout: [dict], pargs:Namespace) -> str:
     # Resolve output unique output name
-    caps: [dict] = get_data(layout, pargs.cap_dir)
+    caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file)
 
     seen: dict = {}
     printi('Resolving cap output names')
@@ -58,21 +58,38 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
     if pargs.nprocs == 1:
         # Run as usual, seems to help with the error reporting because reasons
         for cap in caps:
-            handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
+            handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
     else:
         with ThreadPoolExecutor(pargs.nprocs) as ex:
             cops: ['[dict,str]->()'] = [
-                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
+                ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
                 for cap in caps
             ]
             wait(cops)
 
     # Sequentially import the models (for thread-safety)
     if blender_available():
+        printi('Preparing material')
+        colourMaterials:dict = { m['name'] : m for m in colour_map }
+        for m in colourMaterials.values():
+            colourStr:str = str(m['colour'])
+            colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+            m['material'] = data.materials.new(name=m['name'])
+            m['material'].diffuse_color = colour
+
         objectsPreImport: [str] = data.objects.keys()
         for cap in caps:
             printi('Importing "%s" into blender...' % cap['oname'])
+            objectsPreSingleImport:[str] = data.objects.keys()
             ops.import_scene.obj(filepath=cap['oname'], axis_up='Z', axis_forward='Y')
+            objectsPostSingleImport:[str] = data.objects.keys()
+            cap['imported-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport))
+            cap['imported-object'] = context.scene.objects[cap['imported-name']]
+            printi(cap['imported-name'])
+            printi('Applying material to %s' % cap['oname'])
+            if cap['cap-colour'] is not None:
+                cap['imported-object'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
+                cap['imported-object'].active_material = colourMaterials[cap['cap-colour']]['material']
             printi('Deleting file "%s"' % cap['oname'])
             remove(cap['oname'])
         objectsPostImport: [str] = data.objects.keys()
@@ -106,7 +123,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> str:
         return None
 
 
-def get_data(layout: [dict], cap_dir: str) -> [dict]:
+def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
@@ -114,6 +131,9 @@ def get_data(layout: [dict], cap_dir: str) -> [dict]:
     if duplicate_cap_names != []:
         printw('Duplicate keycap names detected:\n\t' + '\n\t'.join(duplicate_cap_names))
     layout_with_caps: [dict] = inner_join(caps, 'cap-name', layout, 'cap-name')
+
+    colour_map:[dict] = read_yaml(colour_map_file)
+    layout_with_caps:[dict] = list(map(lambda cap: apply_colour(cap, colour_map), layout_with_caps))
 
     # Warn about missing models
     missing_models: [str] = list_diff(
@@ -127,12 +147,12 @@ def get_data(layout: [dict], cap_dir: str) -> [dict]:
 
 
 def apply_colour(cap:dict, colour_map:[dict]) -> dict:
-    cap_name:str = cap['cap-name']
+    cap_name:str = cap['key']
     for mapping in colour_map:
-        if any(list(map(lambda r: match(r, cap_name) is not None, mapping['keys']))):
-            cap['cap-colour'] = str(mapping['colour'])
+        if any(list(map(lambda r: match('^' + r + '$', cap_name, IGNORECASE) is not None, mapping['keys']))):
+            cap['cap-colour'] = mapping['name']
             return cap
-    cap['cap-colour'] = 'ffffff'
+    cap['cap-colour'] = None
     return cap
 
 
@@ -142,14 +162,13 @@ def de_spookify(cap: dict) -> dict:
 
 
 def handle_cap(cap: dict, unit_length: float, cap_x_offset: float,
-        cap_y_offset: float, colour_map:[dict]):
+        cap_y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
     cap = de_spookify(cap)
     translate_to_origin(cap['cap-obj'])
     cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
     cap = apply_cap_position(cap)
     printi('Resolving colour of cap %s' % cap['oname'])
-    apply_colour(cap, colour_map)
     printi('Outputting to "%s"' % cap['oname'])
     write_obj(cap['oname'], cap['cap-obj'])
 

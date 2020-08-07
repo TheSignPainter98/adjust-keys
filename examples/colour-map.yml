@@ -1,7 +1,10 @@
-- colour: 880000
+- name: green
+  colour: '32a852'
   keys:
-  - '[^-]*'
-  - '[A-Z0-9]*'
-- colour: 000880
+  - .-.+
+  - '[^+]'
+  - ''
+- name: purple
+  colour: 'ad1aad'
   keys:
-  - '.*'
+  - .*
