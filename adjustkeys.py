@@ -17,10 +17,11 @@ from scale import get_scale
 from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
 from update_checker import update_available
+from util import dict_union
 from yaml_io import read_yaml
 
 
-def main(*args: [[str]]) -> int:
+def main(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
@@ -59,22 +60,22 @@ def main(*args: [[str]]) -> int:
     # Adjust model positions
     model_name:str
     if not pargs.no_adjust_caps:
-        model_name = adjust_caps(layout, pargs)
+        model_data = adjust_caps(layout, pargs)
 
     # Adjust glyph positions
     glyph_names:[str]
     if not pargs.no_adjust_glyphs:
-        glyph_names = adjust_glyphs(layout, pargs)
+        glyph_data = adjust_glyphs(layout, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs and blender_available():
-        shrink_wrap_glyphs_to_keys(glyph_names, model_name, pargs.cap_unit_length, pargs.shrink_wrap_offset)
+        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], pargs.cap_unit_length, pargs.shrink_wrap_offset)
 
-    return 0
+    return dict_union(model_data, glyph_data)
 
 
 if __name__ == '__main__':
     try:
-        exit(main(argv))
+        exit(main(argv) is None)
     except KeyboardInterrupt:
         exit(1)
