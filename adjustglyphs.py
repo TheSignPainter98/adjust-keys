@@ -133,7 +133,6 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
         printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
-    exit(0)
     glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
         map(lambda m: {
