@@ -1,0 +1,10 @@
+- name: green
+  colour: '32a852'
+  keys:
+  - .-.+
+  - '[^+/*-]'
+  - ''
+- name: purple
+  colour: 'ad1aad'
+  keys:
+  - .*
