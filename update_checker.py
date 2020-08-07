@@ -53,10 +53,8 @@ def check_update(pedanticCheck:bool) -> bool:
         if 'tag_name' in parsedResp:
             printi('Latest version is %s, current version is %s' %(parsedResp['tag_name'], version))
             if pedanticCheck:
-                print('asdf')
                 return version != parsedResp['tag_name']
             else:
-                print('fdsa')
                 return version_is_outdated(version, parsedResp['tag_name'])
     printw('Failed to find out the name of the latest version from github')
     return False
