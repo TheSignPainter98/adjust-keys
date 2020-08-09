@@ -17,3 +17,4 @@ requirements.txt
 .no_adjustkeys_update
 version.py
 ChangeLog.md
+ftemp/
