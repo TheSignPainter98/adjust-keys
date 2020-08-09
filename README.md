@@ -6,10 +6,12 @@
 This is a [python][python] script which generates layouts of keycaps and glyphs for (automatic) import into [Blender!][blender]
 Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys—simply specify the layout you want using the JSON output of [KLE][kle] to have the computer guide the caps into the mathematically-correct locations.
 
-This script can be used to create a _single source of truth_ for glyph alignment on caps, so later changes and fixes can be more easily propagated.
+This script can be used to create a _single source of truth_ for glyph alignment on caps and—as an added bonus—colourway-config, so later changes and fixes can be more easily propagated.
 
 Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases]).
 Also, command-line options can be saved and automatically read from the file `opts.yml` for later use.
+
+The [python][python] API of `adjustkeys` also allows a coder to be notified of the objects it creates, thereby enabling it to form part of a larger keyboard-render build-system, should the user be that-way inclined.
 
 ## Why Bother?
 
