@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v9
+name: Generate artifacts v10
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -35,5 +35,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: adjust-keys.zip
+          args: adjust-keys.zip ChangeLog.md
 
