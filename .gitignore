@@ -18,3 +18,4 @@ requirements.txt
 version.py
 ChangeLog.md
 *.pdf
+*.xcf
