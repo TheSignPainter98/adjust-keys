@@ -150,11 +150,11 @@ def flatten_list(lst:list) -> list:
     else:
         return list(reduce(concat, map(flatten_list, lst), []))
 
-def get_only(lst:[object]) -> object:
+def get_only(lst:[object], empty_message:str='Attempted to get an element in an empty list', plural_message='Attempted to get "only" element in a list of size %d (expected exactly one element)') -> object:
     if lst == []:
-        die('Attempted to get an element in an empty list')
+        die(empty_message)
     elif len(lst) > 1:
-        die('Attempted to get "only" element in a list of size %d (expected exactly one element)' % len(lst))
+        die(plural_message % len(lst))
     else:
         return lst[0]
 

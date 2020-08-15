@@ -3,6 +3,7 @@
 from functools import reduce
 from log import die, printi
 from os.path import exists
+from path import fopen
 from util import concat
 from sys import stdout
 
@@ -17,7 +18,7 @@ def read_obj(cfile: str) -> [dict]:
     if 'cfile' == '-':
         rawCap = stdin.readlines()
     else:
-        with open(cfile, 'r') as f:
+        with fopen(cfile, 'r') as f:
             rawCap = f.readlines()
     return parse_cap(rawCap)
 

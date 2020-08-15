@@ -12,6 +12,7 @@ from log import die, init_logging, printi, printw
 from glyphinf import glyph_inf
 from os import remove, walk
 from os.path import exists, join
+from path import init_path, fopen
 from positions import resolve_glyph_positions
 from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
@@ -30,6 +31,7 @@ from yaml_io import read_yaml, write_yaml
 def main(*args: [str]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
+    init_path(pargs.path)
 
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
     svgObjNames: [str] = adjust_glyphs(layout, pargs)
@@ -46,7 +48,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
                                                     pargs.global_y_offset)
 
     for i in range(len(placed_glyphs)):
-        with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
+        with fopen(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
             placed_glyphs[i] = dict_union(
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
