@@ -20,6 +20,7 @@ from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
 from update_checker import update_available
 from util import dict_union
+from yaml import dump
 from yaml_io import read_yaml
 
 
@@ -34,6 +35,10 @@ def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
     init_path(pargs.path)
+
+    if pargs.print_opts_yml:
+        print('\n'.join(list(map(lambda l: '# ' + l, dump(pargs.__dict__).split('\n')[:-1]))))
+        return {}
 
     if update_available(pargs):
         printw('A new version is available, please download it by going to https://github.com/TheSignPainter98/adjust-keys/releases/latest. You can suppress update-checking with the -Vn or -Vs flags')

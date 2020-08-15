@@ -62,6 +62,7 @@ def parse_args(args:[str]) -> Namespace:
             'homing_keys': [ 'f', 'j' ],
             'colour_map_file': './examples/colour-map.yml',
             'path': ':'.join([ '.', dirname(__file__), dirname(getcwd()) ] + ([path.abspath] if blender_available() else [])),
+            'print_opts_yml': False
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
@@ -98,6 +99,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-X', '--glyph-x-offset', action='store', type=float, dest='global_x_offset', help='global offset which moves every glyph to the right' + arg_inf(dargs, 'global_x_offset'), metavar='float')
     ap.add_argument('-y', '--cap-y-offset', action='store', type=float, dest='cap_y_offset', help='global offset which moves every keycap downwards' + arg_inf(dargs, 'cap_y_offset'), metavar='float')
     ap.add_argument('-Y', '--glyph-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every glyph downwards' + arg_inf(dargs, 'global_y_offset'), metavar='float')
+    ap.add_argument('-#', '--opts-yml', action='store_true', dest='print_opts_yml', help='Print the current options values in the YAML format for configuration purposes and exit' + arg_inf(dargs, 'print_opts_yml'))
 
     # Sanitise and obtain parsed arguments
     args = sanitise_args('adjustkeys', args)
