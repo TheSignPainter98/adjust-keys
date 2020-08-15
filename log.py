@@ -1,5 +1,6 @@
 # Copyright (C) Edward Jones
 
+from exceptions import AdjustKeysException
 from sys import argv, stderr
 
 verbosity: int = 0
@@ -18,15 +19,14 @@ def init_logging(verbosity_in: bool):
 
 
 ##
-# @brief Write a message to stderr and exit
+# @brief Write a message to stderr and raise an exception
 #
 # @param args Message things
 # @param kwargs key-value message things
 #
 # @return Nothing
 def die(*args, **kwargs):
-    printe(*args, **kwargs)
-    exit(1)
+    raise AdjustKeysException(' '.join(list(map(str, args))))
 
 
 ##

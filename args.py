@@ -1,7 +1,7 @@
 # Copyright (C) Edward Jones
 
 from argparse import ArgumentParser, Namespace
-from log import printe
+from log import die
 from multiprocessing import cpu_count
 from os.path import exists
 from sanitise_args import arg_inf, sanitise_args
@@ -14,7 +14,7 @@ description:str = 'This is a python script which generates layouts of keycaps an
 
 ##
 # @brief Parse commandline arguments
-# If an error occurs, the program immediately exits.
+# If an error occurs, the an exception is raised
 #
 # @param args:[str] A list of commandline arguments, including argv[0], the program name
 #
@@ -94,7 +94,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-Y', '--glyph-y-offset', action='store', type=float, dest='global_y_offset', help='global offset which moves every glyph downwards' + arg_inf(dargs, 'global_y_offset'), metavar='float')
 
     # Sanitise and obtain parsed arguments
-    args = sanitise_args('adjustglyphs', args)
+    args = sanitise_args('adjustkeys', args)
     pargs:dict = ap.parse_args(args[1:]).__dict__
 
     # Obtain yaml arguments
@@ -103,8 +103,7 @@ def parse_args(args:[str]) -> Namespace:
         if exists(pargs['opt_file']):
             yargs = read_yaml(pargs['opt_file'])
         else:
-            printe('Failed to find options file %s' % pargs['opt_file'])
-            exit(1)
+            die('Failed to find options file "%s"' % pargs['opt_file'])
     elif exists(dargs['opt_file']):
         yargs = read_yaml(dargs['opt_file'])
 
