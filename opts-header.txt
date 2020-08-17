@@ -1,0 +1,15 @@
+Hello.
+In this file you can specify the options you want to run adjustkeys with, such as the layout, glyph-map or colour-map you want to use.
+You can get more information about each of the options by referring to the pdf documentation supplied with the release.
+
+This file is written in YAML (which stands for YAML Ain't Markup Language, a human-readible structured format for specifying data.
+You can find pointers on the syntax at https://medium.com/@siliconlay/yaml-a-simple-introduction-414a2b174fb4
+Most importantly here, *any line which starts with a # is a comment and is ignored*.
+To edit an option, simply remove the # at the start of the line and change the value to the right of the colon.
+
+The values shown here are the default values when the release was generated on a linux server.
+The majority are the same as when you run this code, but in the case of `path`, a more Windows- or macOS-specific one are used in practice.
+Exact default values can be seen by setting the `print_opts_yml` option to `true` and running the program as usual.
+
+Options start below.
+------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) examples/example-opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys.pdf
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys.pdf
 
 all: adjustkeys
 .PHONY: all
@@ -53,8 +53,8 @@ adjust-keys.zip: $(DIST_CONTENT)
 adjustkeys: $(ADJUST_KEYS_SRCS)
 	$(compilePython)
 
-examples/example-opts.yml: adjustkeys
-	./$< '-#' > $@
+examples/opts.yml: opts-header.txt adjustkeys
+	(sed 's/^/# /' | sed 's/ $$//'&& echo && ./adjustkeys '-#' | grep -v opt_file) < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
 	pipreqs --force --print 2>/dev/null > $@
@@ -74,7 +74,10 @@ examples/%:
 	@# Do nothing
 LICENSE:
 	@# Do nothing
+opts-header.txt:
+	@# Do nothing
+
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip
 .PHONY: clean
