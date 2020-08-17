@@ -60,4 +60,6 @@ def check_update(pedanticCheck:bool) -> bool:
     return False
 
 def version_is_outdated(vc:str, vu:str) -> bool:
+    if not vc or not vu:
+        return False
     return tuple(map(int, vc[1:].split('.')))[:-1] < tuple(map(int, vu[1:].split('.')))[:-1]
