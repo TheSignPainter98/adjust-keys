@@ -37,7 +37,7 @@ def die(*args, **kwargs):
 #
 # @return Nothing
 def printi(*args, **kwargs):
-    if verbosity >= 1:
+    if verbosity >= 2:
         print(*args, file=stderr, **kwargs)
 
 
@@ -60,5 +60,5 @@ def printe(*args, **kwargs):
 #
 # @return Nothing
 def printw(*args, **kwargs):
-    if verbosity >= 0:
+    if verbosity >= 1:
         print(f'{argv[0]}: WARNING:', *args, file=stderr, **kwargs)

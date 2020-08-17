@@ -10,9 +10,9 @@ from functools import reduce
 from layout import get_layout, parse_layout
 from log import die, init_logging, printi, printw
 from glyphinf import glyph_inf
-from os import remove, walk
+from os import remove
 from os.path import exists, join
-from path import init_path, fopen
+from path import init_path, fopen, fwalk
 from positions import resolve_glyph_positions
 from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
@@ -48,7 +48,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
                                                     pargs.global_y_offset)
 
     for i in range(len(placed_glyphs)):
-        with fopen(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
+        with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
             placed_glyphs[i] = dict_union(
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
@@ -132,6 +132,7 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
         }, profile['y-offsets'].items()))
     profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
+    print('glyphs...', glyph_offsets)
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
         printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
@@ -178,11 +179,7 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> di
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
         die('Directory "%s" doesn\'t exist' % dname)
-    svgs: [str] = []
-    for (root, _, fnames) in walk(dname):
-        svgs += list(
-            map(lambda f: join(root, f),
-                list(filter(lambda f: f.endswith('.svg'), fnames))))
+    svgs: [str] = list(filter(lambda f: f.endswith('.svg'), fwalk(dname)))
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs

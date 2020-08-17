@@ -73,12 +73,12 @@ def adjustkeys(*args: [[str]]) -> dict:
     layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
 
     # Adjust model positions
-    model_name:str
+    model_data:dict = {}
     if not pargs.no_adjust_caps:
         model_data = adjust_caps(layout, pargs)
 
     # Adjust glyph positions
-    glyph_names:[str]
+    glyph_data:dict = {}
     if not pargs.no_adjust_glyphs:
         glyph_data = adjust_glyphs(layout, pargs)
 

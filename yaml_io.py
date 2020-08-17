@@ -2,7 +2,7 @@
 
 from log import die, printi
 from os.path import exists
-from path import fopen
+from path import fexists, fopen
 from sys import stdin
 from yaml import dump, safe_load
 
@@ -20,8 +20,8 @@ def read_yaml(fname: str) -> dict:
             % fname)
         return safe_load(stdin)
     else:
-        if exists(fname):
-            with fopen(fname, 'r', encoding='utf-8') as f:
+        if fexists(fname):
+            with fopen(fname, 'Could not find file "%s"' % fname, 'Multiple files (%%d) named "%s" found: %%s' % fname, 'r', encoding='utf-8') as f:
                 return safe_load(f)
         else:
             die('Failed to read file "%s"' % fname)

@@ -3,11 +3,13 @@
 from argparse import ArgumentParser, Namespace
 from blender_available import blender_available
 if blender_available():
-    from bpy import path
+    from bpy import data
 from log import die
 from multiprocessing import cpu_count
 from os import getcwd
-from os.path import dirname, exists
+from os.path import dirname, exists, join
+from platform import system
+from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from version import version
@@ -15,6 +17,8 @@ from yaml_io import read_yaml, write_yaml
 
 description:str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 
+home:str = Path.home()
+install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows': join(home, 'Library', 'Application Support', 'Adjustkeys'), 'Darwin': join(home, 'AppData', 'Local', 'Adjustkeys') }[system()]
 
 ##
 # @brief Parse commandline arguments
@@ -60,8 +64,8 @@ def parse_args(args:[str]) -> Namespace:
             'no_check_update': False,
             'suppress_update_checking': False,
             'homing_keys': [ 'f', 'j' ],
-            'colour_map_file': './examples/colour-map.yml',
-            'path': ':'.join([ '.', dirname(__file__), dirname(getcwd()) ] + ([path.abspath] if blender_available() else [])),
+            'colour_map_file': 'examples/colour-map.yml',
+            'path': ':'.join([ install_dir, getcwd() ] + ([data.filepath] if blender_available() and data.filepath else [])),
             'print_opts_yml': False
         }
 
