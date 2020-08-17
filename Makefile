@@ -57,7 +57,7 @@ examples/opts.yml: opts-header.txt adjustkeys
 	(sed 's/^/# /' | sed 's/ $$//'&& echo && ./adjustkeys '-#' | grep -v opt_file) < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
-	pipreqs --force --print 2>/dev/null > $@
+	(pipreqs --force --print 2>/dev/null | grep -v bpy) > $@
 
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
