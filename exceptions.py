@@ -8,3 +8,6 @@ class AdjustGlyphsException(AdjustKeysException):
 
 class AdjustCapsException(AdjustKeysException):
     pass
+
+class AdjustKeysGracefulExit(Exception):
+    pass

@@ -8,7 +8,7 @@ if blender_available():
 from adjustcaps import adjust_caps, get_caps
 from adjustglyphs import adjust_glyphs, glyph_files
 from args import parse_args, Namespace
-from exceptions import AdjustKeysException
+from exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from glyphinf import glyph_name
 from layout import get_layout, parse_layout
 from log import init_logging, printi, printw
@@ -27,6 +27,8 @@ from yaml_io import read_yaml
 def main(*args:[[str]]) -> dict:
     try:
         return adjustkeys(args)
+    except AdjustKeysGracefulExit:
+        return 0
     except AdjustKeysException as akex:
         print(argv[0] + ':', akex)
         return 1

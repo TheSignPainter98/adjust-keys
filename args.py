@@ -1,13 +1,15 @@
 # Copyright (C) Edward Jones
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from blender_available import blender_available
 if blender_available():
     from bpy import data
+from exceptions import AdjustKeysGracefulExit
 from log import die
 from multiprocessing import cpu_count
 from os import getcwd
 from os.path import dirname, exists, join
+from path import fexists
 from platform import system
 from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
@@ -28,7 +30,7 @@ install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows
 #
 # @return A namespace of options
 def parse_args(args:[str]) -> Namespace:
-    ap:ArgumentParser = ArgumentParser(description=description)
+    ap:ArgumentParser = ArgumentParser(description=description, add_help=False)
 
     # Default values
     dargs:dict = {
@@ -66,7 +68,9 @@ def parse_args(args:[str]) -> Namespace:
             'homing_keys': [ 'f', 'j' ],
             'colour_map_file': 'examples/colour-map.yml',
             'path': ':'.join([ install_dir, getcwd() ] + ([data.filepath] if blender_available() and data.filepath else [])),
-            'print_opts_yml': False
+            'print_opts_yml': False,
+            'show_version': False,
+            'show_help': False
         }
 
     ap.add_argument('-@', '--args', action='store', dest='opt_file', help='specify a YAML option file to be take read initial argument values from (default: %s)' % dargs['opt_file'], metavar='file')
@@ -75,6 +79,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-d', '--shrink-wrap-offset', action='store', dest='shrink_wrap_offset', type=float, help='Specify the offset above the surfave used by the shrink wrap' + arg_inf(dargs, 'shrink_wrap_offset'), metavar='mm')
     ap.add_argument('-D', '--svg-dpi', action='store', dest='svg_units_per_mm', type=float, help='Specify the number of units per mm used in the svg images' + arg_inf(dargs, 'svg_units_per_mm', msg='(90dpi)'), metavar='float')
     ap.add_argument('-G', '--glyph-dir', action='store', dest='glyph_dir', help='specify the directory containing the svg glyphs' + arg_inf(dargs, 'glyph_dir'), metavar='file')
+    ap.add_argument('-h', '--help', action='help', help='Show help message and exit' + arg_inf(dargs, 'show_help'))
     ap.add_argument('-H', '--homing', nargs='+', dest='homing_keys', metavar='key', help='Specify which keys are homing keys' + arg_inf(dargs, 'homing_keys'))
     ap.add_argument('-i', '--ignore-id', action='store', type=str, dest='glyph_part_ignore_regex', help='Specify an id for which nodes and their children should be removed from an input glyph svg' + arg_inf(dargs, 'glyph_part_ignore_regex'), metavar='id')
     ap.add_argument('-I', '--iso-enter-glyph-pos', action='store', choices=['centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre', 'body-centre'], dest='iso_enter_glyph_pos', help='Specify the glyph location on an ISO enter key' + arg_inf(dargs, 'iso_enter_glyph_pos'), metavar='pos')
@@ -95,7 +100,7 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-u', '--cap-unit-length', action='store', type=float, dest='cap_unit_length', help='Specify the length of one unit (in mm) for use when placing keycap models' + arg_inf(dargs, 'cap_unit_length'), metavar='float')
     ap.add_argument('-U', '--glyph-unit-length', action='store', type=float, dest='glyph_unit_length', help='Specify the length of one unit (in svg units) for use when placing glyphs' + arg_inf(dargs, 'glyph_unit_length'), metavar='float')
     ap.add_argument('-v', '--verbose', action='store', dest='verbosity', type=int, help='Output verbosely' + arg_inf(dargs, 'verbosity'), metavar='int')
-    ap.add_argument('-V', '--version', action='version', version=version)
+    ap.add_argument('-V', '--version', action='version', version=version, help="Show program's version number and exit" + arg_inf(dargs, 'show_version'))
     ap.add_argument('-Vu', '--check-updates', action='store_true', dest='do_check_update', help='Forcibly for updates' + arg_inf(dargs, 'do_check_update'))
     ap.add_argument('-Vn', '--no-check-updates-version', action='store_true', dest='no_check_update', help='Forcibly for updates' + arg_inf(dargs, 'no_check_update'))
     ap.add_argument('-Vs', '--suppress-update-checking', action='store_true', dest='suppress_update_checking', help='Forcibly for updates' + arg_inf(dargs, 'suppress_update_checking'))
@@ -112,14 +117,22 @@ def parse_args(args:[str]) -> Namespace:
     # Obtain yaml arguments
     yargs:dict = {}
     if 'opt_file' in pargs and pargs['opt_file'] is not None:
-        if exists(pargs['opt_file']):
+        if fexists(pargs['opt_file']):
             yargs = read_yaml(pargs['opt_file'])
         else:
             die('Failed to find options file "%s"' % pargs['opt_file'])
-    elif exists(dargs['opt_file']):
-        yargs = read_yaml(dargs['opt_file'])
+    elif fexists(dargs['opt_file']):
+        raw_yargs = read_yaml(dargs['opt_file'])
+        yargs = raw_yargs if type(raw_yargs) == dict else {}
 
-    return Namespace(**dict_union_ignore_none(dict_union_ignore_none(dargs, yargs), pargs))
+    npargs:Namespace = Namespace(**dict_union_ignore_none(dict_union_ignore_none(dargs, yargs), pargs))
+    if npargs.show_version:
+        ap.print_version()
+        raise AdjustKeysGracefulExit()
+    elif npargs.show_help:
+        ap.print_help()
+        raise AdjustKeysGracefulExit()
+    return npargs
 
 def dict_union_ignore_none(a:dict, b:dict) -> dict:
     return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))
