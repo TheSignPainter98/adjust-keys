@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys.pdf
+DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 
 all: adjustkeys
 .PHONY: all
@@ -28,8 +28,11 @@ endef
 %.1.gz: %.1
 	gzip -kf $<
 
-adjustkeys.pdf: adjustkeys.1
+adjustkeys_command_line_manual.pdf: adjustkeys.1
 	groff -man -Tpdf -fH < $< > $@
+
+adjustkeys_yaml_manual.pdf: adjustkeys.1 man-wrap.awk yaml-usage.awk
+	(awk -f man-wrap.awk | awk -f yaml-usage.awk | grep -v '^$$' | groff -man -Tpdf -fH) < $< > $@
 
 adjustkeys.html: adjustkeys.1
 	groff -man -Thtml < $< > $@
@@ -79,5 +82,5 @@ opts-header.txt:
 
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf
 .PHONY: clean
