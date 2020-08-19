@@ -75,6 +75,7 @@ def args_from_str(s: str) -> [str]:
     return args
 
 
-def arg_inf(dargs: dict, key: str, msg: str = None) -> str:
-    return ' (default: %s%s, yaml-option-file-key: %s)' % (
-        dargs[key], ' ' + msg if msg else '', key)
+def arg_inf(arg:dict) -> str:
+    if 'default' in arg:
+        return ' (default: %s%s, yaml-option-file-key: %s)' % (arg['default'], ' ' + arg['arg_inf_msg'] if 'arg_inf_msg' in arg else '', arg['dest'])
+    return ''
