@@ -19,3 +19,4 @@ version.py
 ChangeLog.md
 *.pdf
 *.xcf
+adjustkeys_addon.py
