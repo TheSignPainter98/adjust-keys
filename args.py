@@ -378,8 +378,8 @@ arg_dict: dict = {a['dest']: a for a in args if 'dest' in a}
 configurable_args: [dict] = list(
     sorted(filter(lambda a: 'dest' in a and 'label' in a, args),
            key=lambda a:
-           ('choices' in a, str(a['type']), a['label'], a['str-type']
-            if 'str-type' in a else 'raw')))
+           ('choices' in a, str(a['type']), a['str-type']
+            if 'str-type' in a else 'raw', a['label'])))
 
 
 ##
