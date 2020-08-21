@@ -1,0 +1,87 @@
+# Copyright (C) Edward Jones
+
+bl_info:dict = {
+        'name': 'adjustkeys',
+        'author': "Ed Jones",
+        'blender': (2, 83, 0),
+        'location': 'https://www.github.com/TheSignPainter98/adjustkeys',
+        'description': 'Automatic keycap and glyph alignment tool',
+        'warning': '',
+        'doc_url': '{BLENDER_MANUAL_URL}/addons/import_export/adjustkeys.html',
+        'support': 'TESTING',
+        'category': 'Import-Export',
+    }
+
+if 'bpy' in locals():
+    import importlib
+    if 'adjustkeys' in locals():
+        importlib.reload(adjustkeys)
+
+from bpy.utils import register_class, unregister_class
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import Panel, Operator, PropertyGroup, Scene
+from inspect import getmembers
+from os.path import dirname
+from sys import path
+path.append(dirname(__file__))
+
+from args import configurable_args
+from adjustkeys import main as adjustkeys
+
+arg_dict:dict = { a['dest']: a for a in configurable_args }
+configurable_arg_dests:[str] = list(map(lambda a: a['dest'], configurable_args))
+
+assert all(map(lambda a: 'help' in a, configurable_args))
+
+class KczaCustomPropertyGroup(PropertyGroup):
+    # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by propgen.py when building
+    KCZA_CUSTOM_PROPERTIES
+
+def sanitise_choice_args(kv:tuple) -> tuple:
+    (k,v) = kv
+    if 'choices' in arg_dict[k]:
+        v = v.lower().replace('_', '-')
+    return (k,v)
+
+
+class AdjustKeysOperator(Operator):
+    bl_idname = 'object.adjustkeys'
+    bl_label = 'Adjustkeys operator'
+
+    def execute(self, context):
+        self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
+        akargs:dict = dict(map(sanitise_choice_args, filter(lambda m: m[0] in configurable_arg_dests, getmembers(context.scene.adjustkeys_custom_props))))
+        adjustkeys(akargs)
+        return {'FINISHED'}
+
+class KCZA_PT_AdjustKeysPanel(Panel):
+    ''''''
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_label = 'Adjustkeys'
+    bl_context = 'render'
+    bl_icon = 'MOD_MESHDEFORM'
+    #  bl_category = 'kcza'
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.operator('object.adjustkeys', text='Place caps and glyphs', icon='MOD_MESHDEFORM')
+        for carg in configurable_args:
+            row = layout.row()
+            row.prop(context.scene.adjustkeys_custom_props, carg['dest'])
+
+def register():
+    register_class(KczaCustomPropertyGroup)
+    Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
+    register_class(KCZA_PT_AdjustKeysPanel)
+    register_class(AdjustKeysOperator)
+
+def unregister():
+    unregister_class(KczaCustomPropertyGroup)
+    del Scene.adjustkeys_custom_props
+    unregister_class(KCZA_PT_AdjustKeysPanel)
+    unregister_class(AdjustKeysOperator)
+
+if __name__ == '__main__':
+    register()

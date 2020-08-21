@@ -6,11 +6,12 @@ from util import dict_union, key_subst, rem, safe_get
 from yaml_io import read_yaml
 
 
-def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:[str]) -> [dict]:
+def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str) -> [dict]:
     return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys)
 
 
-def parse_layout(layout_row_profiles: [str], layout: [[dict]], homing_keys:[str]) -> [dict]:
+def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str) -> [dict]:
+    homing_keys:[str] = raw_homing_keys.split(',')
     printi('Reading layout information')
     if len(layout_row_profiles) < len(layout):
         printw(

@@ -59,6 +59,9 @@ requirements.txt: $(ADJUST_KEYS_SRCS)
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
 
+adjustkeys_addon.py: adjustkeys_addon.py.in args.py propgen.py
+	./propgen.py < $< > $@
+
 %.py:
 	@# Do nothing
 profiles/kat/%.yml %.yml:
