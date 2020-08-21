@@ -1,6 +1,7 @@
 # Copyright (C) Edward Jones
 
 from argparse import ArgumentParser, Namespace
+from functools import reduce
 from log import die, printe
 from multiprocessing import cpu_count
 from os.path import exists
@@ -389,7 +390,7 @@ configurable_args: [dict] = list(
 # @param args:[str] A list of commandline arguments, including argv[0], the program name
 #
 # @return A namespace of options
-def parse_args(iargs: 'Either str [str] dict') -> Namespace:
+def parse_args(iargs: tuple) -> Namespace:
     ap: ArgumentParser = ArgumentParser(description=description)
 
     # Generate the argument parser
@@ -406,8 +407,8 @@ def parse_args(iargs: 'Either str [str] dict') -> Namespace:
 
     # Sanitise and obtain parsed arguments
     pargs: dict
-    if type(args) == dict:
-        pargs = iargs
+    if type(iargs) == tuple and all(map(lambda a: type(a) == dict, iargs)):
+        pargs = dict(reduce(dict_union, iargs, {}))
     else:
         iargs = sanitise_args('adjustglyphs', iargs)
         pargs: dict = ap.parse_args(iargs[1:]).__dict__
@@ -425,7 +426,6 @@ def parse_args(iargs: 'Either str [str] dict') -> Namespace:
 
     dargs = { a['dest']: a['default'] for a in args if 'dest' in a }
     rargs: dict = dict_union_ignore_none(dict_union_ignore_none(dargs, yargs), pargs)
-    print(arg_dict.keys())
     rargs = dict(map(lambda p: (p[0], arg_dict[p[0]]['type'](p[1])), rargs.items()))
     checkResult:str = check_args(rargs)
     if checkResult is not None:

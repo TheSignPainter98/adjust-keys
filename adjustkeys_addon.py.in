@@ -26,12 +26,12 @@ from sys import path
 path.append(dirname(__file__))
 
 from args import configurable_args
+from adjustkeys import main as adjustkeys
+
 arg_dict:dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests:[str] = list(map(lambda a: a['dest'], configurable_args))
 
 assert all(map(lambda a: 'help' in a, configurable_args))
-#  from bpy.props import StringProperty
-#  from bpy_extras.io_utils import ImportHelper
 
 class KczaCustomPropertyGroup(PropertyGroup):
     # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by propgen.py when building
@@ -50,7 +50,8 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
-        print(dict(map(sanitise_choice_args, filter(lambda m: m[0] in configurable_arg_dests, getmembers(context.scene.adjustkeys_custom_props)))))
+        akargs:dict = dict(map(sanitise_choice_args, filter(lambda m: m[0] in configurable_arg_dests, getmembers(context.scene.adjustkeys_custom_props))))
+        adjustkeys(akargs)
         return {'FINISHED'}
 
 class KCZA_PT_AdjustKeysPanel(Panel):
