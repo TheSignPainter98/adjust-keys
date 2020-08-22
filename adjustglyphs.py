@@ -12,7 +12,7 @@ from log import die, init_logging, printi, printw
 from glyphinf import glyph_inf
 from os import remove
 from os.path import exists, join
-from path import init_path, fopen, fwalk
+from path import walk
 from positions import resolve_glyph_positions
 from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
@@ -31,7 +31,6 @@ from yaml_io import read_yaml, write_yaml
 def main(*args: [str]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
-    init_path(pargs.path)
 
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
     svgObjNames: [str] = adjust_glyphs(layout, pargs)
@@ -179,7 +178,7 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> di
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
         die('Directory "%s" doesn\'t exist' % dname)
-    svgs: [str] = list(filter(lambda f: f.endswith('.svg'), fwalk(dname)))
+    svgs: [str] = list(filter(lambda f: f.endswith('.svg'), walk(dname)))
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs

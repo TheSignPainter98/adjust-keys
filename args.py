@@ -9,7 +9,6 @@ from log import die
 from multiprocessing import cpu_count
 from os import getcwd
 from os.path import dirname, exists, join
-from path import fexists
 from platform import system
 from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
@@ -93,7 +92,6 @@ def parse_args(args:[str]) -> Namespace:
     ap.add_argument('-Ns', '--no-shrink-wrap', action='store_true', dest='no_shrink_wrap', help="Don't shrink wrap the adjusted glyphs and to the adjusted caps" + arg_inf(dargs, 'no_shrink_wrap'))
     ap.add_argument('-o', '--output', action='store', dest='output_dir', help='Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes' + arg_inf(dargs, 'output_dir'), metavar='dir')
     ap.add_argument('-O', '--output-prefix', action='store', dest='output_prefix', help='Specify a prefix to be applied to all output names' + arg_inf(dargs, 'output_prefix'), metavar='str')
-    ap.add_argument('-P', '--path', action='store', dest='path', help='Specify a different search path---a colon-separated list of directories which are searched every time a file is read. Default holds the current working directory (e.g. of Blender if opened through that), the directory in which adjustkeys is stored and the directory of the currently-open .blend file if available' + arg_inf(dargs, 'path'), metavar='path')
     ap.add_argument('-R', '--profile-row-file', action='store', dest='layout_row_profile_file', help='specify the file containing the mapping from rows of the layout to their profile row' + arg_inf(dargs, 'layout_row_profile_file'), metavar='file')
     ap.add_argument('-Sg', '--show-glyph-names', action='store_true', dest='list_glyphs', help='Output a list of known glyphs read from the input files' + arg_inf(dargs, 'list_glyphs'))
     ap.add_argument('-Sn', '--show-cap-names', action='store_true', dest='list_cap_names', help='Output a list of known keycap names read form the input files' + arg_inf(dargs, 'list_cap_names'))
@@ -118,11 +116,11 @@ def parse_args(args:[str]) -> Namespace:
     # Obtain yaml arguments
     yargs:dict = {}
     if 'opt_file' in pargs and pargs['opt_file'] is not None:
-        if fexists(pargs['opt_file']):
+        if exists(pargs['opt_file']):
             yargs = read_yaml(pargs['opt_file'])
         else:
             die('Failed to find options file "%s"' % pargs['opt_file'])
-    elif fexists(dargs['opt_file']):
+    elif exists(dargs['opt_file']):
         raw_yargs = read_yaml(dargs['opt_file'])
         yargs = raw_yargs if type(raw_yargs) == dict else {}
 

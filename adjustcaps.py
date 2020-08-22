@@ -14,9 +14,9 @@ from layout import get_layout, parse_layout
 from log import init_logging, printi, printw
 from math import inf
 from obj_io import read_obj, write_obj
-from os import makedirs, remove, walk
+from os import makedirs, remove
 from os.path import basename, exists, join
-from path import init_path, fwalk
+from path import walk
 from positions import resolve_cap_position, translate_to_origin
 from re import IGNORECASE, match
 from sys import argv, exit
@@ -27,7 +27,6 @@ from yaml_io import read_yaml
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
-    init_path(pargs.path)
     if not exists(pargs.output_dir):
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
@@ -189,7 +188,7 @@ def apply_cap_position(cap: dict) -> dict:
 
 
 def get_caps(cap_dir: str) -> [dict]:
-    capFiles: [str] = list(filter(lambda f: f.endswith('.obj'), fwalk(cap_dir)))
+    capFiles: [str] = list(filter(lambda f: f.endswith('.obj'), walk(cap_dir)))
     return list(
         map(lambda c: {
             'cap-name': basename(c)[:-4],

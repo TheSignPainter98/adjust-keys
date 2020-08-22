@@ -2,7 +2,6 @@
 
 from log import die, printi
 from os.path import exists
-from path import fexists, fopen
 from sys import stdin
 from yaml import dump, safe_load
 
@@ -16,15 +15,15 @@ from yaml import dump, safe_load
 def read_yaml(fname: str) -> dict:
     if fname == '-':
         printi(
-            'Reading %s from stdin, please either type something or redirect a file in here'
+            'Reading %s from stdin, please either type something or have redirected a file in here'
             % fname)
         return safe_load(stdin)
     else:
-        if fexists(fname):
-            with fopen(fname, 'Could not find file "%s"' % fname, 'Multiple files (%%d) named "%s" found: %%s' % fname, 'r', encoding='utf-8') as f:
+        if exists(fname):
+            with open(fname, 'r', encoding='utf-8') as f:
                 return safe_load(f)
         else:
-            die('Failed to read file "%s"' % fname)
+            die('Couldn\'t find or read file "%s"' % fname)
 
 
 ##

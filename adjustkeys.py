@@ -14,7 +14,6 @@ from layout import get_layout, parse_layout
 from log import init_logging, printi, printw
 from os import makedirs
 from os.path import exists
-from path import init_path
 from scale import get_scale
 from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
@@ -36,7 +35,6 @@ def main(*args:[[str]]) -> dict:
 def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
-    init_path(pargs.path)
 
     if pargs.print_opts_yml:
         print('\n'.join(list(map(lambda l: '# ' + l, dump(pargs.__dict__).split('\n')[:-1]))))
