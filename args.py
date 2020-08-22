@@ -8,7 +8,7 @@ from exceptions import AdjustKeysGracefulExit
 from log import die
 from multiprocessing import cpu_count
 from os import getcwd
-from os.path import dirname, exists, join
+from os.path import abspath, dirname, exists, join, normpath
 from platform import system
 from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
@@ -21,6 +21,9 @@ description:str = 'This is a python script which generates layouts of keycaps an
 home:str = Path.home()
 progname:str = 'adjustkeys'
 install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows': join(home, 'Library', 'Application Support', 'Adjustkeys'), 'Darwin': join(home, 'AppData', 'Local', 'Adjustkeys') }[system()]
+adjustkeys_path:str = normpath(abspath(dirname(__file__)))
+if adjustkeys_path.endswith('adjustkeys'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 
 ##
 # @brief Parse commandline arguments
@@ -41,10 +44,10 @@ def parse_args(args:[str]) -> Namespace:
             'cap_unit_length': 19.05,
             'cap_x_offset': 0.525,
             'cap_y_offset': 0.525,
-            'cap_dir': 'profiles/kat/',
-            'layout_file': 'examples/layout.yml',
-            'layout_row_profile_file': 'examples/layout_row_profiles.yml',
-            #  'output_location': 'adjusted-glyphs.svg',
+            'cap_dir': join(adjustkeys_path, 'profiles/kat/'),
+            'layout_file': join(adjustkeys_path, 'examples/layout.yml'),
+            'layout_row_profile_file': join(adjustkeys_path, 'examples/layout_row_profiles.yml'),
+            #  'output_location': join(adjustkeys_path, 'adjusted-glyphs.svg',)
             'list_glyphs': False,
             'list_cap_names': False,
             'list_cap_models': False,
@@ -52,9 +55,9 @@ def parse_args(args:[str]) -> Namespace:
             'glyph_part_ignore_regex': 'cap-guide',
             'global_x_offset': 0.0,
             'global_y_offset': 0.0,
-            'profile_file': 'profiles/kat/centres.yml',
+            'profile_file': join(adjustkeys_path, 'profiles/kat/centres.yml'),
             'glyph_dir': '.',
-            'glyph_map_file': 'examples/menacing-map.yml',
+            'glyph_map_file': join(adjustkeys_path, 'examples/menacing-map.yml'),
             'nprocs': 2 * cpu_count(),
             'shrink_wrap_offset': 0.0001,
             'svg_units_per_mm': 90.0 / 25.4,
@@ -66,8 +69,7 @@ def parse_args(args:[str]) -> Namespace:
             'no_check_update': False,
             'suppress_update_checking': False,
             'homing_keys': [ 'f', 'j' ],
-            'colour_map_file': 'examples/colour-map.yml',
-            'path': ':'.join([ install_dir, getcwd() ] + ([data.filepath] if blender_available() and data.filepath else [])),
+            'colour_map_file': join(adjustkeys_path, 'examples/colour-map.yml'),
             'print_opts_yml': False,
             'show_version': False,
             'show_help': False
