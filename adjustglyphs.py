@@ -131,7 +131,6 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
         }, profile['y-offsets'].items()))
     profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
-    print('glyphs...', glyph_offsets)
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
         printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
