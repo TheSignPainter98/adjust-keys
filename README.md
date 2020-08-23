@@ -102,7 +102,6 @@ Please see the [contribution note,][contrib-note] abide by the [code of conduct]
 	2. List the order of row profiles in a file `./profiles/y/layout_row_profiles.yml`
 	3. (The annoying one) Compute the centres of the faces of the each keycap in units relative to the top left corner of the area occupied by the keycap, see [standard 1u keycap size diagram][keycap-info] for reference, and place the result in `./profiles/y/centres.yml`
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code you’ve written!
-
 Above all, please abide by the licenses of the relevant works!
 For example, the license for Gotham, a de-facto standard type family for KAT and KAM sets, would prohibit it’s inclusion in this repo.
 
@@ -113,7 +112,7 @@ The [licensing section](#author-and-acknowledgements) section below should be up
 I wrote this in Python for two reasons:
 
 1. There exists a large, well-documented Python API for Blender
-2. So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges
+2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I've written in a decent while, please if anyone's out there, look upon this as the sort of mess which can arise when records aren't a proper part of the type system (a pretty alien concept to Python).
 
 Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 My sanity would have been better-off had I instead done this in [Haskell][haskell], but I guess everyone has their regrets, eh?
@@ -130,6 +129,7 @@ All files written by contributors to this project are covered under the [GNU Les
 - The example layouts, `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
 
 Please ensure that credit is given where it is due.
+Gotta thank Swishy for suggesting that `adjustkeys` could also be a Blender extension.
 
 [blender]: https://www.blender.org
 [contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md

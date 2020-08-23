@@ -48,7 +48,7 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             # Apply current position data
             key['row'] = row
             key['col'] = col
-            key['profile-part'] = layout_row_profiles[lineInd]
+            key['profile-part'] = layout_row_profiles[min(lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
             if 'key' in key:
@@ -108,6 +108,8 @@ def parse_key(key: 'either str dict',
         ret = key_subst(ret, 'x', 'shift-x')
     if 'y' in ret:
         ret = key_subst(ret, 'y', 'shift-y')
+    if 'c' in ret:
+        ret = key_subst(ret, 'c', 'cap-colour-raw')
     if 'w' in ret:
         ret = key_subst(ret, 'w', 'width')
     else:
@@ -116,6 +118,7 @@ def parse_key(key: 'either str dict',
         ret = key_subst(ret, 'h', 'height')
     else:
         ret['height'] = 1.0
+
 
     if 'key' not in ret:
         printw("Key \"%s\" %s 'key' field, please put one in" %
