@@ -89,6 +89,11 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
             printi(cap['imported-name'])
             printi('Applying material to %s' % cap['oname'])
             if cap['cap-colour'] is not None:
+                if cap['cap-colour'] not in colourMaterials:
+                    colourStr:str = cap['cap-colour']
+                    colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+                    colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
+                    colourMaterials[colourStr]['material'].diffuse_color = colour
                 cap['imported-object'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
                 cap['imported-object'].active_material = colourMaterials[cap['cap-colour']]['material']
             printi('Deleting file "%s"' % cap['oname'])
@@ -149,6 +154,9 @@ def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
 
 def apply_colour(cap:dict, colour_map:[dict]) -> dict:
     cap_name:str = cap['key']
+    if 'cap-colour-raw' in cap:
+        cap['cap-colour'] = cap['cap-colour-raw']
+        return cap
     for mapping in colour_map:
         if any(list(map(lambda r: match('^' + r + '$', cap_name, IGNORECASE) is not None, mapping['keys']))):
             cap['cap-colour'] = mapping['name']
