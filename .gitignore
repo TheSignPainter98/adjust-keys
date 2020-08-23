@@ -20,3 +20,4 @@ ChangeLog.md
 *.pdf
 *.xcf
 *opts.yml
+adjustkeys_addon.py

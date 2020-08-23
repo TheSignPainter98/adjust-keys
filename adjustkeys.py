@@ -94,3 +94,8 @@ if __name__ == '__main__':
         exit(adjustkeys(argv) is None)
     except KeyboardInterrupt:
         exit(1)
+    except AdjustKeysGracefulExit:
+        exit(0)
+    except AdjustKeysException as akex:
+        print(argv[0] + ':', akex)
+        exit(1)
