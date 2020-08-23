@@ -1,10 +1,17 @@
 # Copyright (C) Edward Jones
 
 from argparse import ArgumentParser, Namespace
+from blender_available import blender_available
+if blender_available():
+    from bpy import data
+from exceptions import AdjustKeysGracefulExit
+from log import die
 from functools import reduce
-from log import die, printe
 from multiprocessing import cpu_count
-from os.path import exists
+from os import getcwd
+from os.path import abspath, dirname, exists, join, normpath
+from platform import system
+from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
 from version import version
@@ -315,6 +322,14 @@ args: [dict] = [{
     'default': 'adjustedkeys',
     'type': str
 }, {
+    'dest': 'print_opts_yml',
+    'short': '-#',
+    'long': '--print-opts-yml',
+    'action': 'store_true',
+    'help': 'Print the current options values in the YAML format for configuration purposes and exit',
+    'default': False,
+    'type': bool
+}, {
     'dest': 'profile_file',
     'short': '-C',
     'long': '--centres',
@@ -369,12 +384,24 @@ args: [dict] = [{
     'type': int,
     'choices': [0, 1, 2]
 }, {
+    'dest': 'show_version',
     'short': '-V',
     'long': '--version',
     'action': 'version',
     'version': version,
+    'help': 'Show current version and exit',
+    'default': False,
+    'type': bool
+}, {
+    'dest': 'show_help',
+    'short': '-h',
+    'long': '--help',
+    'action': 'help',
+    'help': 'Print help message and exit',
+    'default': False,
     'type': bool
 }]
+
 arg_dict: dict = {a['dest']: a for a in args if 'dest' in a}
 configurable_args: [dict] = list(
     sorted(filter(lambda a: 'dest' in a and 'label' in a, args),
@@ -382,16 +409,22 @@ configurable_args: [dict] = list(
            ('choices' in a, str(a['type']), a['str-type']
             if 'str-type' in a else 'raw', a['label'])))
 
+home:str = Path.home()
+progname:str = 'adjustkeys'
+install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows': join(home, 'Library', 'Application Support', 'Adjustkeys'), 'Darwin': join(home, 'AppData', 'Local', 'Adjustkeys') }[system()]
+adjustkeys_path:str = normpath(abspath(dirname(__file__)))
+if adjustkeys_path.endswith('adjustkeys'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 
 ##
 # @brief Parse commandline arguments
-# If an error occurs, the program immediately exits.
+# If an error occurs, the an exception is raised
 #
 # @param args:[str] A list of commandline arguments, including argv[0], the program name
 #
 # @return A namespace of options
 def parse_args(iargs: tuple) -> Namespace:
-    ap: ArgumentParser = ArgumentParser(description=description)
+    ap: ArgumentParser = ArgumentParser(description=description, add_help=False)
 
     # Generate the argument parser
     for arg in args:
@@ -419,10 +452,10 @@ def parse_args(iargs: tuple) -> Namespace:
         if exists(pargs['opt_file']):
             yargs = read_yaml(pargs['opt_file'])
         else:
-            printe('Failed to find options file %s' % pargs['opt_file'])
-            exit(1)
+            die('Failed to find options file "%s"' % pargs['opt_file'])
     elif exists(default_opts_file):
-        yargs = read_yaml(default_opts_file)
+        raw_yargs = read_yaml(default_opts_file)
+        yargs = raw_yargs if type(raw_yargs) == dict else {}
 
     dargs = { a['dest']: a['default'] for a in args if 'dest' in a }
     rargs: dict = dict_union_ignore_none(dict_union_ignore_none(dargs, yargs), pargs)
@@ -431,18 +464,25 @@ def parse_args(iargs: tuple) -> Namespace:
     if checkResult is not None:
         ap.print_usage()
         die(checkResult)
-    return Namespace(**rargs)
+
+    npargs:Namespace = Namespace(**rargs)
+    if npargs.show_version:
+        ap.print_version()
+        raise AdjustKeysGracefulExit()
+    elif npargs.show_help:
+        ap.print_help()
+        raise AdjustKeysGracefulExit()
+    return npargs
 
 
-def check_args(args: dict) -> bool:
+def check_args(args: dict) -> 'Maybe str':
     items: [[str, object]] = args.items()
-    if all(map(lambda a: type(a[1]) == arg_dict[a[0]]['type'], items)) and all(
-        map(
-            lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]]
-            ['choices'], items)):
-            wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: type(a[1]) != arg_dict[a[0]]['type'], items)))
-            wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(arg_dict[a[0]]['choices']), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
-    return None
+    if all(map(lambda a: type(a[1]) == arg_dict[a[0]]['type'], items)) and all(map( lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]] ['choices'], items)):
+        return None
+    wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: type(a[1]) != arg_dict[a[0]]['type'], items)))
+    wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(arg_dict[a[0]]['choices']), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
+
+    return '\n'.join(wrong_types + wrong_choices)
 
 
 def dict_union_ignore_none(a: dict, b: dict) -> dict:

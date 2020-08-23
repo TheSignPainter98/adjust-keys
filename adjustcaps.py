@@ -14,8 +14,9 @@ from layout import get_layout, parse_layout
 from log import init_logging, printi, printw
 from math import inf
 from obj_io import read_obj, write_obj
-from os import makedirs, remove, walk
+from os import makedirs, remove
 from os.path import basename, exists, join
+from path import walk
 from positions import resolve_cap_position, translate_to_origin
 from re import IGNORECASE, match
 from sys import argv, exit
@@ -83,7 +84,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
             objectsPreSingleImport:[str] = data.objects.keys()
             ops.import_scene.obj(filepath=cap['oname'], axis_up='Z', axis_forward='Y')
             objectsPostSingleImport:[str] = data.objects.keys()
-            cap['imported-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport))
+            cap['imported-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap['oname'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap['oname'])
             cap['imported-object'] = context.scene.objects[cap['imported-name']]
             printi(cap['imported-name'])
             printi('Applying material to %s' % cap['oname'])
@@ -116,7 +117,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
                 0].data.name = 'capmodel'
             objectsPostRename: [str] = data.objects.keys()
             importedModelName = get_only(
-                list_diff(objectsPostRename, objectsPreRename))
+                    list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
             printi('Keycap model renamed to "%s"' % importedModelName)
         return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
     else:
@@ -187,11 +188,7 @@ def apply_cap_position(cap: dict) -> dict:
 
 
 def get_caps(cap_dir: str) -> [dict]:
-    capFiles: [str] = []
-    for (root, _, fnames) in walk(cap_dir):
-        capFiles += list(
-            map(lambda f: join(root, f),
-                list(filter(lambda f: f.endswith('.obj'), fnames))))
+    capFiles: [str] = list(filter(lambda f: f.endswith('.obj'), walk(cap_dir)))
     return list(
         map(lambda c: {
             'cap-name': basename(c)[:-4],

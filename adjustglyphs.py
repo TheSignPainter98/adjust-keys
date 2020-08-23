@@ -10,8 +10,9 @@ from functools import reduce
 from layout import get_layout, parse_layout
 from log import die, init_logging, printi, printw
 from glyphinf import glyph_inf
-from os import remove, walk
+from os import remove
 from os.path import exists, join
+from path import walk
 from positions import resolve_glyph_positions
 from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
@@ -176,11 +177,7 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> di
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
         die('Directory "%s" doesn\'t exist' % dname)
-    svgs: [str] = []
-    for (root, _, fnames) in walk(dname):
-        svgs += list(
-            map(lambda f: join(root, f),
-                list(filter(lambda f: f.endswith('.svg'), fnames))))
+    svgs: [str] = list(filter(lambda f: f.endswith('.svg'), walk(dname)))
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs

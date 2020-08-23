@@ -33,8 +33,8 @@ You’ll need a working installation of [`python3`][python] and its package mana
 	- If python complains of a missing module, install missing dependencies by calling `pip3 install -r requirements.txt`
 3. Configure the command-line arguments (see output with `-h` from step 2) and adjust data files appropriately (see [custom setup](#custom-setup))
 4. Run the code—replace `ARGS` with what you found in step 3 in one of the following methods of running the script:
-	- Run direct from the command-line _with_ Blender by pasting `blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')"`
-	- Run from GUI _within_ Blender by opening a Python console and pasting `import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustkeys')); import adjustkeys; adjustkeys.main('ARGS')`
+	- Run from GUI _within_ Blender by opening a Python console and pasting `import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()`
+	- Run direct from the command-line _through_ Blender by pasting `blender --python-expr "import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()"`
 	- Run from the command-line _without_ blender as in step 2 before manually importing the files left on disk
 5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a complete layout)
 6. Enjoy free time
@@ -47,7 +47,7 @@ Assuming the zip is in `Downloads`, to generate a standard exposé of keycap mod
 ```bash
 cd Downloads
 unzip adjust-keycaps.zip
-blender --python-expr "import bpy; import os.path; import sys; sys.path.append(os.path.join(os.path.basename(bpy.data.filepath), 'adjustcaps')); import adjustcaps; adjustcaps.main('-v3')"
+blender --python-expr "import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()"
 ```
 
 Perhaps while it’s running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
