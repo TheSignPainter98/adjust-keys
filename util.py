@@ -145,7 +145,7 @@ def safe_get(a: [object], i: object) -> object:
 
 
 def flatten_list(lst:list) -> list:
-    if type(lst) == str:
+    if type(lst) != list and type(lst) != tuple:
         return [lst]
     else:
         return list(reduce(concat, map(flatten_list, lst), []))

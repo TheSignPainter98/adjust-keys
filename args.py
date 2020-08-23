@@ -20,6 +20,9 @@ from yaml_io import read_yaml, write_yaml
 description: str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 
 # Arguments
+adjustkeys_path:str = normpath(abspath(dirname(__file__)))
+if adjustkeys_path.endswith('adjustkeys'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'cap_dir',
@@ -28,7 +31,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the keycap obj files',
     'metavar': 'file',
-    'default': 'profiles/kat/',
+    'default': join(adjustkeys_path, 'profiles/kat/'),
     'label': 'Keycap model folder',
     'type': str,
     'str-type': 'dir'
@@ -76,7 +79,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the location of the colour map file',
     'metavar': 'file',
-    'default': './examples/colour-map.yml',
+    'default': join(adjustkeys_path, './examples/colour-map.yml'),
     'label': 'Colour map file',
     'type': str,
     'str-type': 'file'
@@ -119,7 +122,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the svg glyphs',
     'metavar': 'file',
-    'default': './',
+    'default': join(adjustkeys_path, './'),
     'label': 'Glyph folder',
     'type': str,
     'str-type': 'dir'
@@ -131,7 +134,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from glyphs to the key ids they will appear upon',
     'metavar': 'file',
-    'default': 'examples/menacing-map.yml',
+    'default': join(adjustkeys_path, 'examples/menacing-map.yml'),
     'label': 'Glyph-keycap mapping file',
     'type': str,
     'str-type': 'file'
@@ -199,7 +202,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the file containing the layout to use',
     'metavar': 'file',
-    'default': 'examples/layout.yml',
+    'default': join(adjustkeys_path, 'examples/layout.yml'),
     'label': 'KLE layout JSON file',
     'type': str,
     'str-type': 'file'
@@ -211,7 +214,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from rows of the layout to their profile row',
     'metavar': 'file',
-    'default': 'examples/layout_row_profiles.yml',
+    'default': join(adjustkeys_path, 'examples/layout_row_profiles.yml'),
     'label': 'Layout row-profile list file',
     'type': str,
     'str-type': 'file'
@@ -309,7 +312,7 @@ args: [dict] = [{
     'help':
     'Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes',
     'metavar': 'dir',
-    'default': './',
+    'default': join(adjustkeys_path, './'),
     'type': str,
     'str-type': 'dir'
 }, {
@@ -336,7 +339,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the profile-centres YAML file to use',
     'metavar': 'file',
-    'default': 'profiles/kat/centres.yml',
+    'default': join(adjustkeys_path, 'profiles/kat/centres.yml'),
     'label': 'Keycap profile centre file',
     'type': str,
     'str-type': 'file'
@@ -412,9 +415,6 @@ configurable_args: [dict] = list(
 home:str = Path.home()
 progname:str = 'adjustkeys'
 install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows': join(home, 'Library', 'Application Support', 'Adjustkeys'), 'Darwin': join(home, 'AppData', 'Local', 'Adjustkeys') }[system()]
-adjustkeys_path:str = normpath(abspath(dirname(__file__)))
-if adjustkeys_path.endswith('adjustkeys'):
-    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 
 ##
 # @brief Parse commandline arguments
@@ -440,10 +440,10 @@ def parse_args(iargs: tuple) -> Namespace:
 
     # Sanitise and obtain parsed arguments
     pargs: dict
-    if type(iargs) == tuple and all(map(lambda a: type(a) == dict, iargs)):
-        pargs = dict(reduce(dict_union, iargs, {}))
+    iargs = sanitise_args('adjustglyphs', iargs)
+    if type(iargs) == dict:
+        pargs = iargs
     else:
-        iargs = sanitise_args('adjustglyphs', iargs)
         pargs: dict = ap.parse_args(iargs[1:]).__dict__
 
     # Obtain yaml arguments

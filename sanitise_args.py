@@ -3,7 +3,7 @@
 from functools import reduce
 from log import die
 from sys import argv
-from util import concat, flatten_list
+from util import concat, dict_union, flatten_list
 
 
 def sanitise_args(pname: str, args) -> list:
@@ -15,6 +15,9 @@ def sanitise_args(pname: str, args) -> list:
     args = flatten_list(args)
     if type(args) == list and all(map(lambda a: type(a) == str, args)):
         args = list(reduce(concat, map(args_from_str, args), []))
+    elif type(args) == list and all(map(lambda a: type(a) == dict, args)):
+        # If dictionaries, just unite them and return that, they cannot be further sanitised (we ignore petty issues such as the existence of files here :P)
+        return dict(reduce(dict_union, args, {}))
     elif type(args) == str:
         args = args_from_str(args)
     else:
