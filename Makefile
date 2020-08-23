@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(wildcard profiles/kat/*.obj profiles/kat/*.yml) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
+DIST_CONTENT = adjustkeys $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 
 all: adjustkeys
 .PHONY: all
@@ -68,11 +68,14 @@ ChangeLog.md: change-log.sh change-log-format.awk
 adjustkeys_addon.py: adjustkeys_addon.py.in args.py propgen.py
 	./propgen.py < $< > $@
 
+profiles/%/centres.yml: profiles/%/centres.csv centres.yml.in centres.awk
+	(awk -F, -f centres.awk | m4 -P - centres.yml.in) < $< > $@
+
 %.py:
 	@# Do nothing
-profiles/kat/%.yml %.yml:
+%.yml:
 	@# Do nothing
-profiles/kat/%.obj:
+profiles/%/%.obj:
 	@# Do nothing
 examples/%:
 	@# Do nothing
@@ -85,5 +88,5 @@ opts-header.txt:
 
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf
+	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml)
 .PHONY: clean
