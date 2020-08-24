@@ -1,8 +1,25 @@
 #!/usr/bin/python3
 
-from args import configurable_args
+from args import configurable_args, op_args
 from math import ceil, log10
 from sys import stdin
+from util import rem
+
+def main() -> None:
+    props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
+    ops:[dict] = list(sorted(map(op, op_args), key=lambda op: op['label']))
+    file:str = stdin.read()
+
+    replacements:dict = {
+        'KCZA_CUSTOM_PROPERTIES': props,
+        'KCZA_CUSTOM_OPERATORS': '\n\n'.join(list(map(lambda op: op['src'], ops))),
+        'KCZA_CUSTOM_OPERATOR_HEADERS': ', '.join(list(map(lambda op: str(rem(op, 'src')), ops))),
+        'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops)))
+    }
+
+    for p in replacements.items():
+        file = file.replace(p[0], p[1])
+    print(file)
 
 def prop(a:dict) -> str:
     atype:type = a['type']
@@ -41,9 +58,37 @@ def prop(a:dict) -> str:
         else:
             return f"StringProperty(name={label}, description={description}, default={default})"
 
+def op(arg:dict) -> dict:
+    opName:str = op_name(arg['dest'])
+    opIdName:str = 'object.' + opName.lower()
+    opIdLabel:str = arg['label']
+    return {
+        'name': opName,
+        'icon': arg['icon'] if 'icon' in arg else 'SCRIPT',
+        'idname': opIdName,
+        'label': arg['label'],
+        'src': '\n'.join([
+            'class %s(Operator):' % opName,
+            '    ' + '\n    '.join([
+                "bl_idname = '%s'" % opIdName,
+                "bl_label = '%s'" % arg['label'],
+                '',
+                'def execute(self, context):',
+                '    ' + '\n        '.join([
+                    "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
+                    'akargs:dict = get_args_from_ui(context)',
+                    "print('=' * 80)",
+                    "adjustkeys(akargs, { '%s': '%s' })" % (arg['dest'], arg['short']),
+                    "print('=' * 80)",
+                    "return {'FINISHED'}"
+                ])
+            ])
+        ])
+    }
 
-def ident(x:object) -> object:
-    return x
-props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
+def op_name(dest:str) -> str:
+    return 'akminiop' + dest.title().replace('_', '')
 
-print(stdin.read().replace('KCZA_CUSTOM_PROPERTIES', props))
+
+if __name__ == '__main__':
+    main()

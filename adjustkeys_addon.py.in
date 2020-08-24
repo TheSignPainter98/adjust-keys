@@ -19,7 +19,7 @@ if 'bpy' in locals():
 
 from bpy.utils import register_class, unregister_class
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Panel, Operator, PropertyGroup, Scene
+from bpy.types import Context, Panel, Operator, PropertyGroup, Scene
 from inspect import getmembers
 from os.path import dirname
 from sys import path
@@ -43,6 +43,8 @@ def sanitise_choice_args(kv:tuple) -> tuple:
         v = v.lower().replace('_', '-')
     return (k,v)
 
+def get_args_from_ui(context:Context) -> dict:
+    return dict(map(sanitise_choice_args, filter(lambda m: m[0] in configurable_arg_dests, getmembers(context.scene.adjustkeys_custom_props))))
 
 class AdjustKeysOperator(Operator):
     bl_idname = 'object.adjustkeys'
@@ -50,9 +52,14 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
-        akargs:dict = dict(map(sanitise_choice_args, filter(lambda m: m[0] in configurable_arg_dests, getmembers(context.scene.adjustkeys_custom_props))))
+        akargs:dict = get_args_from_ui(context)
         adjustkeys(akargs)
         return {'FINISHED'}
+
+KCZA_CUSTOM_OPERATORS
+
+generatedOperators:[dict] = [ KCZA_CUSTOM_OPERATOR_HEADERS ]
+generatedOperatorClasses:[type] = [ KCZA_CUSTOM_OPERATOR_TYPES ]
 
 class KCZA_PT_AdjustKeysPanel(Panel):
     ''''''
@@ -67,21 +74,28 @@ class KCZA_PT_AdjustKeysPanel(Panel):
         layout = self.layout
         col = layout.column()
         col.operator('object.adjustkeys', text='Place caps and glyphs', icon='MOD_MESHDEFORM')
+        for op in generatedOperators:
+            col.operator(op['idname'], text=op['label'], icon=op['icon'])
         for carg in configurable_args:
             row = layout.row()
             row.prop(context.scene.adjustkeys_custom_props, carg['dest'])
 
+classes:[type] = [
+    KCZA_PT_AdjustKeysPanel,
+    AdjustKeysOperator
+] + generatedOperatorClasses
+
 def register():
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
-    register_class(KCZA_PT_AdjustKeysPanel)
-    register_class(AdjustKeysOperator)
+    for cls in classes:
+        register_class(cls)
 
 def unregister():
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
-    unregister_class(KCZA_PT_AdjustKeysPanel)
-    unregister_class(AdjustKeysOperator)
+    for cls in classes:
+        unregister_class(cls)
 
 if __name__ == '__main__':
     register()

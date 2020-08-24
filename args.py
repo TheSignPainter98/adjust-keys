@@ -226,7 +226,9 @@ args: [dict] = [{
     'help': 'Output a list of known keycap names read form the input files',
     'default': False,
     'label': 'List keycap model names',
-    'type': bool
+    'type': bool,
+    'label': 'Print found keycap models',
+    'op': True
 }, {
     'dest': 'list_cap_names',
     'short': '-Sn',
@@ -235,7 +237,9 @@ args: [dict] = [{
     'help': 'Output a list of known keycap names read form the input files',
     'default': False,
     'label': 'List keycap mapping-names',
-    'type': bool
+    'type': bool,
+    'label': 'Print known keycap labels',
+    'op': True
 }, {
     'dest': 'list_glyphs',
     'short': '-Sg',
@@ -244,7 +248,9 @@ args: [dict] = [{
     'help': 'Output a list of known glyphs read from the input files',
     'default': False,
     'label': 'List found glyph names',
-    'type': bool
+    'type': bool,
+    'label': 'Print known glyph names',
+    'op': True
 }, {
     'dest': 'no_adjust_caps',
     'short': '-Nc',
@@ -331,7 +337,9 @@ args: [dict] = [{
     'action': 'store_true',
     'help': 'Print the current options values in the YAML format for configuration purposes and exit',
     'default': False,
-    'type': bool
+    'type': bool,
+    'label': 'Print opts.yml',
+    'op': True
 }, {
     'dest': 'profile_file',
     'short': '-C',
@@ -392,9 +400,11 @@ args: [dict] = [{
     'long': '--version',
     'action': 'version',
     'version': version,
-    'help': 'Show current version and exit',
+    'help': 'Print current version and exit',
     'default': False,
-    'type': bool
+    'type': bool,
+    'label': 'Print version',
+    'op': True
 }, {
     'dest': 'show_help',
     'short': '-h',
@@ -407,10 +417,11 @@ args: [dict] = [{
 
 arg_dict: dict = {a['dest']: a for a in args if 'dest' in a}
 configurable_args: [dict] = list(
-    sorted(filter(lambda a: 'dest' in a and 'label' in a, args),
+    sorted(filter(lambda a: 'dest' in a and 'label' in a and 'op' not in a, args),
            key=lambda a:
            ('choices' in a, str(a['type']), a['str-type']
             if 'str-type' in a else 'raw', a['label'])))
+op_args:[dict] = list(filter(lambda a: 'dest' in a and 'label' in a and 'op' in a and a['op'], args))
 
 home:str = Path.home()
 progname:str = 'adjustkeys'
