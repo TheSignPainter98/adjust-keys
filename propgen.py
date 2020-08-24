@@ -7,7 +7,7 @@ from util import rem
 
 def main() -> None:
     props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
-    ops:[dict] = list(sorted(map(op, op_args), key=lambda op: op['label']))
+    ops:[dict] = list(sorted(map(op, op_args), key=lambda op: (op['icon'], op['label'])))
     file:str = stdin.read()
 
     replacements:dict = {
