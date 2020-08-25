@@ -11,7 +11,7 @@ from args import parse_args, Namespace
 from exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from glyphinf import glyph_name
 from layout import get_layout, parse_layout
-from log import init_logging, printi, printw
+from log import die, init_logging, printi, printw
 from os import makedirs
 from os.path import exists
 from scale import get_scale
@@ -65,12 +65,14 @@ def adjustkeys(*args: [[str]]) -> dict:
         print('\n'.join(list(map(lambda kc: kc[0] + ' @ ' + kc[1], knownCaps))))
         return 0
 
+    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+
+    if not blender_available():
+        die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
     if not exists(pargs.output_dir):
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
-
-    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
 
     # Adjust model positions
     model_data:dict = {}
@@ -83,7 +85,7 @@ def adjustkeys(*args: [[str]]) -> dict:
         glyph_data = adjust_glyphs(layout, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
-    if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs and blender_available():
+    if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:
         shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], pargs.cap_unit_length, pargs.shrink_wrap_offset)
 
     return dict_union(model_data, glyph_data)

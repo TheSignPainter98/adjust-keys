@@ -31,6 +31,9 @@ def main(*args: [[str]]) -> int:
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+    if not blender_available():
+        die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
+
     adjust_caps(layout, pargs)
 
     return 0
@@ -45,52 +48,49 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
+        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
 
     # Sequentially import the models (for thread-safety)
-    if blender_available():
-        printi('Preparing material')
-        colourMaterials:dict = { m['name'] : m for m in colour_map }
-        for m in colourMaterials.values():
-            colourStr:str = str(m['colour'])
-            colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-            m['material'] = data.materials.new(name=m['name'])
-            m['material'].diffuse_color = colour
+    printi('Preparing material')
+    colourMaterials:dict = { m['name'] : m for m in colour_map }
+    for m in colourMaterials.values():
+        colourStr:str = str(m['colour'])
+        colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+        m['material'] = data.materials.new(name=m['name'])
+        m['material'].diffuse_color = colour
 
-        # Apply materials
-        printi('Applying material colourings...')
-        for cap in caps:
-            if cap['cap-colour'] is not None:
-                if cap['cap-colour'] not in colourMaterials:
-                    colourStr:str = cap['cap-colour']
-                    colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-                    colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
-                    colourMaterials[colourStr]['material'].diffuse_color = colour
-                cap['cap-obj'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
-                cap['cap-obj'].active_material = colourMaterials[cap['cap-colour']]['material']
+    # Apply materials
+    printi('Applying material colourings...')
+    for cap in caps:
+        if cap['cap-colour'] is not None:
+            if cap['cap-colour'] not in colourMaterials:
+                colourStr:str = cap['cap-colour']
+                colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+                colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
+                colourMaterials[colourStr]['material'].diffuse_color = colour
+            cap['cap-obj'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
+            cap['cap-obj'].active_material = colourMaterials[cap['cap-colour']]['material']
 
-        importedModelName: str = None
-        importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
-        if len(importedCapObjects) != 0:
-            printi('Joining keycap models into a single object')
-            ctx: dict = context.copy()
+    importedModelName: str = None
+    importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
+    if len(importedCapObjects) != 0:
+        printi('Joining keycap models into a single object')
+        ctx: dict = context.copy()
 
-            ctx['object'] = ctx['active_object'] = importedCapObjects[0]
-            ctx['selected_objects'] = ctx[
-                'selected_editable_objects'] = importedCapObjects
-            ops.object.join(ctx)
+        ctx['object'] = ctx['active_object'] = importedCapObjects[0]
+        ctx['selected_objects'] = ctx[
+            'selected_editable_objects'] = importedCapObjects
+        ops.object.join(ctx)
 
-            printi('Renaming keycap model')
-            objectsPreRename: [str] = data.objects.keys()
-            importedCapObjects[0].name = importedCapObjects[
-                0].data.name = 'capmodel'
-            objectsPostRename: [str] = data.objects.keys()
-            importedModelName = get_only(
-                    list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
-            printi('Keycap model renamed to "%s"' % importedModelName)
-        return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
-    else:
-        return {}
+        printi('Renaming keycap model')
+        objectsPreRename: [str] = data.objects.keys()
+        importedCapObjects[0].name = importedCapObjects[
+            0].data.name = 'capmodel'
+        objectsPostRename: [str] = data.objects.keys()
+        importedModelName = get_only(
+                list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
+        printi('Keycap model renamed to "%s"' % importedModelName)
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
