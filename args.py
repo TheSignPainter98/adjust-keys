@@ -29,7 +29,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the keycap obj files',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'profiles/kat/'),
+    'default': join(adjustkeys_path, 'profiles', 'kat'),
     'label': 'Keycap model folder',
     'type': str,
     'str-type': 'dir'
@@ -77,7 +77,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the location of the colour map file',
     'metavar': 'file',
-    'default': join(adjustkeys_path, './examples/colour-map.yml'),
+    'default': join(adjustkeys_path, 'examples', 'colour-map.yml'),
     'label': 'Colour map file',
     'type': str,
     'str-type': 'file'
@@ -120,7 +120,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the svg glyphs',
     'metavar': 'file',
-    'default': join(adjustkeys_path, './'),
+    'default': adjustkeys_path,
     'label': 'Glyph folder',
     'type': str,
     'str-type': 'dir'
@@ -132,7 +132,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from glyphs to the key ids they will appear upon',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/menacing-map.yml'),
+    'default': join(adjustkeys_path, 'examples', 'menacing-map.yml'),
     'label': 'Glyph-keycap mapping file',
     'type': str,
     'str-type': 'file'
@@ -200,7 +200,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the file containing the layout to use',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/layout.yml'),
+    'default': join(adjustkeys_path, 'examples', 'layout.yml'),
     'label': 'KLE layout JSON file',
     'type': str,
     'str-type': 'file'
@@ -212,7 +212,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from rows of the layout to their profile row',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/layout_row_profiles.yml'),
+    'default': join(adjustkeys_path, 'examples', 'layout_row_profiles.yml'),
     'label': 'Layout row-profile list file',
     'type': str,
     'str-type': 'file'
@@ -316,7 +316,7 @@ args: [dict] = [{
     'help':
     'Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes',
     'metavar': 'dir',
-    'default': join(adjustkeys_path, './'),
+    'default': adjustkeys_path,
     'type': str,
     'str-type': 'dir'
 }, {
@@ -345,7 +345,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the profile-centres YAML file to use',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'profiles/kat/centres.yml'),
+    'default': join(adjustkeys_path, 'profiles', 'kat', 'centres.yml'),
     'label': 'Keycap profile centre file',
     'type': str,
     'str-type': 'file'
