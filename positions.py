@@ -2,6 +2,7 @@
 
 from log import printw
 from math import inf
+from mathutils import Matrix, Vector
 
 
 def resolve_glyph_positions(data: [dict], ulen: float, gx: float,
@@ -32,18 +33,6 @@ def resolve_cap_position(cap: dict, ulen: float, ox: float, oy: float) -> dict:
     return cap
 
 
-def translate_to_origin(data: [[str, [[str, list]]]]):
-    # Translate each group to the origin
-    for _, _, _, gd in data:
-        # Obtain minimum points in x, y and z
-        exts: [float] = [inf, -inf, inf]
-        funcs: ['[float,float] -> float'] = [min, max, min]
-        for t, d in gd:
-            if t == 'v':
-                for i in range(len(d)):
-                    exts[i] = funcs[i](exts[i], d[i])
-        # Translate by offset to origin
-        for t, d in gd:
-            if t == 'v':
-                for i in range(len(d)):
-                    d[i] -= exts[i]
+def translate_to_origin(cap_obj:object):
+    cap_obj.data.transform(Matrix.Translation(-Vector(cap_obj.bound_box[3])))
+    cap_obj.matrix_world.translation += Vector(cap_obj.bound_box[3])
