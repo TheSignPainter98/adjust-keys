@@ -2,8 +2,6 @@
 
 from argparse import ArgumentParser, Namespace
 from blender_available import blender_available
-if blender_available():
-    from bpy import data
 from exceptions import AdjustKeysGracefulExit
 from log import die
 from functools import reduce
