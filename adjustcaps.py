@@ -45,7 +45,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
+        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
 
     # Sequentially import the models (for thread-safety)
     if blender_available():
