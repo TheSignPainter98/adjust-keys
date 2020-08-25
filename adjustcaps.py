@@ -43,18 +43,6 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
 
     colour_map:[dict] = read_yaml(pargs.colour_map_file)
 
-    #  printi('Adjusting and outputting caps on %d thread%s...' %(pargs.nprocs, 's' if pargs.nprocs != 1 else ''))
-    #  if pargs.nprocs == 1:
-        #  # Run as usual, seems to help with the error reporting because reasons
-        #  for cap in caps:
-            #  handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
-    #  else:
-        #  with ThreadPoolExecutor(pargs.nprocs) as ex:
-            #  cops: ['[dict,str]->()'] = [
-                #  ex.submit(handle_cap, cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
-                #  for cap in caps
-            #  ]
-            #  wait(cops)
     printi('Adjusting keycaps...')
     for cap in caps:
         handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
