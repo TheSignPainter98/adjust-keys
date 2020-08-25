@@ -13,7 +13,7 @@ def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
     # Shrink-wrap glyphs onto the keycaps
     printi('Shrink-wrapping glyphs onto "%s"' % keycap_model_name)
     for glyph_name in glyph_names:
-        # Translate to favourable position (assuming no 3u tall keycaps
+        # Translate to favourable position (assuming no 3u tall keycaps)
         glyph:Obj = data.objects[glyph_name]
         glyph.location.z += 3.0 * cap_unit_length
 
