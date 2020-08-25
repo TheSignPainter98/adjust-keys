@@ -11,7 +11,7 @@ from args import parse_args, Namespace
 from exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from glyphinf import glyph_name
 from layout import get_layout, parse_layout
-from log import init_logging, printi, printw
+from log import die, init_logging, printi, printw
 from os import makedirs
 from os.path import exists
 from scale import get_scale
@@ -65,12 +65,14 @@ def adjustkeys(*args: [[str]]) -> dict:
         print('\n'.join(list(map(lambda kc: kc[0] + ' @ ' + kc[1], knownCaps))))
         return 0
 
+    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+
+    if not blender_available():
+        die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
     if not exists(pargs.output_dir):
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
-
-    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
 
     # Adjust model positions
     model_data:dict = {}
