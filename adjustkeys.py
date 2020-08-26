@@ -28,9 +28,6 @@ def main(*args:[[str]]) -> dict:
         return adjustkeys(args)
     except AdjustKeysGracefulExit:
         return 0
-    except AdjustKeysException as akex:
-        print(argv[0] + ':', akex)
-        return 1
 
 def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)

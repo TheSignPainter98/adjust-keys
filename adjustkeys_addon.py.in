@@ -1,14 +1,26 @@
 # Copyright (C) Edward Jones
+# Type annotations have been removed as they seem to interfere with importing into Blender. I'm sorry.
 
-bl_info:dict = {
+from importlib import reload
+from sys import path
+from os.path import dirname
+from .devtools import setup_addon_modules
+reload(devtools)
+modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
+path.append(dirname(__file__))
+from .args import configurable_args
+from .adjustkeys import main as adjustkeys
+del path[path.index(dirname(__file__))]
+
+
+bl_info = {
         'name': 'adjustkeys',
         'author': "Ed Jones",
         'version': VERSION,
         'blender': (2, 83, 0),
-        'location': 'https://www.github.com/TheSignPainter98/adjustkeys',
+        'location': 'Properties > Render Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
-        'warning': '',
-        'doc_url': '{BLENDER_MANUAL_URL}/addons/import_export/adjustkeys.html',
+        'warning': 'Adjustkeys is still in development so please play nice :P',
         'support': 'TESTING',
         'category': 'Import-Export',
     }
@@ -18,19 +30,13 @@ if 'bpy' in locals():
     if 'adjustkeys' in locals():
         importlib.reload(adjustkeys)
 
-from bpy.utils import register_class, unregister_class
+from bpy.utils import register_class, register_module, unregister_class, unregister_module
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, Panel, Operator, PropertyGroup, Scene
 from inspect import getmembers
-from os.path import dirname
-from sys import path
-path.append(dirname(__file__))
 
-from args import configurable_args
-from adjustkeys import main as adjustkeys
-
-arg_dict:dict = { a['dest']: a for a in configurable_args }
-configurable_arg_dests:[str] = list(map(lambda a: a['dest'], configurable_args))
+arg_dict = { a['dest']: a for a in configurable_args }
+configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
 assert all(map(lambda a: 'help' in a, configurable_args))
 
@@ -53,14 +59,14 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
-        akargs:dict = get_args_from_ui(context)
+        akargs = get_args_from_ui(context)
         adjustkeys(akargs)
         return {'FINISHED'}
 
 KCZA_CUSTOM_OPERATORS
 
-generatedOperators:[dict] = [ KCZA_CUSTOM_OPERATOR_HEADERS ]
-generatedOperatorClasses:[type] = [ KCZA_CUSTOM_OPERATOR_TYPES ]
+generatedOperators = [ KCZA_CUSTOM_OPERATOR_HEADERS ]
+generatedOperatorClasses = [ KCZA_CUSTOM_OPERATOR_TYPES ]
 
 class KCZA_PT_AdjustKeysPanel(Panel):
     ''''''
@@ -81,18 +87,29 @@ class KCZA_PT_AdjustKeysPanel(Panel):
             row = layout.row()
             row.prop(context.scene.adjustkeys_custom_props, carg['dest'])
 
-classes:[type] = [
+classes = [
     KCZA_PT_AdjustKeysPanel,
     AdjustKeysOperator
 ] + generatedOperatorClasses
 
+from traceback import print_exc
+
 def register():
+    try:
+        register_module(__name__)
+        print('Registered %s with %d modules' % (bl_info['name'], len(modules)))
+    except:
+        print_exc()
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
     for cls in classes:
         register_class(cls)
 
 def unregister():
+    try:
+        unregister_module(__name__)
+    except:
+        print_exc()
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
     for cls in classes:
