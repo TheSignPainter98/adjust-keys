@@ -4,17 +4,20 @@ from args import configurable_args, op_args
 from math import ceil, log10
 from sys import stdin
 from util import rem
+from version import version
 
 def main() -> None:
     props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
     ops:[dict] = list(sorted(map(op, op_args), key=lambda op: (op['icon'], op['label'])))
+    tuple_version:tuple = tuple(version[1:].split('.')) if len(version) != 0 else (0, 0, 1)
     file:str = stdin.read()
 
     replacements:dict = {
         'KCZA_CUSTOM_PROPERTIES': props,
         'KCZA_CUSTOM_OPERATORS': '\n\n'.join(list(map(lambda op: op['src'], ops))),
         'KCZA_CUSTOM_OPERATOR_HEADERS': ', '.join(list(map(lambda op: str(rem(op, 'src')), ops))),
-        'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops)))
+        'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops))),
+        'VERSION': str(tuple_version)
     }
 
     for p in replacements.items():
@@ -76,9 +79,9 @@ def op(arg:dict) -> dict:
                 'def execute(self, context):',
                 '    ' + '\n        '.join([
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
-                    'akargs:dict = get_args_from_ui(context)',
+                    'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
-                    "adjustkeys(akargs, { '%s': '%s' })" % (arg['dest'], arg['short']),
+                    "adjustkeys(akargs, { '%s': True })" % arg['dest'],
                     "print('=' * 80)",
                     "return {'FINISHED'}"
                 ])

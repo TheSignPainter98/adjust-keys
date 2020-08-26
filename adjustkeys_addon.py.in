@@ -3,6 +3,7 @@
 bl_info:dict = {
         'name': 'adjustkeys',
         'author': "Ed Jones",
+        'version': VERSION,
         'blender': (2, 83, 0),
         'location': 'https://www.github.com/TheSignPainter98/adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
