@@ -23,6 +23,7 @@ bl_info = {
         'warning': 'Adjustkeys is still in development so please play nice :P',
         'support': 'TESTING',
         'category': 'Import-Export',
+        'tracker_url': 'https://github.com/TheSignPainter98/adjust-keys/issues',
     }
 
 if 'bpy' in locals():
