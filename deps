@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 from functools import reduce
-from log import die
-from os.path import exists
-from util import concat, list_diff, safe_get
+from adjustkeys.log import die
+from os.path import exists, join, dirname
+from adjustkeys.util import concat, list_diff, safe_get
 from sys import exit, argv
 
 
@@ -15,9 +15,9 @@ def main(args: [str]) -> int:
     seen:[str] = []
     while toExplore != []:
         seen = list(set(seen + toExplore))
-        newDeps:[str] = list(set(list(reduce(concat, list(map(get_deps, toExplore)), []))))
+        newDeps:{str} = list(reduce(concat, map(get_deps, toExplore)))
         toExplore = list_diff(newDeps, seen)
-    print(' '.join(list(map(lambda d: d+'.py', list(filter(lambda d: exists(d+'.py'), seen))))))
+    print(' '.join(list(filter(exists, map(lambda d: d + '.py', seen)))))
 
     return 0
 
@@ -35,7 +35,12 @@ def get_deps(mod: str) -> [str]:
         filter(
             lambda l: safe_get(l, 0) == 'import' or safe_get(l, 2) == 'import',
             list(map(lambda l: l.split(' '), code))))
-    return list(map(lambda l: l[1], import_lines))
+    return list(map(lambda i: resolve_local(mod, i), map(lambda l: l[1], import_lines)))
+
+def resolve_local(mod:str, dep:str) -> str:
+    if not dep.startswith('.'):
+        return dep
+    return join(dirname(mod), dep[1:])
 
 
 if __name__ == '__main__':

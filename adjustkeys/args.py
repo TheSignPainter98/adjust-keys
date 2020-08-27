@@ -1,28 +1,29 @@
 # Copyright (C) Edward Jones
 
+from .blender_available import blender_available
+from .exceptions import AdjustKeysGracefulExit
+from .log import die
+from .sanitise_args import arg_inf, sanitise_args
+from .util import dict_union
+from .version import version
+from .yaml_io import read_yaml, write_yaml
 from argparse import ArgumentParser, Namespace
-from blender_available import blender_available
-if blender_available():
-    from bpy import data
-from exceptions import AdjustKeysGracefulExit
-from log import die
 from functools import reduce
 from multiprocessing import cpu_count
 from os import getcwd
 from os.path import abspath, dirname, exists, join, normpath
-from platform import system
 from pathlib import Path
-from sanitise_args import arg_inf, sanitise_args
-from util import dict_union
-from version import version
-from yaml_io import read_yaml, write_yaml
+from platform import system
+if blender_available():
+    from bpy import data
 
 description: str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 
 # Arguments
 adjustkeys_path:str = normpath(abspath(dirname(__file__)))
-if adjustkeys_path.endswith('adjustkeys'):
-    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
+adjustkeys_possible_rel_bin_path:str = join('adjustkeys-bin', 'adjustkeys')
+if adjustkeys_path.endswith(adjustkeys_possible_rel_bin_path):
+    adjustkeys_path = normpath(adjustkeys_path[:-len(adjustkeys_possible_rel_bin_path)])
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'cap_dir',
@@ -318,7 +319,7 @@ args: [dict] = [{
     'help':
     'Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes',
     'metavar': 'dir',
-    'default': join(adjustkeys_path, './'),
+    'default': adjustkeys_path,
     'type': str,
     'str-type': 'dir'
 }, {

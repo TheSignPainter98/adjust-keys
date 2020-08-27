@@ -1,6 +1,6 @@
 *.json
 __pycache__/
-adjustkeys
+adjustkeys-bin
 glyphinf
 bin*/
 *.swp

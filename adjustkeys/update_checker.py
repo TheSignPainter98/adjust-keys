@@ -1,8 +1,9 @@
 # Copyright (C) Edward Jones
 
-from args import Namespace
+from .args import Namespace
+from .log import printi, printw
+from .version import version
 from os.path import exists
-from log import printi, printw
 
 metaDataUrl:str = 'https://api.github.com/repos/TheSignPainter98/adjust-keys/releases/latest'
 updateSuppressorFile: str = '.no_adjustkeys_update'
@@ -45,7 +46,6 @@ def update_available(pargs: Namespace) -> bool:
 
 def check_update(pedanticCheck:bool) -> bool:
     from grequests import get as gget, map as gmap
-    from version import version
     from yaml import safe_load, FullLoader
     resp:Response = gmap([gget(url=metaDataUrl)])[0]
     if resp:

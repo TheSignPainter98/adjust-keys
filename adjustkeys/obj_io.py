@@ -1,9 +1,9 @@
 # Copyright (C) Edward Jones
 
+from .log import die, printi
+from .util import concat
 from functools import reduce
-from log import die, printi
 from os.path import exists
-from util import concat
 from sys import stdout
 
 # Keeps the python parser happy when looking at type annotations. It doesn't even use them so it doesn't really have a right to complain, does it?

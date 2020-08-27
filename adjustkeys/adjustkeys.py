@@ -1,26 +1,26 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from blender_available import blender_available
+from .blender_available import blender_available
 if blender_available():
     from bpy import ops
 
-from adjustcaps import adjust_caps, get_caps
-from adjustglyphs import adjust_glyphs, glyph_files
-from args import parse_args, Namespace
-from exceptions import AdjustKeysException, AdjustKeysGracefulExit
-from glyphinf import glyph_name
-from layout import get_layout, parse_layout
-from log import init_logging, printi, printw
+from .adjustcaps import adjust_caps, get_caps
+from .adjustglyphs import adjust_glyphs, glyph_files
+from .args import parse_args, Namespace
+from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
+from .glyphinf import glyph_name
+from .layout import get_layout, parse_layout
+from .log import init_logging, printi, printw
+from .scale import get_scale
+from .shrink_wrap import shrink_wrap_glyphs_to_keys
+from .update_checker import update_available
+from .util import dict_union
+from .yaml_io import read_yaml
 from os import makedirs
 from os.path import exists
-from scale import get_scale
-from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
-from update_checker import update_available
-from util import dict_union
 from yaml import dump
-from yaml_io import read_yaml
 
 
 def main(*args:[[str]]) -> dict:

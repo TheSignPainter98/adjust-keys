@@ -1,12 +1,13 @@
 #!/usr/bin/make
 
 .DEFAULT_GOAL := all
+SHELL = /usr/bin/bash
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys.py) version.py
-DIST_CONTENT = adjustkeys $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
+ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys/adjustkeys.py) adjustkeys/version.py
+DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 BLENDER_ADDON_CONTENT = $(ADJUST_KEYS_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys_addon.py devtools.py
 
-all: adjustkeys
+all: adjustkeys-bin
 .PHONY: all
 
 ifndef NO_CYTHON
@@ -15,15 +16,8 @@ define runCython
 endef
 endif
 
-define compilePython
-	$(RM) -r bin_$@/
-	$(runCython)
-	mkdir bin_$@
-	cp $^ bin_$@
-	cp bin_$@/$(@).py bin_$@/__main__.py
-	cd bin_$@/ && zip -q $@.zip $(shell echo $^ | tr ' ' '\n') __main__.py && cd ../
-	echo '#!/usr/bin/python3' | cat - bin_$@/$@.zip > $@
-	chmod 700 $@
+define mkTargetDir
+	@mkdir -p $(@D)
 endef
 
 %.1.gz: %.1
@@ -38,14 +32,14 @@ adjustkeys_yaml_manual.pdf: adjustkeys.1 man-wrap.awk yaml-usage.awk
 adjustkeys.html: adjustkeys.1
 	groff -man -Thtml < $< > $@
 
-%.1: %
+%.1: bin/%
 ifndef NO_HELP2MAN
 	(echo '.ad l' && help2man -N --no-discard-stderr ./$<) > $@
 else
 	echo 'Distributable compiled without help2man' > $@
 endif
 
-version.py:
+adjustkeys/version.py:
 	(echo '# Copyright (C) Edward Jones&version: str = "$(VERSION)"' | tr '&' '\n') > $@
 
 dist: adjust-keys.zip adjust-keys-blender-addon.zip
@@ -57,19 +51,28 @@ adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
 	# echo 'bl_info = {}' > adjust_keys_blender_addon/__init__.py
 	# echo 'from .adjustkeys_addon import bl_info' > adjust_keys_blender_addon/__init__.py
 	cp adjust_keys_blender_addon/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
-	zip $@ $(foreach file,$^,adjust_keys_blender_addon/$(file)) adjust_keys_blender_addon/__init__.py
+	zip -q -MM $@ $(foreach file,$^,adjust_keys_blender_addon/$(file)) adjust_keys_blender_addon/__init__.py
 	touch $@
 	echo $^
 
 adjust-keys.zip: $(DIST_CONTENT)
-	zip -q $@ $^
+	zip -q -MM $@ $^
 	touch $@
 
-adjustkeys: $(ADJUST_KEYS_SRCS)
-	$(compilePython)
+adjustkeys-bin: $(ADJUST_KEYS_SRCS)
+	$(RM) -r bin_$(@F)/
+	$(mkTargetDir)
+	$(runCython)
+	mkdir bin_$(@F)
+	cp --parents $^ adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)
+	cp bin_$(@F)/adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)/__main__.py
+	touch bin_$(@F)/adjustkeys/__init__.py
+	cd bin_$(@F)/ && zip -q -MM $(@F).zip $^ adjustkeys/__init__.py __main__.py && cd ../
+	echo '#!/usr/bin/python3' | cat - bin_$(@F)/$(@F).zip > $@
+	chmod 700 $@
 
-examples/opts.yml: opts-header.txt adjustkeys
-	(sed 's/^/# /' | sed 's/ $$//'&& echo && ./adjustkeys '-#' | grep -v opt_file) < $< > $@
+examples/opts.yml: opts-header.txt adjustkeys-bin
+	(sed 's/^/# /' | sed 's/ $$//'&& echo && ./adjustkeys-bin '-#' | grep -v opt_file) < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
 	(pipreqs --force --print 2>/dev/null | grep -v bpy) > $@
@@ -98,5 +101,5 @@ opts-header.txt:
 
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ adjustkeys *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/
+	$(RM) -r bin_*/ __pycache__/ bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/
 .PHONY: clean

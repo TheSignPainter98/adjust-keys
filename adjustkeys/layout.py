@@ -1,9 +1,9 @@
 # Copyright (C) Edward Jones
 
-from log import die, printi, printw
+from .log import die, printi, printw
+from .util import dict_union, key_subst, rem, safe_get
+from .yaml_io import read_yaml
 from re import match
-from util import dict_union, key_subst, rem, safe_get
-from yaml_io import read_yaml
 
 
 def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str) -> [dict]:

@@ -1,6 +1,6 @@
 # Copyright (C) Edward Jones
 
-from log import die, printi
+from .log import die, printi
 from os.path import exists
 from sys import stdin
 from yaml import dump, safe_load

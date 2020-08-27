@@ -1,6 +1,6 @@
 # Copyright (C) Edward Jones
 
-from log import printw
+from .log import printw
 from math import inf
 
 

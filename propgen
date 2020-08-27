@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-from args import configurable_args, op_args
+from adjustkeys.args import configurable_args, op_args
 from math import ceil, log10
 from sys import stdin
-from util import rem
-from version import version
+from adjustkeys.util import rem
+from adjustkeys.version import version
 
 def main() -> None:
     props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
