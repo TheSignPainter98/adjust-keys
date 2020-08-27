@@ -8,7 +8,7 @@ from .adjustkeys.devtools import setup_addon_modules
 #  reload(.adjustkeys.devtools)
 modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
 path.append(dirname(__file__))
-from .adjustkeys.args import configurable_args
+from .adjustkeys.args import arg_dict, configurable_args
 from .adjustkeys.adjustkeys import main as adjustkeys
 del path[path.index(dirname(__file__))]
 
@@ -35,6 +35,7 @@ from bpy.utils import register_class, unregister_class
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, Panel, Operator, PropertyGroup, Scene
 from inspect import getmembers
+from math import ceil, log10
 
 arg_dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
