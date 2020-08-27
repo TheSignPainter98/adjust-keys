@@ -18,13 +18,12 @@ def handle_missing_dependencies():
         binary_path_python = bpp
 
     # Get installed packages
-    pipListProc:Popen = Popen([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE, stderr=PIPE)
+    pipListProc:Popen = Popen([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE)
     o:tuple = pipListProc.communicate()
     pstdout:str = o[0].decode()
-    pstderr:str = o[1].decode()
-    if pipListProc.returncode or pstderr:
+    if pipListProc.returncode:
         from exceptions import AdjustKeysException
-        raise AdjustKeysException(pstderr)
+        raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
     installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pstdout.split('\n'))))[2:]
 
     # Get required packages
@@ -38,12 +37,10 @@ def handle_missing_dependencies():
 
     # Install any missing packages
     if missing_packages != []:
-        pipInstallProc:Popen = Popen([binary_path_python, '-m', 'pip', '-r', requirements_file], stdout=PIPE, stderr=PIPE)
-        o:tuple = pipInstallProc.communicate()
-        pstdout2:str = o[0].decode()
-        pstderr2:str = o[1].decode()
-        if pipInstallProc.returncode or pstderr2:
+        pipInstallProc:Popen = Popen([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
+        pipInstallProc.communicate()
+        if pipInstallProc.returncode:
             from exceptions import AdjustKeysException
-            raise AdjustKeysException(pstderr2)
+            raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
         print('Successfully installed adjustkeys dependencies')
 
