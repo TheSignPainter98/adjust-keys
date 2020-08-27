@@ -34,7 +34,7 @@ def adjustkeys(*args: [[str]]) -> dict:
     init_logging(pargs.verbosity)
 
     if pargs.print_opts_yml:
-        print('\n'.join(list(map(lambda l: '# ' + l, dump(pargs.__dict__).split('\n')[:-1]))))
+        print(dump(pargs.__dict__)[:-1])
         return {}
 
     if update_available(pargs):

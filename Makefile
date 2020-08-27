@@ -70,7 +70,7 @@ adjustkeys-bin: $(ADJUST_KEYS_SRCS)
 	chmod 700 $@
 
 examples/opts.yml: opts-header.txt adjustkeys-bin
-	(sed 's/^/# /' | sed 's/ $$//'&& echo && ./adjustkeys-bin '-#' | grep -v opt_file) < $< > $@
+	((cat && ./adjustkeys-bin '-#' && sed 's/^/# /') | sed 's/ $$//' | grep -v opt_file) < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
 	(pipreqs --force --print 2>/dev/null | grep -v bpy) > $@
