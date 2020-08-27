@@ -480,7 +480,7 @@ def parse_args(iargs: tuple) -> Namespace:
 
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_version:
-        ap.print_version()
+        print(version)
         raise AdjustKeysGracefulExit()
     elif npargs.show_help:
         ap.print_help()
