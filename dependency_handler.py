@@ -1,6 +1,14 @@
 # Copyright (C) Edward Jones
 
+have_run_dependency_handler:bool = False
+
 def handle_missing_dependencies():
+    # Don't run the dependency handler multiple times in the same session
+    global have_run_dependency_handler
+    if have_run_dependency_handler:
+        return
+    have_run_dependency_handler = True
+
     # Get dependency list
     from importlib.util import find_spec
     from os.path import exists, join
@@ -43,4 +51,3 @@ def handle_missing_dependencies():
             from exceptions import AdjustKeysException
             raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
         print('Successfully installed adjustkeys dependencies')
-
