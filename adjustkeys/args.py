@@ -21,9 +21,10 @@ description: str = 'This is a python script which generates layouts of keycaps a
 
 # Arguments
 adjustkeys_path:str = normpath(abspath(dirname(__file__)))
-adjustkeys_possible_rel_bin_path:str = join('adjustkeys-bin', 'adjustkeys')
-if adjustkeys_path.endswith(adjustkeys_possible_rel_bin_path):
-    adjustkeys_path = normpath(adjustkeys_path[:-len(adjustkeys_possible_rel_bin_path)])
+if adjustkeys_path.endswith('adjustkeys'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
+if adjustkeys_path.endswith('adjustkeys-bin'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys-bin')])
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'cap_dir',
