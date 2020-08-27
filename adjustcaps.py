@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
 from layout import get_layout, parse_layout
-from log import init_logging, printi, printw
+from log import die, init_logging, printi, printw
 from math import inf
 from obj_io import read_obj, write_obj
 from os import makedirs, remove

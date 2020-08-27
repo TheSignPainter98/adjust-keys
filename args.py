@@ -7,8 +7,9 @@ from log import die
 from functools import reduce
 from multiprocessing import cpu_count
 from os import getcwd
-from os.path import abspath, dirname, exists, join, normpath
+from os.path import exists, join
 from platform import system
+from path import adjustkeys_path
 from pathlib import Path
 from sanitise_args import arg_inf, sanitise_args
 from util import dict_union
@@ -18,9 +19,6 @@ from yaml_io import read_yaml, write_yaml
 description: str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 
 # Arguments
-adjustkeys_path:str = normpath(abspath(dirname(__file__)))
-if adjustkeys_path.endswith('adjustkeys'):
-    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'cap_dir',

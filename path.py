@@ -1,7 +1,11 @@
 # Copyright (C) Edward Jones
 
 from os import walk as owalk
-from os.path import join
+from os.path import abspath, dirname, join, normpath
+
+adjustkeys_path:str = normpath(abspath(dirname(__file__)))
+if adjustkeys_path.endswith('adjustkeys'):
+    adjustkeys_path = normpath(adjustkeys_path[:-len('adjustkeys')])
 
 def walk(dname:str) -> [str]:
     ret:[str] = []
