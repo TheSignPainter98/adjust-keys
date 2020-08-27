@@ -32,6 +32,9 @@ def main(*args: [str]) -> int:
     init_logging(pargs.verbosity)
 
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+    if not blender_available():
+        die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
+
     svgObjNames: [str] = adjust_glyphs(layout, pargs)
 
     return 0
@@ -75,25 +78,25 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     svgObjectNames: str = None
     with open(output_location, 'w+') as f:
         print(svg, file=f)
-    if blender_available():
-        printi('Importing svg into blender')
-        objectsPreImport: [str] = data.objects.keys()
-        ops.import_curve.svg(filepath=output_location)
-        objectsPostImport: [str] = data.objects.keys()
 
-        # Rename the svg
-        svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
+    printi('Importing svg into blender')
+    objectsPreImport: [str] = data.objects.keys()
+    ops.import_curve.svg(filepath=output_location)
+    objectsPostImport: [str] = data.objects.keys()
 
-        # Apprpriately scale the objects
-        printi('Scaling glyphs')
-        for svgObjectName in svgObjectNames:
-            data.objects[svgObjectName].scale *= scale
+    # Rename the svg
+    svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
 
-        # Clean output
-        if exists(output_location):
-            printi('Deleting file "%s"' % output_location)
-            remove(output_location)
-        printi('Successfully imported svg objects')
+    # Apprpriately scale the objects
+    printi('Scaling glyphs')
+    for svgObjectName in svgObjectNames:
+        data.objects[svgObjectName].scale *= scale
+
+    # Clean output
+    if exists(output_location):
+        printi('Deleting file "%s"' % output_location)
+        remove(output_location)
+    printi('Successfully imported svg objects')
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
 

@@ -33,7 +33,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the keycap obj files',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'profiles/kat/'),
+    'default': join(adjustkeys_path, 'profiles', 'kat'),
     'label': 'Keycap model folder',
     'type': str,
     'str-type': 'dir'
@@ -81,7 +81,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the location of the colour map file',
     'metavar': 'file',
-    'default': join(adjustkeys_path, './examples/colour-map.yml'),
+    'default': join(adjustkeys_path, 'examples', 'colour-map.yml'),
     'label': 'Colour map file',
     'type': str,
     'str-type': 'file'
@@ -124,7 +124,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the svg glyphs',
     'metavar': 'file',
-    'default': join(adjustkeys_path, './'),
+    'default': adjustkeys_path,
     'label': 'Glyph folder',
     'type': str,
     'str-type': 'dir'
@@ -136,7 +136,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from glyphs to the key ids they will appear upon',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/menacing-map.yml'),
+    'default': join(adjustkeys_path, 'examples', 'menacing-map.yml'),
     'label': 'Glyph-keycap mapping file',
     'type': str,
     'str-type': 'file'
@@ -204,7 +204,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the file containing the layout to use',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/layout.yml'),
+    'default': join(adjustkeys_path, 'examples', 'layout.yml'),
     'label': 'KLE layout JSON file',
     'type': str,
     'str-type': 'file'
@@ -216,7 +216,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from rows of the layout to their profile row',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples/layout_row_profiles.yml'),
+    'default': join(adjustkeys_path, 'examples', 'layout_row_profiles.yml'),
     'label': 'Layout row-profile list file',
     'type': str,
     'str-type': 'file'
@@ -349,7 +349,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the profile-centres YAML file to use',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'profiles/kat/centres.yml'),
+    'default': join(adjustkeys_path, 'profiles', 'kat', 'centres.yml'),
     'label': 'Keycap profile centre file',
     'type': str,
     'str-type': 'file'
@@ -493,7 +493,7 @@ def check_args(args: dict) -> 'Maybe str':
     if all(map(lambda a: type(a[1]) == arg_dict[a[0]]['type'], items)) and all(map( lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]] ['choices'], items)):
         return None
     wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: type(a[1]) != arg_dict[a[0]]['type'], items)))
-    wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(arg_dict[a[0]]['choices']), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
+    wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(list(map(str, arg_dict[a[0]]['choices']))), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
 
     return '\n'.join(wrong_types + wrong_choices)
 
