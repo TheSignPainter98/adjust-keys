@@ -4,12 +4,12 @@
 from importlib import reload
 from sys import path
 from os.path import dirname
-from .devtools import setup_addon_modules
-reload(devtools)
+from .adjustkeys.devtools import setup_addon_modules
+#  reload(.adjustkeys.devtools)
 modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
 path.append(dirname(__file__))
-from .args import configurable_args
-from .adjustkeys import main as adjustkeys
+from .adjustkeys.args import configurable_args
+from .adjustkeys.adjustkeys import main as adjustkeys
 del path[path.index(dirname(__file__))]
 
 
@@ -31,7 +31,7 @@ if 'bpy' in locals():
     if 'adjustkeys' in locals():
         importlib.reload(adjustkeys)
 
-from bpy.utils import register_class, register_module, unregister_class, unregister_module
+from bpy.utils import register_class, unregister_class
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import Context, Panel, Operator, PropertyGroup, Scene
 from inspect import getmembers
@@ -57,6 +57,7 @@ def get_args_from_ui(context:Context) -> dict:
 class AdjustKeysOperator(Operator):
     bl_idname = 'object.adjustkeys'
     bl_label = 'Adjustkeys operator'
+    bl_description = 'Adjust keycaps and glyphs into the locations configured by the parameters below.'
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
@@ -96,21 +97,21 @@ classes = [
 from traceback import print_exc
 
 def register():
-    try:
-        register_module(__name__)
-        print('Registered %s with %d modules' % (bl_info['name'], len(modules)))
-    except:
-        print_exc()
+    #  try:
+        #  register_module(__name__)
+        #  print('Registered %s with %d modules' % (bl_info['name'], len(modules)))
+    #  except:
+        #  print_exc()
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
     for cls in classes:
         register_class(cls)
 
 def unregister():
-    try:
-        unregister_module(__name__)
-    except:
-        print_exc()
+    #  try:
+        #  unregister_module(__name__)
+    #  except:
+        #  print_exc()
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
     for cls in classes:

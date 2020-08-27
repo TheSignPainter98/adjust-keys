@@ -75,6 +75,7 @@ def op(arg:dict) -> dict:
             '    ' + '\n    '.join([
                 "bl_idname = '%s'" % opIdName,
                 "bl_label = '%s'" % arg['label'],
+                "bl_description = '%s'" % arg['help'],
                 '',
                 'def execute(self, context):',
                 '    ' + '\n        '.join([
