@@ -21,8 +21,7 @@ from os.path import basename, exists, join
 from re import IGNORECASE, match
 from sys import argv, exit
 if blender_available():
-    from bpy import context, data, ops
-
+    from bpy import ops
 
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
@@ -40,6 +39,9 @@ def main(*args: [[str]]) -> int:
 
 
 def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
+    if blender_available():
+        from bpy import context, data
+
     # Resolve output unique output name
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file)
@@ -94,6 +96,9 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
+    if blender_available():
+        from bpy import context, data
+
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)

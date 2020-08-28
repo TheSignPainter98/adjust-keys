@@ -2,7 +2,7 @@
 
 from .blender_available import blender_available
 if blender_available():
-    from bpy import data, context, types
+    from bpy import types
 
 from .log import printi
 
@@ -10,6 +10,7 @@ from .log import printi
 def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
                                cap_unit_length: float,
                                shrink_wrap_offset: float) -> None:
+    from bpy import data
     # Shrink-wrap glyphs onto the keycaps
     printi('Shrink-wrapping glyphs onto "%s"' % keycap_model_name)
     for glyph_name in glyph_names:

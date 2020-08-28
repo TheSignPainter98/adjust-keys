@@ -18,7 +18,7 @@ from re import match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
 if blender_available():
-    from bpy import data, ops
+    from bpy import ops
 
 
 ##
@@ -41,6 +41,8 @@ def main(*args: [str]) -> int:
 
 
 def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
+    if blender_available():
+        from bpy import data
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
