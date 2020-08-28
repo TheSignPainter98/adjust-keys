@@ -2,6 +2,7 @@
 
 from .blender_available import blender_available
 from .exceptions import AdjustKeysGracefulExit
+from .lazy_import import LazyImport
 from .log import die
 from .sanitise_args import arg_inf, sanitise_args
 from .util import dict_union
@@ -15,7 +16,7 @@ from os.path import abspath, dirname, exists, join, normpath
 from pathlib import Path
 from platform import system
 if blender_available():
-    from bpy import data
+    data = LazyImport('bpy', 'data')
 
 description: str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 

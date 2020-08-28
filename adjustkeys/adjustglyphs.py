@@ -5,6 +5,7 @@ from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .glyphinf import glyph_inf
 from .layout import get_layout, parse_layout
+from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw
 from .path import walk
 from .positions import resolve_glyph_positions
@@ -19,6 +20,7 @@ from sys import argv, exit
 from xml.dom.minidom import Element, parseString
 if blender_available():
     from bpy import ops
+    data = LazyImport('bpy', 'data')
 
 
 ##
@@ -41,8 +43,6 @@ def main(*args: [str]) -> int:
 
 
 def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
-    if blender_available():
-        from bpy import data
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 

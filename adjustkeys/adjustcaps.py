@@ -5,6 +5,7 @@
 from .args import parse_args
 from .blender_available import blender_available
 from .layout import get_layout, parse_layout
+from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw
 from .obj_io import read_obj, write_obj
 from .path import walk
@@ -22,6 +23,8 @@ from re import IGNORECASE, match
 from sys import argv, exit
 if blender_available():
     from bpy import ops
+    data = LazyImport('bpy', 'data')
+    context = LazyImport('bpy', 'context')
 
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
@@ -39,9 +42,6 @@ def main(*args: [[str]]) -> int:
 
 
 def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
-    if blender_available():
-        from bpy import context, data
-
     # Resolve output unique output name
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file)
@@ -96,9 +96,6 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
-    if blender_available():
-        from bpy import context, data
-
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
