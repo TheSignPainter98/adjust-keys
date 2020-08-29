@@ -12,6 +12,8 @@ from .adjustkeys.args import arg_dict, configurable_args
 from .adjustkeys.adjustkeys import main as adjustkeys
 del path[path.index(dirname(__file__))]
 
+from .adjustkeys.dependency_handler import handle_missing_dependencies
+handle_missing_dependencies()
 
 bl_info = {
         'name': 'adjustkeys',
@@ -21,7 +23,7 @@ bl_info = {
         'location': 'Properties > Render Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
         'warning': 'Adjustkeys is still in development so please play nice :P',
-        'support': 'TESTING',
+        'support': 'COMMUNITY',
         'category': 'Import-Export',
         'tracker_url': 'https://github.com/TheSignPainter98/adjust-keys/issues',
     }

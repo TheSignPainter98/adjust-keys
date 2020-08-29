@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from .blender_available import blender_available
-if blender_available():
-    from bpy import ops
+from .dependency_handler import handle_missing_dependencies
+handle_missing_dependencies()
 
 from .adjustcaps import adjust_caps, get_caps
 from .adjustglyphs import adjust_glyphs, glyph_files
-from .args import parse_args, Namespace
+from .args import adjustkeys_path,parse_args, Namespace
+from .blender_available import blender_available
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .layout import get_layout, parse_layout
@@ -18,7 +18,7 @@ from .update_checker import update_available
 from .util import dict_union
 from .yaml_io import read_yaml
 from os import makedirs
-from os.path import exists
+from os.path import exists, join
 from sys import argv, exit
 from yaml import dump
 
@@ -86,7 +86,6 @@ def adjustkeys(*args: [[str]]) -> dict:
         shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], pargs.cap_unit_length, pargs.shrink_wrap_offset)
 
     return dict_union(model_data, glyph_data)
-
 
 if __name__ == '__main__':
     try:

@@ -13,6 +13,7 @@ all: adjustkeys-bin
 ifndef NO_CYTHON
 define runCython
 	cython3 -X language_level=3 $^
+	@$(RM) $(^:.py=.c)
 endef
 endif
 
