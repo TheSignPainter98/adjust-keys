@@ -14,7 +14,6 @@ from functools import reduce
 from multiprocessing import cpu_count
 from os import getcwd
 from os.path import exists, join
-from pathlib import Path
 from platform import system
 if blender_available():
     data = LazyImport('bpy', 'data')
@@ -122,7 +121,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the svg glyphs',
     'metavar': 'file',
-    'default': adjustkeys_path,
+    'default': join(adjustkeys_path, 'examples'),
     'label': 'Glyph folder',
     'type': str,
     'str-type': 'dir'
@@ -284,11 +283,12 @@ args: [dict] = [{
     'long': '--args',
     'action': 'store',
     'help':
-    'specify a YAML option file to be take read initial argument values from',
+    'specify a YAML option file to read initial argument values from',
     'metavar': 'file',
     'default': None,
     'type': str,
-    'str-type': 'file'
+    'str-type': 'file',
+    'label': 'YAML option file'
 }, {
     'dest': 'output_dir',
     'short': '-o',
@@ -394,9 +394,7 @@ configurable_args: [dict] = list(
             if 'str-type' in a else 'raw', a['label'])))
 op_args:[dict] = list(filter(lambda a: 'dest' in a and 'label' in a and 'op' in a and a['op'], args))
 
-home:str = Path.home()
 progname:str = 'adjustkeys'
-install_dir:str = { 'Linux': join(home, '.local', 'lib', 'adjustkeys'), 'Windows': join(home, 'Library', 'Application Support', 'Adjustkeys'), 'Darwin': join(home, 'AppData', 'Local', 'Adjustkeys') }[system()]
 
 ##
 # @brief Parse commandline arguments
@@ -427,10 +425,12 @@ def parse_args(iargs: tuple) -> Namespace:
         pargs = iargs
     else:
         pargs: dict = ap.parse_args(iargs[1:]).__dict__
+    if 'opt_file' not in pargs or pargs['opt_file'] is None:
+        pargs['opt_file'] = 'None'
 
     # Obtain yaml arguments
     yargs: dict = {}
-    if 'opt_file' in pargs and pargs['opt_file'] is not None:
+    if pargs['opt_file'] != 'None':
         if exists(pargs['opt_file']):
             yargs = read_yaml(pargs['opt_file'])
         else:

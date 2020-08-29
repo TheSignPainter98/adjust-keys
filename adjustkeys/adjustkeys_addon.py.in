@@ -20,7 +20,7 @@ bl_info = {
         'author': "Ed Jones",
         'version': VERSION,
         'blender': (2, 83, 0),
-        'location': 'Properties > Render Properties > Adjustkeys',
+        'location': 'Properties > Scene Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
         'warning': 'Adjustkeys is still in development so please play nice :P',
         'support': 'COMMUNITY',
@@ -42,11 +42,10 @@ from math import ceil, log10
 arg_dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
-assert all(map(lambda a: 'help' in a, configurable_args))
-
 class KczaCustomPropertyGroup(PropertyGroup):
-    # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by propgen.py when building
+    # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by propgen when building
     KCZA_CUSTOM_PROPERTIES
+
 
 def sanitise_choice_args(kv:tuple) -> tuple:
     (k,v) = kv
@@ -65,11 +64,15 @@ class AdjustKeysOperator(Operator):
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
         akargs = get_args_from_ui(context)
+        if akargs['opt_file'] != 'None':
+            akargs = { 'opt_file': akargs['opt_file'] }
+        print(akargs)
         adjustkeys(akargs)
         return {'FINISHED'}
 
 KCZA_CUSTOM_OPERATORS
 
+# If you're seeing CUSTOM_OPERATOR_* things, note that they get replaced by propgen when building
 generatedOperators = [ KCZA_CUSTOM_OPERATOR_HEADERS ]
 generatedOperatorClasses = [ KCZA_CUSTOM_OPERATOR_TYPES ]
 
@@ -78,9 +81,8 @@ class KCZA_PT_AdjustKeysPanel(Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_label = 'Adjustkeys'
-    bl_context = 'render'
+    bl_context = 'scene'
     bl_icon = 'MOD_MESHDEFORM'
-    #  bl_category = 'kcza'
 
     def draw(self, context):
         layout = self.layout
@@ -97,24 +99,13 @@ classes = [
     AdjustKeysOperator
 ] + generatedOperatorClasses
 
-from traceback import print_exc
-
 def register():
-    #  try:
-        #  register_module(__name__)
-        #  print('Registered %s with %d modules' % (bl_info['name'], len(modules)))
-    #  except:
-        #  print_exc()
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
     for cls in classes:
         register_class(cls)
 
 def unregister():
-    #  try:
-        #  unregister_module(__name__)
-    #  except:
-        #  print_exc()
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
     for cls in classes:

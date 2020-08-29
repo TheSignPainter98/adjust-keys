@@ -49,6 +49,7 @@ def prop(a:dict) -> str:
         maxval:float = a['max']
         return f"IntProperty(name={label}, description={description}, default={default}, min={minval}, max={maxval})"
     elif atype == str:
+        default = "d if ((d := %s) is not None) else 'None'" % default
         if 'str-type' in a:
             str_type:str = a['str-type']
             if str_type == 'file':
