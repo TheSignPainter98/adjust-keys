@@ -71,7 +71,7 @@ adjustkeys-bin: $(ADJUST_KEYS_SRCS)
 	chmod 700 $@
 
 examples/opts.yml: opts-header.txt adjustkeys-bin
-	((cat && ./adjustkeys-bin '-#' && sed 's/^/# /') | sed 's/ $$//' | grep -v opt_file) < $< > $@
+	((sed 's/^/# /' && ./adjustkeys-bin '-#') | sed 's/ $$//' | grep -v opt_file | sed 's/print_opts_yml: true/print_opts_yml: false/') < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
 	(pipreqs --force --print 2>/dev/null | grep -v bpy) > $@
@@ -101,5 +101,5 @@ opts-header.txt:
 
 
 clean:
-	$(RM) -r bin_*/ __pycache__/ bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py
+	$(RM) -r bin_*/ __pycache__/ bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
 .PHONY: clean
