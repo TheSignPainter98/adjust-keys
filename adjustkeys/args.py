@@ -72,6 +72,15 @@ args: [dict] = [{
     'soft-min': 0,
     'soft-max': 100.0
 }, {
+    'dest': 'check_update',
+    'short': '-Vu',
+    'long': '--check-updates',
+    'action': 'store_true',
+    'help': "Check for Adjustkeys updates, improves execution speed but Adjustkeys should be run at least once while update-checking to auto-install any missing python dependencies",
+    'default': False,
+    'type': bool,
+    'label': "Don't check for updates"
+},{
     'dest': 'colour_map_file',
     'short': '-c',
     'long': '--colour-map',
@@ -82,14 +91,6 @@ args: [dict] = [{
     'label': 'Colour map file',
     'type': str,
     'str-type': 'file'
-}, {
-    'dest': 'do_check_update',
-    'short': '-Vu',
-    'long': '--check-updates',
-    'action': 'store_true',
-    'help': 'Forcibly for updates',
-    'default': False,
-    'type': bool
 }, {
     'dest': 'global_x_offset',
     'short': '-X',
@@ -268,15 +269,7 @@ args: [dict] = [{
     'default': False,
     'label': "Don't produce aligned glyphs",
     'type': bool
-}, {
-    'dest': 'no_check_update',
-    'short': '-Vn',
-    'long': '--no-check-updates-version',
-    'action': 'store_true',
-    'help': 'Forcibly for updates',
-    'default': False,
-    'type': bool
-}, {
+},  {
     'dest': 'no_shrink_wrap',
     'short': '-Ns',
     'long': '--no-shrink-wrap',
@@ -350,14 +343,6 @@ args: [dict] = [{
     'soft-min': 0.0,
     'soft-max': 1.0,
 }, {
-    'dest': 'suppress_update_checking',
-    'short': '-Vs',
-    'long': '--suppress-update-checking',
-    'action': 'store_true',
-    'help': 'Forcibly for updates',
-    'default': False,
-    'type': bool
-}, {
     'dest': 'svg_units_per_mm',
     'short': '-D',
     'long': '--svg-upmm',
@@ -424,7 +409,7 @@ def parse_args(iargs: tuple) -> Namespace:
     ap: ArgumentParser = ArgumentParser(description=description, add_help=False)
 
     # Generate the argument parser
-    for arg in args:
+    for arg in list(sorted(args, key=lambda arg: arg['short'].lower())):
         ap.add_argument(
             arg['short'], arg['long'],
             **dict_union(
