@@ -1,6 +1,6 @@
 # Copyright (C) Edward Jones
 
-from exceptions import AdjustKeysException
+from .exceptions import AdjustKeysException
 from sys import argv, stderr
 
 verbosity: int = 0

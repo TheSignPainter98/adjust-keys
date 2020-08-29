@@ -10,9 +10,9 @@ def handle_missing_dependencies():
     have_run_dependency_handler = True
 
     # Get dependency list
+    from .path import adjustkeys_path
     from importlib.util import find_spec
     from os.path import exists, join
-    from path import adjustkeys_path
     requirements_file:str = join(adjustkeys_path, 'requirements.txt')
     if not exists(requirements_file):
         return
@@ -30,7 +30,7 @@ def handle_missing_dependencies():
     o:tuple = pipListProc.communicate()
     pstdout:str = o[0].decode()
     if pipListProc.returncode:
-        from exceptions import AdjustKeysException
+        from .exceptions import AdjustKeysException
         raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
     installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pstdout.split('\n'))))[2:]
 
@@ -48,6 +48,6 @@ def handle_missing_dependencies():
         pipInstallProc:Popen = Popen([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
         pipInstallProc.communicate()
         if pipInstallProc.returncode:
-            from exceptions import AdjustKeysException
+            from .exceptions import AdjustKeysException
             raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
         print('Successfully installed adjustkeys dependencies')

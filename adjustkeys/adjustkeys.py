@@ -1,29 +1,26 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from dependency_handler import handle_missing_dependencies
+from .dependency_handler import handle_missing_dependencies
 handle_missing_dependencies()
 
-from blender_available import blender_available
-if blender_available():
-    from bpy import ops
-
-from adjustcaps import adjust_caps, get_caps
-from adjustglyphs import adjust_glyphs, glyph_files
-from args import adjustkeys_path, parse_args, Namespace
-from exceptions import AdjustKeysException, AdjustKeysGracefulExit
-from glyphinf import glyph_name
-from layout import get_layout, parse_layout
-from log import die, init_logging, printi, printw
+from .adjustcaps import adjust_caps, get_caps
+from .adjustglyphs import adjust_glyphs, glyph_files
+from .args import adjustkeys_path,parse_args, Namespace
+from .blender_available import blender_available
+from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
+from .glyphinf import glyph_name
+from .layout import get_layout, parse_layout
+from .log import die, init_logging, printi, printw
+from .scale import get_scale
+from .shrink_wrap import shrink_wrap_glyphs_to_keys
+from .update_checker import update_available
+from .util import dict_union
+from .yaml_io import read_yaml
 from os import makedirs
 from os.path import exists, join
-from scale import get_scale
-from shrink_wrap import shrink_wrap_glyphs_to_keys
 from sys import argv, exit
-from update_checker import update_available
-from util import dict_union
 from yaml import dump
-from yaml_io import read_yaml
 
 
 def main(*args:[[str]]) -> dict:
@@ -31,16 +28,13 @@ def main(*args:[[str]]) -> dict:
         return adjustkeys(args)
     except AdjustKeysGracefulExit:
         return 0
-    except AdjustKeysException as akex:
-        print(argv[0] + ':', akex)
-        return 1
 
 def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
     init_logging(pargs.verbosity)
 
     if pargs.print_opts_yml:
-        print('\n'.join(list(map(lambda l: '# ' + l, dump(pargs.__dict__).split('\n')[:-1]))))
+        print(dump(pargs.__dict__)[:-1])
         return {}
 
     if update_available(pargs):

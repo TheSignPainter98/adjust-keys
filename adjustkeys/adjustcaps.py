@@ -1,28 +1,30 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from blender_available import blender_available
 
-from args import parse_args
+from .args import parse_args
+from .blender_available import blender_available
+from .layout import get_layout, parse_layout
+from .lazy_import import LazyImport
+from .log import die, init_logging, printi, printw
+from .obj_io import read_obj, write_obj
+from .path import walk
+from .positions import resolve_cap_position, translate_to_origin
+from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
+from .yaml_io import read_yaml
 from argparse import Namespace
-if blender_available():
-    from bpy import context, data, ops
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
-from layout import get_layout, parse_layout
-from log import die, init_logging, printi, printw
 from math import inf
-from obj_io import read_obj, write_obj
 from os import makedirs, remove
 from os.path import basename, exists, join
-from path import walk
-from positions import resolve_cap_position, translate_to_origin
 from re import IGNORECASE, match
 from sys import argv, exit
-from util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
-from yaml_io import read_yaml
-
+if blender_available():
+    from bpy import ops
+    data = LazyImport('bpy', 'data')
+    context = LazyImport('bpy', 'context')
 
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)

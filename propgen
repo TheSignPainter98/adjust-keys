@@ -1,20 +1,22 @@
 #!/usr/bin/python3
 
-from args import configurable_args, op_args
-from math import ceil, log10
+from adjustkeys.args import configurable_args, op_args
 from sys import stdin
-from util import rem
+from adjustkeys.util import rem
+from adjustkeys.version import version
 
 def main() -> None:
     props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
     ops:[dict] = list(sorted(map(op, op_args), key=lambda op: (op['icon'], op['label'])))
+    tuple_version:tuple = tuple(version[1:].split('.')) if len(version) != 0 else (0, 0, 1)
     file:str = stdin.read()
 
     replacements:dict = {
         'KCZA_CUSTOM_PROPERTIES': props,
         'KCZA_CUSTOM_OPERATORS': '\n\n'.join(list(map(lambda op: op['src'], ops))),
         'KCZA_CUSTOM_OPERATOR_HEADERS': ', '.join(list(map(lambda op: str(rem(op, 'src')), ops))),
-        'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops)))
+        'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops))),
+        'VERSION': str(tuple_version)
     }
 
     for p in replacements.items():
@@ -25,22 +27,22 @@ def prop(a:dict) -> str:
     atype:type = a['type']
     label:str = '"' + a['label'] + '"'
     description:str = '"' + a['help'] + '"'
-    default = a['default'] if a['type'] != str else '"' + a['default'] + '"'
+    dest:str = a['dest']
+    default = "arg_dict['%s']['default']" % dest
     if 'choices' in a:
         choices:[[str, str, str, int]] = []
         rawChoices = a['choices']
         for i in range(len(rawChoices)):
             choice = rawChoices[i]
             choices.append((choice.upper().replace('-', '_'), choice.title(), '', i))
-        default = default.upper().replace('-', '_')
+        default = default + ".upper().replace('-', '_')"
         return f'EnumProperty(items={choices}, name={label}, default={default}, description={description})'
     elif atype == bool:
         return f"BoolProperty(name={label}, description={description}, default={default})"
     elif atype == float:
         soft_min:float = a['soft-min']
         soft_max:float = a['soft-max']
-        fractional_default:float = float(a['default']) % 1.0
-        precision:int = min(5, max(1, ceil(-log10(fractional_default)) + 2 if fractional_default != 0 else 0))
+        precision:str = "min(5, max(1, ceil(-log10(arg_dict['%s']['default'])) + 2 if arg_dict['%s']['default'] != 0 else 0))" % (dest, dest)
         return f"FloatProperty(name={label}, description={description}, default={default}, soft_min={soft_min}, soft_max={soft_max}, precision={precision})"
     elif atype == int:
         minval:float = a['min']
@@ -72,13 +74,14 @@ def op(arg:dict) -> dict:
             '    ' + '\n    '.join([
                 "bl_idname = '%s'" % opIdName,
                 "bl_label = '%s'" % arg['label'],
+                "bl_description = '%s'" % arg['help'],
                 '',
                 'def execute(self, context):',
                 '    ' + '\n        '.join([
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
-                    'akargs:dict = get_args_from_ui(context)',
+                    'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
-                    "adjustkeys(akargs, { '%s': '%s' })" % (arg['dest'], arg['short']),
+                    "adjustkeys(akargs, { '%s': True })" % arg['dest'],
                     "print('=' * 80)",
                     "return {'FINISHED'}"
                 ])

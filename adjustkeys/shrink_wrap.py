@@ -1,10 +1,12 @@
 # Copyright (C) Edward Jones
 
-from blender_available import blender_available
+from .blender_available import blender_available
+from .lazy_import import LazyImport
 if blender_available():
-    from bpy import data, context, types
+    from bpy import types
+    data = LazyImport('bpy', 'data')
 
-from log import printi
+from .log import printi
 
 
 def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,

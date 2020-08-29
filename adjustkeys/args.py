@@ -1,20 +1,23 @@
 # Copyright (C) Edward Jones
 
+from .blender_available import blender_available
+from .exceptions import AdjustKeysGracefulExit
+from .lazy_import import LazyImport
+from .log import die
+from .path import adjustkeys_path
+from .sanitise_args import arg_inf, sanitise_args
+from .util import dict_union
+from .version import version
+from .yaml_io import read_yaml, write_yaml
 from argparse import ArgumentParser, Namespace
-from blender_available import blender_available
-from exceptions import AdjustKeysGracefulExit
-from log import die
 from functools import reduce
 from multiprocessing import cpu_count
 from os import getcwd
 from os.path import exists, join
-from platform import system
-from path import adjustkeys_path
 from pathlib import Path
-from sanitise_args import arg_inf, sanitise_args
-from util import dict_union
-from version import version
-from yaml_io import read_yaml, write_yaml
+from platform import system
+if blender_available():
+    data = LazyImport('bpy', 'data')
 
 description: str = 'This is a python script which generates layouts of keycaps and glyphs for (automatic) import into Blender! Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys - simply specify the layout you want using the JSON output of KLE to have the computer guide the caps into the mathematically-correct locations. This script can be used to create a single source of truth for glyph alignment on caps, so later changes and fixes can be more easily propagated.'
 
@@ -283,19 +286,6 @@ args: [dict] = [{
     'label': "Don't shrink-wrap glyphs onto keys",
     'type': bool
 }, {
-    'dest': 'nprocs',
-    'short': '-j',
-    'long': '--jobs',
-    'action': 'store',
-    'help':
-    'Specify the number of threads which are used in concurrent sections to improve performance',
-    'metavar': 'n',
-    'default': 2 * cpu_count(),
-    'label': 'CPU cores to use',
-    'type': int,
-    'min': 0,
-    'max': 4 * cpu_count()
-}, {
     'dest': 'opt_file',
     'short': '-@',
     'long': '--args',
@@ -474,7 +464,7 @@ def parse_args(iargs: tuple) -> Namespace:
 
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_version:
-        ap.print_version()
+        print(version)
         raise AdjustKeysGracefulExit()
     elif npargs.show_help:
         ap.print_help()

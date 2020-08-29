@@ -1,25 +1,26 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from blender_available import blender_available
-if blender_available():
-    from bpy import data, ops
-
-from args import parse_args, Namespace
+from .args import parse_args, Namespace
+from .blender_available import blender_available
+from .glyphinf import glyph_inf
+from .layout import get_layout, parse_layout
+from .lazy_import import LazyImport
+from .log import die, init_logging, printi, printw
+from .path import walk
+from .positions import resolve_glyph_positions
+from .scale import get_scale
+from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
+from .yaml_io import read_yaml, write_yaml
 from functools import reduce
-from layout import get_layout, parse_layout
-from log import die, init_logging, printi, printw
-from glyphinf import glyph_inf
 from os import remove
 from os.path import exists, join
-from path import walk
-from positions import resolve_glyph_positions
-from util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
 from re import match
-from scale import get_scale
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
-from yaml_io import read_yaml, write_yaml
+if blender_available():
+    from bpy import ops
+    data = LazyImport('bpy', 'data')
 
 
 ##

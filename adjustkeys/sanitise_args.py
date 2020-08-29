@@ -1,9 +1,9 @@
 # Copyright (C) Edward Jones
 
+from .log import die
+from .util import concat, dict_union, flatten_list
 from functools import reduce
-from log import die
 from sys import argv
-from util import concat, dict_union, flatten_list
 
 
 def sanitise_args(pname: str, args) -> list:

@@ -1,7 +1,7 @@
 # Copyright (C) Edward Jones
 
 from functools import reduce
-from log import die
+from .log import die
 
 
 ##
