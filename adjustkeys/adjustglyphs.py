@@ -141,8 +141,8 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
     glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
         map(lambda m: {
-            'key': m[0],
-            'glyph': m[1]
+            'key': str(m[0]),
+            'glyph': str(m[1])
         }, glyph_map.items()))
 
     key_offsets = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')

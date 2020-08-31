@@ -4,8 +4,8 @@
 SHELL = /usr/bin/bash
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys/adjustkeys.py) adjustkeys/version.py
-DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
-BLENDER_ADDON_CONTENT = $(ADJUST_KEYS_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
+DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
+BLENDER_ADDON_CONTENT = $(ADJUST_KEYS_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
 
 all: adjustkeys-bin
 .PHONY: all
@@ -48,14 +48,13 @@ dist: adjust-keys.zip adjust-keys-blender-addon.zip
 
 adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
 	mkdir -p adjust_keys_blender_addon
-	cp --parents $^ adjust_keys_blender_addon/
+	cp --parents $(foreach file,$^,"$(file)") adjust_keys_blender_addon/
 	cp adjust_keys_blender_addon/adjustkeys/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
-	zip -q -MM $@ $(foreach file,$^,adjust_keys_blender_addon/$(file)) adjust_keys_blender_addon/__init__.py
+	zip -q -MM $@ $(foreach file,$^,"adjust_keys_blender_addon/$(file)") adjust_keys_blender_addon/__init__.py
 	touch $@
-	echo $^
 
 adjust-keys.zip: $(DIST_CONTENT)
-	zip -q -MM $@ $^
+	zip -q -MM $@ $(foreach file,$^,"$(file)")
 	touch $@
 
 adjustkeys-bin: $(ADJUST_KEYS_SRCS)
@@ -78,6 +77,7 @@ requirements.txt: $(ADJUST_KEYS_SRCS)
 
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
+
 adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py propgen
 	./propgen < $< > $@
 
