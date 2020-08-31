@@ -6,7 +6,7 @@ from .args import parse_args
 from .blender_available import blender_available
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
-from .log import die, init_logging, printi, printw
+from .log import die, init_logging, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
 from .positions import move_object_origin_to_global_origin, resolve_cap_position
@@ -38,6 +38,8 @@ def main(*args: [[str]]) -> int:
         die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
 
     adjust_caps(layout, pargs)
+
+    print_warnings()
 
     return 0
 

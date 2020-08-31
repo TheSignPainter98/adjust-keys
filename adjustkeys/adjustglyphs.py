@@ -6,7 +6,7 @@ from .blender_available import blender_available
 from .glyphinf import glyph_inf
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
-from .log import die, init_logging, printi, printw
+from .log import die, init_logging, printi, printw, print_warnings
 from .path import walk
 from .positions import resolve_glyph_positions
 from .scale import get_scale
@@ -38,6 +38,8 @@ def main(*args: [str]) -> int:
         die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
 
     svgObjNames: [str] = adjust_glyphs(layout, pargs)
+
+    print_warnings()
 
     return 0
 

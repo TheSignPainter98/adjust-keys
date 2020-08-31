@@ -4,6 +4,7 @@ from .exceptions import AdjustKeysException
 from sys import argv, stderr
 
 verbosity: int = 0
+warnings:[[tuple,dict]] = []
 
 
 ##
@@ -17,6 +18,14 @@ def init_logging(verbosity_in: bool):
     global verbosity
     verbosity = verbosity_in
 
+
+##
+# @brief Print all of the stored warnings
+#
+# @return Nothing
+def print_warnings():
+    for args,kwargs in warnings:
+        print(*args, file=stderr, **kwargs)
 
 ##
 # @brief Write a message to stderr and raise an exception
@@ -61,4 +70,4 @@ def printe(*args, **kwargs):
 # @return Nothing
 def printw(*args, **kwargs):
     if verbosity >= 1:
-        print(f'{argv[0]}: WARNING:', *args, file=stderr, **kwargs)
+        warnings.append(([f'{argv[0]}: WARNING:'] + list(args), kwargs))

@@ -371,7 +371,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'Output verbosely',
     'metavar': 'int',
-    'default': 0,
+    'default': 1,
     'type': int,
     'choices': [0, 1, 2]
 }, {
