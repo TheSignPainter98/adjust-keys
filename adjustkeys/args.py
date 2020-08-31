@@ -268,7 +268,16 @@ args: [dict] = [{
     'default': False,
     'label': "Don't produce aligned glyphs",
     'type': bool
-},  {
+}, {
+    'dest': 'no_apply_colours',
+    'short': '-NC',
+    'long': '--no-apply-colours',
+    'action': 'store',
+    'help': "Don't apply colour materials to the keycaps",
+    'default': False,
+    'label': "Don't apply colours",
+    'type': bool
+}, {
     'dest': 'no_shrink_wrap',
     'short': '-Ns',
     'long': '--no-shrink-wrap',
