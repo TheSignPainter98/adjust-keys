@@ -33,6 +33,6 @@ def resolve_cap_position(cap: dict, ulen: float, ox: float, oy: float) -> dict:
     return cap
 
 
-def translate_to_origin(cap_obj:object):
-    cap_obj.data.transform(Matrix.Translation(-Vector(cap_obj.bound_box[3])))
-    cap_obj.matrix_world.translation += Vector(cap_obj.bound_box[3])
+def move_object_origin_to_global_origin(obj:object):
+    obj.data.transform(Matrix.Translation(-Vector(obj.bound_box[3])))
+    obj.matrix_world.translation += Vector(obj.bound_box[3])
