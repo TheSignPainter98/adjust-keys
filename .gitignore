@@ -4,9 +4,7 @@ adjustkeys-bin
 glyphinf
 bin*/
 *.swp
-*.svg
 *.c
-*.obj
 *.mtl
 *.zip
 temp/
@@ -23,3 +21,4 @@ ChangeLog.md
 adjustkeys_addon.py
 centres.yml
 adjust_keys_blender_addon/
+adjustedkeys*

@@ -121,7 +121,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'specify the directory containing the svg glyphs',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples'),
+    'default': join(adjustkeys_path, 'glyphs', 'red-hat-display'),
     'label': 'Glyph folder',
     'type': str,
     'str-type': 'dir'
@@ -133,7 +133,7 @@ args: [dict] = [{
     'help':
     'specify the file containing the mapping from glyphs to the key ids they will appear upon',
     'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples', 'menacing-map.yml'),
+    'default': join(adjustkeys_path, 'examples', 'ansi-example-map.yml'),
     'label': 'Glyph-keycap mapping file',
     'type': str,
     'str-type': 'file'
