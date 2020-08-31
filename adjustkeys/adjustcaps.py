@@ -45,7 +45,7 @@ def main(*args: [[str]]) -> int:
 def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file)
+    caps: [dict] = get_data(layout, pargs.cap_dir, pargs.colour_map_file, pargs.no_apply_colours)
 
     colour_map:[dict] = read_yaml(pargs.colour_map_file)
 
@@ -63,16 +63,17 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
         m['material'].diffuse_color = colour
 
     # Apply materials
-    printi('Applying material colourings...')
-    for cap in caps:
-        if cap['cap-colour'] is not None:
-            if cap['cap-colour'] not in colourMaterials:
-                colourStr:str = cap['cap-colour']
-                colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-                colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
-                colourMaterials[colourStr]['material'].diffuse_color = colour
-            cap['cap-obj'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
-            cap['cap-obj'].active_material = colourMaterials[cap['cap-colour']]['material']
+    if not pargs.no_apply_colours:
+        printi('Applying material colourings...')
+        for cap in caps:
+            if cap['cap-colour'] is not None:
+                if cap['cap-colour'] not in colourMaterials:
+                    colourStr:str = cap['cap-colour']
+                    colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+                    colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
+                    colourMaterials[colourStr]['material'].diffuse_color = colour
+                cap['cap-obj'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
+                cap['cap-obj'].active_material = colourMaterials[cap['cap-colour']]['material']
 
     importedModelName: str = None
     importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
@@ -101,7 +102,7 @@ def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
-def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
+def get_data(layout: [dict], cap_dir: str, colour_map_file:str, no_apply_colours:bool) -> [dict]:
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
@@ -134,8 +135,9 @@ def get_data(layout: [dict], cap_dir: str, colour_map_file:str) -> [dict]:
             cap_data['cap-obj'] = new_obj
             context.scene.collection.objects.link(new_obj)
 
-    colour_map:[dict] = read_yaml(colour_map_file)
-    layout_with_caps:[dict] = list(map(lambda cap: apply_colour(cap, colour_map), layout_with_caps))
+    if not no_apply_colours:
+        colour_map:[dict] = read_yaml(colour_map_file)
+        layout_with_caps = list(map(lambda cap: apply_colour(cap, colour_map), layout_with_caps))
 
     # Warn about missing models
     missing_models: [str] = list_diff(
@@ -155,7 +157,8 @@ def handle_cap(cap: dict, unit_length: float, cap_x_offset: float,
     cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
     cap = apply_cap_position(cap)
     printi('Resolving colour of cap %s' % cap['cap-name'])
-    cap = apply_colour(cap, colour_map)
+    if colour_map is not None:
+        cap = apply_colour(cap, colour_map)
 
 
 def apply_colour(cap:dict, colour_map:[dict]) -> dict:
