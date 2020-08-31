@@ -11,7 +11,7 @@ from .blender_available import blender_available
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .layout import get_layout, parse_layout
-from .log import die, init_logging, printi, printw
+from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
 from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .update_checker import update_available
@@ -28,6 +28,8 @@ def main(*args:[[str]]) -> dict:
         return adjustkeys(args)
     except AdjustKeysGracefulExit:
         return 0
+    finally:
+        print_warnings()
 
 def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
@@ -88,12 +90,15 @@ def adjustkeys(*args: [[str]]) -> dict:
     return dict_union(model_data, glyph_data)
 
 if __name__ == '__main__':
+    rc:int = 0
+    err:Exception = None
     try:
-        exit(adjustkeys(argv) is None)
+        rc = adjustkeys(argv) is None
     except KeyboardInterrupt:
-        exit(1)
+        rc = 1
     except AdjustKeysGracefulExit:
-        exit(0)
+        rc = 0
     except AdjustKeysException as akex:
         print(argv[0] + ':', akex)
-        exit(1)
+        rc = 1
+    exit(rc)
