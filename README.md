@@ -124,7 +124,7 @@ All files written by contributors to this project are covered under the [GNU Les
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
-- The typeface used in `examples/menacing.svg` is [Noto Serif JP][noto-serif-jp] which uses the [Open Font License][ofl]
+- The typeface used in `glyphs/red-hat-display.svg` is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
 - The keycap representation used in `examples/menacing.svg` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The example layouts, `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
 
@@ -144,9 +144,9 @@ Thanks to Swishy for suggesting that `adjustkeys` could benefit from also being 
 [kle-ansi-104]: https://github.com/ijprest/keyboard-layout-editor/blob/master/layouts.json
 [makefile]: https://github.com/TheSignPainter98/adjust-keys/blob/master/Makefile
 [menacing]: https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/examples/menacing.svg
-[noto-serif-jp]: https://fonts.google.com/specimen/Noto+Serif+JP
 [ofl]: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
+[red-hat-display]: https://fonts.google.com/specimen/Red+Hat+Display
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
 [zfrontier]: https://en.zfrontier.com
