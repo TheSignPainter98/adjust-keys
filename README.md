@@ -13,6 +13,27 @@ Also, command-line options can be saved and automatically read from the file `op
 
 The [python][python] API of `adjustkeys` also allows a coder to be notified of the objects it creates, thereby enabling it to form part of a larger keyboard-render build-system, should the user be that-way inclined.
 
+## Table of Contents
+
+<!-- vim-markdown-toc GFM -->
+
+* [Why Bother?](#why-bother)
+* [Usage](#usage)
+	* [Usage Through a Blender Addon (Regular)](#usage-through-a-blender-addon-regular)
+	* [Usage Through Other Scripts (Advanced)](#usage-through-other-scripts-advanced)
+* [Custom Setup](#custom-setup)
+	* [Using a custom layout](#using-a-custom-layout)
+	* [Changing keycap profiles](#changing-keycap-profiles)
+	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
+	* [Setting layout-row profiles](#setting-layout-row-profiles)
+	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
+* [Building from Source](#building-from-source)
+* [Contributing](#contributing)
+* [Gripes](#gripes)
+* [Author and Acknowledgements](#author-and-acknowledgements)
+
+<!-- vim-markdown-toc -->
+
 ## Why Bother?
 
 Alignment is important.
@@ -26,22 +47,79 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-### Blender Addon
+You’ll need a working installation of Blender, [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
+There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
 
-### Calling from other scripts
+### Usage Through a Blender Addon (Regular)
+
+You’ll need a working installation of Blender.
+
+1. Go to the [releases page][releases] and download `adjust-keys-blender-addon.zip`
+2. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded
+3. Go to _Properties > Scene Properties > Adjustkeys_ to see the menu
+4. Press _place caps and glyphs_
+5. Wait a moment, et voilà!
+
+See the [custom setup section](#custom-setup) for how to change the stock settings into your own keycap set.
+
+### Usage Through Other Scripts (Advanced)
+
+If you want to use `adjustkeys` through another python script for the purpose of automating something a script:
+
+1. Go to the [releases page][releases], download `adjust-keys.zip` and unzip it so that the `adjustkeys-bin` binary somewhere you won’t accidentally delete it
+2. Copy the path where `adjustkeys` now is (I have mine in `/home/kcza/Documents/keys/adjustkeys-bin`)
+3. In your existing Python script add the following lines, appropriately substituting the path from the previous step:
+
+```python
+from sys import path
+path.append('/path/to/adjustkeys-bin')
+from adjustkeys import main as adjustkeys
+```
+
+4. Now, you can call `adjustkeys` as necessary from your script.
+   The function takes input of either an (arbitrarily-nested) list of strings corresponding to command-line arguments, or a dictionary corresponding to the yaml arguments.
+   Both are equally expressive but dictionaries are the more standard way of passing data of the two.
+   The function returns a dictionary containing the names of the objects created during that run, and the number of warnings triggered.
+
+A complete python example is below.
+
+```python
+from sys import path
+path.append('./adjustkeys-bin')
+from adjustkeys import main as adjustkeys
+
+adjustkeys_args:dict = {
+		'glyph_dir': './my-super-cool-glyphs/',
+		'layout_row_profiles_file': 'examples/layout_row_profiles-60.yml',
+		'layout_file': './my-exotic-layout.json'
+	}
+inf:dict = adjustkeys(adjustkeys_args)
+```
+
+Assuming that the `my-super-cool-glyphs` folder is full of (super cool) glyphs, that the `adjustkeys.zip` has been extracted into the same folder as the script above (hence `examples/` is next to it) and that `my-exotic-layout.json` exists and contains a valid [KLE][kle] layout.
 
 ## Custom Setup
 
-It's a fair assumption that the user will not be contented with just re-making the examples all day—they should probably want to do something cool themselves.
-There are a few important files which are combined to make the layout you see before you; it's important that the user has some notion of what each does and what they should look like as otherwise `adjustkeys` won't be able to work.
-There's not too much to each, but some understanding should help avoid errors.
+It’s a fair assumption that the user will not be contented with just re-making the examples all day—they should probably want to do something cool themselves.
+There are a few important files which are combined to make the layout you see before you; it’s important that the user has some notion of what each does and what they should look like as otherwise `adjustkeys` won’t be able to work.
+There’s not too much to each, but some understanding should help avoid errors.
+
+They’ll be explained in this section, but as an overview, `adjustkeys` takes:
+
+- A directory containing `.obj` files each containing an individual keycap
+- A directory containing the glyphs to be placed, each in a separate `.svg` file
+- A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
+- A `yaml` file which lists the profiles of each row in order top to bottom
+- A `yaml` file which specifies the location of the centre of a key in a particular profile
+- A `yaml` file which specifies a mapping from key names to glyph names
+
 
 ### Using a custom layout
 
-This is probably the easy bit—just head on over to [KLE,][kle] configure a layout (a grid-like one like a standard 104 key ANSI layout will do, angling isn't explicitly supported just yet) then click the _Download > Download JSON._
-It's important to note that [KLE][kle] interactive editor **doesn't use JSON, it's just JSON-like**, so simply copy-pasting might not work.
+This is probably the easy bit—just head on over to [KLE,][kle] configure a layout (a grid-like one like a standard 104 key ANSI layout will do, angling isn’t explicitly supported just yet) then click the _Download > Download JSON._
+It’s important to note that [KLE][kle] interactive editor **doesn’t use JSON, it’s just JSON-like**, so simply copy-pasting might not work.
 
-Here's the first few lines of a valid file as an example:
+Here’s the first few lines of a valid file as an example:
 
 ```json
 [
@@ -61,22 +139,23 @@ Here's the first few lines of a valid file as an example:
 To change keycap profiles, you need a few things.
 (Please note that in the `profiles/kat/` folder everything is supplied for KAT-profiles keycaps.
 
-If a profile you want isn't in the repo, you'll need two things:
+If a profile you want isn’t in the repo, you’ll need two things:
 
 1. A folder containing one `obj` file for each keycap width and row combination, named as `row-width.obj`, e.g. the model `r5-1_0u.obj` would be used for a 100%-layout escape key. Note how the radix/decimal point in `1.0` is replaced with an underscore.
 	- If a homing bump is present, the `-homing` suffix is added, for example `r2-1.0u-homing.obj`
 	- Special keys have special names: `iso-enter.obj`, `num-plus.obj`, `num-enter.obj`, `stepped-caps.obj`
+	- The only vertices present in each of these files belong to the keycap model it holds, and the bottom of the cap is parallel to the x-y plane.
 2. A `yaml` file containing information on the location of the centre of a keycap as a fraction of a unit from the top left of the space it occupies (i.e. including margins)
 
 Then to point `adjustkeys` to these through the relevant for keycap models and centres file.
 
 ### Using custom glyphs / fonts
 
-To change the glyphs/images on top of the keycaps, you'll firstly need a folder full of svgs (each containing exactly one image to be applied) and a mapping from the names of the keys in your layout to the name of the file (without the svg extension) which you wish to apply to that key.
+To change the glyphs/images on top of the keycaps, you’ll firstly need a folder full of svgs (each containing exactly one image to be applied) and a mapping from the names of the keys in your layout to the name of the file (without the svg extension) which you wish to apply to that key.
 
 An example folder of glyphs is seen in `glyphs/red-hat-display/` which contains an svg for each legend in some keycap set design which uses the [Red Hat Display][red-hat-display] font.
 
-You'll need to tell `adjustkeys` where in your layout you want each legend to be placed.
+You’ll need to tell `adjustkeys` where in your layout you want each legend to be placed.
 For this you need a mapping such as that in `examples/ansi-example-map.yml`, where some of the lines are below:
 
 ```yaml
@@ -97,15 +176,18 @@ For this you need a mapping such as that in `examples/ansi-example-map.yml`, whe
 Each line is like an instruction which tells `adjustkeys` that keycap named to the _left_ of the colon is to have the svg named to the _right_ of the colon applied to it.
 The keycap names are derived from the [KLE][kle] input JSON; taken as either the text of the key or, if there is more than one symbol on it, the name of each from the top with new-lines `\n` replaced by dashes (such as `@-2` above).
 The glyph names are just the final part of the svg path without the extension—for an svg in `C:/Users/kcza/Downloads/some-glyph.svg` can be referred to simply as `some-glyph` (assuming `adjustkeys` has been told to look for glyphs in `C:/Users/kcza/Downloads/` in the first place).
-The lines don't need to be alphabetical order; they are here just for cleanliness.
+The lines don’t need to be alphabetical order; they are here just for cleanliness.
 
 If you want, you can keep a guide to represent the keycap in the svg which you can have automatically removed when adjustment is performed (this is designed to help with the trial-and-error process of getting things the right size).
 If a curve in your svg has the id `cap-guide` (by default, although the id to exclude can be different), then it will be automatically discarded when combining the svg data.
 
+For the most logical results, ensure that the value provided to the ‘unit-length’ option is the same as the height and width of a 1u-size input svg.
+(By default the unit length is 292, which is the same as the height of every svg in `glyphs/red-hat-display`.)
+
 ### Setting layout-row profiles
 
-As [KLE][kle] doesn't include any information on the profile used in each row, we must add it in ourselves.
-For simplicity, this is done in a separate file so that the user doesn't have to alter the contents of a [KLE][kle] JSON file once downloaded.
+As [KLE][kle] doesn’t include any information on the profile used in each row, we must add it in ourselves.
+For simplicity, this is done in a separate file so that the user doesn’t have to alter the contents of a [KLE][kle] JSON file once downloaded.
 The contents of a layout-row profile file is a list of profile rows to be applied in order to each row of keys represented in the [KLE][kle] file, such as the following.
 
 ```yaml
@@ -120,8 +202,8 @@ Importantly, these values will be used to construct the file-names which `adjust
 For example, the `r5` in `r5-1_0u.obj` comes from this file.
 If there are insufficient rows in the file, the last one is take to represent all subsequent rows (e.g. the bottom two rows on a Cherry set are the same, so `r1` need only be specified once.
 
-Regardless of the keycap manufacturer's choices (e.g. Cherry), the bottom row of a 100% layout should be labelled `r1`.
-This means that the row-number can only increase with greater distance from the user's wrists, and that the same data files can be used across different keycap model sets without needing to arbitrarily reverse the order.
+Regardless of the keycap manufacturer’s choices (e.g. Cherry), the bottom row of a 100% layout should be labelled `r1`.
+This means that the row-number can only increase with greater distance from the user’s wrists, and that the same data files can be used across different keycap model sets without needing to arbitrarily reverse the order.
 
 ### Setting colours (via KLE or name-matching)
 
@@ -130,7 +212,7 @@ The first way is always active and is just a matter of adjusting RGB colours thr
 
 A colour map file is a list of objects, each of which specifies a colour, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
 The file is scanned from top to bottom, so if there are two places a keycap can be matched from, then only one nearest the top of the file will be used.
-Here's an example:
+Here’s an example:
 
 ```yaml
 - name: green
@@ -147,65 +229,39 @@ Here's an example:
 
 Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.
 
-Secondly, note the quote marks—these are used to force the yaml parser to consider what's inside them as a string of letters as otherwise, the hex code `001100` would be considered a number and have the preceding zeros stripped away (leaving `1100`, which isn't good).
+Secondly, note the quote marks—these are used to force the yaml parser to consider what’s inside them as a string of letters as otherwise, the hex code `001100` would be considered a number and have the preceding zeros stripped away (leaving `1100`, which isn’t good).
 
 Finally, observe how you can also use [Python regular expressions][regex-help] to specify keycap names in more general terms.
-If you aren't too comfortable using regular expressions, `adjustkeys` takes a list of keys, so you can more simply copy the names of the keycaps you wish to colour into the appropriate `keys` list, whilst being mindful of indentation and putting the `-` character at the start of each key-name as above.
-These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of 'any character,' so `.*` is just a concise way of telling `adjustkeys` to match _anything._
-It's not essential to know regular expressions, but a few basics can make things a little more streamlined.
+If you aren’t too comfortable using regular expressions, `adjustkeys` takes a list of keys, so you can more simply copy the names of the keycaps you wish to colour into the appropriate `keys` list, whilst being mindful of indentation and putting the `-` character at the start of each key-name as above.
+These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of ‘any character,’ so `.*` is just a concise way of telling `adjustkeys` to match _anything._
+It’s not essential to know regular expressions, but a few basics can make things a little more streamlined.
 The cheatsheet and playground on [regexr][regex-playground] may be helpful.
 
 Please note that the RGB colour must be six characters long.
 
 <!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
 
-You’ll need a working installation of [`python3`][python] and its package manager, [`pip3`][pip], and a a little familiarity with the YAML syntax (although this can be easily picked up, it's designed to be relatively human-friendly).
-
-1. Go to the [releases page][releases], download and unzip the code so the `adjustkeys` binary is next to where you’ll have your `.blend` file
-2. Check everything is working—in a terminal, `cd` into the directory above then run `python3 ./adjustkeys -h` (or for macOS &amp; Linux, `./adjustkeys -h` is both equivalent and shorter)
-	- If python complains of a missing module, install missing dependencies by calling `pip3 install -r requirements.txt`
-3. Configure the command-line arguments (see output with `-h` from step 2) and adjust data files appropriately (see [custom setup](#custom-setup))
-4. Run the code—replace `ARGS` with what you found in step 3 in one of the following methods of running the script:
-	- Run from GUI _within_ Blender by opening a Python console and pasting `import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()`
-	- Run direct from the command-line _through_ Blender by pasting `blender --python-expr "import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()"`
-	- Run from the command-line _without_ blender as in step 2 before manually importing the files left on disk
-5. _Wait_ (it takes me about 15 seconds on my laptop to place all keycaps for a complete layout)
-6. Enjoy free time
-
-## Example
-
-In the zip on the [releases page][releases], some example data files are present and generate the layouts in the images above.
-Assuming the zip is in `Downloads`, to generate a standard exposé of keycap models, run the following, and be prepared to wait a little while—there’s a lot of data to process.
-
-```bash
-cd Downloads
-unzip adjust-keycaps.zip
-blender --python-expr "import os;import platform;import pathlib;import sys;home = pathlib.Path.home();sys.path.append({ 'Linux': os.path.join(home, '.local', 'lib', 'adjustkeys', 'adjustkeys'), 'Windows': os.path.join(home, 'Library', 'Application Support', 'Adjustkeys', 'adjustkeys'), 'Darwin': os.path.join(home, 'AppData', 'Local', 'Adjustkeys', 'adjustkeys') }[platform.system()]);import adjustkeys;adjustkeys.main()"
-```
-
-Perhaps while it’s running, take a look at the [`./examples/menacing.svg`][menacing] file which will appear in the output.
-Notice how the gray construction lines around the glyph are automatically removed!
-This is because they have the id `cap-guide` in the `svg`, which is automatically detected and discarded by `adjustcaps`.
-As such, you can keep a guide to help with the glyph alignment without affecting the output.
-
-## Custom Setup
-
-This script takes input of:
-
-- A directory containing `.obj` files each with an individual keycap in an arbitrary location (_but consistent orientation_), named as `profile-size.obj` (e.g. `r1-1_0u.obj`)
-- A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
-- A `yaml` file which lists the profiles of each row in order top to bottom
-- A folder containing the glyphs to be placed, each in a separate `.svg` file
-- A `yaml` file which specifies the location of the centre of a key in a particular profile
-- A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
-- A `yaml` file which specifies a mapping from key names to glyph names
-
-If called from blender, the arranged keycaps are imported, otherwise, the generated `.svg` and `.obj` files (one for each cap) are left on disk.
-
-It’s important to note that _no other vertices should be present in the object files!_
-Some cleaned KAT profile models are provided, but for other models, please make sure that only the vertices of the keycap are present in the file as otherwise this can mess up alignment when the script translates models to be adjacent to the origin.
-
-Although non-essential, results may be improved by ensuring that all input `.svg` files are be of an identical height and width which is then specified as the `--unit-length` parameter.
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
 
 ## Building from Source
 
@@ -245,7 +301,7 @@ The [licensing section](#author-and-acknowledgements) section below should be up
 I wrote this in Python for two reasons:
 
 1. There exists a large, well-documented Python API for Blender
-2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I've written in a decent while, please if anyone's out there, look upon this work as the kind of mess which can arise when records aren't a proper part of the type system and take note of the silly security measures which are required when a language allows module-imports to have side-effects.
+2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I’ve written in a decent while, please if anyone’s out there, look upon this work as the kind of mess which can arise when records aren’t a proper part of the type system and take note of the silly security measures which are required when a language allows module-imports to have side-effects.
 
 Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 My sanity would have been better-off had I instead done this in [Haskell][haskell], but I guess everyone has their regrets, eh?
