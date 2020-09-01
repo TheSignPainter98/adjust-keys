@@ -7,10 +7,7 @@ from os.path import exists
 
 metaDataUrl:str = 'https://api.github.com/repos/TheSignPainter98/adjust-keys/releases/latest'
 
-def update_available(pargs: Namespace) -> bool:
-    return pargs.check_update and check_update(False)
-
-def check_update(pedanticCheck:bool) -> bool:
+def check_update() -> bool:
     from grequests import get as gget, map as gmap
     from yaml import safe_load, FullLoader
     resp:Response = gmap([gget(url=metaDataUrl)])[0]
