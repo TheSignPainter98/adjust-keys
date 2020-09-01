@@ -314,11 +314,11 @@ Thanks to Swishy for user-testing in the early stages and for suggesting that `a
 
 All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
 
-- KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
+- KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord.
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
 - The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
-- The keycap representation used in `examples/menacing.svg` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
-- The example layouts, `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
+- The keycap representation used in `glyphs/red-hat-display` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
+- The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE.][kle]
 
 Please ensure that credit is given where it is due.
 
