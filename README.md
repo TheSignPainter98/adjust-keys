@@ -310,7 +310,7 @@ My sanity would have been better-off had I instead done this in [Haskell][haskel
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
-Thanks to Swishy for suggesting that `adjustkeys` could benefit from also being a Blender extension.
+Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
 
 All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
 
