@@ -269,13 +269,13 @@ args: [dict] = [{
     'label': "Don't produce aligned glyphs",
     'type': bool
 }, {
-    'dest': 'no_apply_colours',
+    'dest': 'no_apply_colour_map',
     'short': '-NC',
-    'long': '--no-apply-colours',
+    'long': '--no-apply-colour_map',
     'action': 'store',
-    'help': "Don't apply colour materials to the keycaps",
+    'help': "Don't apply colour materials to the keycaps (colouring in KLE layout file will still override this)",
     'default': False,
-    'label': "Don't apply colours",
+    'label': "Don't apply the colour map",
     'type': bool
 }, {
     'dest': 'no_shrink_wrap',
