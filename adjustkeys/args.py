@@ -75,11 +75,12 @@ args: [dict] = [{
     'short': '-Vu',
     'long': '--check-updates',
     'action': 'store_true',
-    'help': "Check for Adjustkeys updates, improves execution speed but Adjustkeys should be run at least once while update-checking to auto-install any missing python dependencies",
+    'help': "Check online (ping GitHub) for Adjustkeys updates",
     'default': False,
     'type': bool,
-    'label': "Don't check for updates"
-},{
+    'label': "Check for updates",
+    'op': True
+}, {
     'dest': 'colour_map_file',
     'short': '-c',
     'long': '--colour-map',

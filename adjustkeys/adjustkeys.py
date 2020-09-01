@@ -14,7 +14,7 @@ from .layout import get_layout, parse_layout
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
 from .shrink_wrap import shrink_wrap_glyphs_to_keys
-from .update_checker import update_available
+from .update_checker import check_update
 from .util import dict_union
 from .yaml_io import read_yaml
 from os import makedirs
@@ -39,8 +39,12 @@ def adjustkeys(*args: [[str]]) -> dict:
         print(dump(pargs.__dict__)[:-1])
         return {}
 
-    if update_available(pargs):
-        printw('A new version is available, please download it by going to https://github.com/TheSignPainter98/adjust-keys/releases/latest. You can suppress update-checking with the -Vn or -Vs flags')
+    if pargs.check_update:
+        if check_update():
+            print('A new version is available, please download it by going to https://github.com/TheSignPainter98/adjust-keys/releases/latest')
+        else:
+            print('Adjustkeys is up-to-date.')
+        return {}
     if pargs.list_cap_names:
         print('\n'.join(
             list(sorted(set(
