@@ -31,7 +31,7 @@ if blender_available():
 # @return Zero if and only if the program is to exit successfully
 def main(*args: [str]) -> int:
     pargs: Namespace = parse_args(args)
-    init_logging(pargs.verbosity)
+    init_logging(pargs)
 
     layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
     if not blender_available():

@@ -1,8 +1,10 @@
 # Copyright (C) Edward Jones
 
 from .exceptions import AdjustKeysException
+from argparse import Namespace
 from sys import argv, stderr
 
+fatal_warnings: bool = False
 verbosity: int = 0
 warnings:[[tuple,dict]] = []
 
@@ -14,18 +16,25 @@ warnings:[[tuple,dict]] = []
 # @param quiet_in:bool Whether to output quietly
 #
 # @return Nothing
-def init_logging(verbosity_in: bool):
+def init_logging(pargs:Namespace):
+    global fatal_warnings
     global verbosity
-    verbosity = verbosity_in
+    fatal_warnings = pargs.fatal_warnings
+    verbosity = pargs.verbosity
+    warnings = []
 
 
 ##
 # @brief Print all of the stored warnings
 #
-# @return Nothing
-def print_warnings():
+# @return The number of warnings printed
+def print_warnings() -> int:
+    global warnings
     for args,kwargs in warnings:
         print(*args, file=stderr, **kwargs)
+    num_warnings:int = len(warnings)
+    warnings = []
+    return num_warnings
 
 ##
 # @brief Write a message to stderr and raise an exception
@@ -69,5 +78,7 @@ def printe(*args, **kwargs):
 #
 # @return Nothing
 def printw(*args, **kwargs):
+    if fatal_warnings:
+        die(*args, **kwargs)
     if verbosity >= 1:
         warnings.append(([f'{argv[0]}: WARNING:'] + list(args), kwargs))

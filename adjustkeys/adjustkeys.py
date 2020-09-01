@@ -24,16 +24,19 @@ from yaml import dump
 
 
 def main(*args:[[str]]) -> dict:
+    ret:dict = {}
     try:
-        return adjustkeys(args)
+        ret = adjustkeys(args)
     except AdjustKeysGracefulExit:
-        return 0
+        ret = {}
     finally:
-        print_warnings()
+        num_warnings:int = print_warnings()
+        ret['num_warnings'] = num_warnings
+    return ret
 
 def adjustkeys(*args: [[str]]) -> dict:
     pargs: Namespace = parse_args(args)
-    init_logging(pargs.verbosity)
+    init_logging(pargs)
 
     if pargs.print_opts_yml:
         print(dump(pargs.__dict__)[:-1])
@@ -52,21 +55,21 @@ def adjustkeys(*args: [[str]]) -> dict:
                     lambda k: k['key'],
                     parse_layout(read_yaml(pargs.layout_row_profile_file),
                                  read_yaml(pargs.layout_file), pargs.homing_keys)))))))
-        return 0
+        return {}
     if pargs.list_glyphs:
         knownGlyphs:[[str,str]] = list(map(lambda g: [glyph_name(g), g], glyph_files(pargs.glyph_dir)))
         maxLen:int = max(map(lambda kg: len(kg[0]), knownGlyphs))
         for kg in knownGlyphs:
             kg[0] = kg[0].ljust(maxLen)
         print('\n'.join(list(map(lambda kg: ' @ '.join(kg), knownGlyphs))))
-        return 0
+        return {}
     if pargs.list_cap_models:
         knownCaps:[[str,str]] = list(map(lambda c: [c['cap-name'], c['cap-source']], get_caps(pargs.cap_dir)))
         maxLen:int = max(map(lambda kc: len(kc[0]), knownCaps))
         for kc in knownCaps:
             kc[0] = kc[0].ljust(maxLen)
         print('\n'.join(list(map(lambda kc: kc[0] + ' @ ' + kc[1], knownCaps))))
-        return 0
+        return {}
 
     layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
 

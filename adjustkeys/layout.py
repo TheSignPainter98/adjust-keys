@@ -13,10 +13,6 @@ def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str) ->
 def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str) -> [dict]:
     homing_keys:[str] = raw_homing_keys.split(',')
     printi('Reading layout information')
-    if len(layout_row_profiles) < len(layout):
-        printw(
-            'Insufficient information about what profile part each row has (e.g. the top row might be r5: got %d but should have at least %d'
-            % (len(layout_row_profiles), len(layout)))
 
     if type(layout) != list and any(
             list(map(lambda l: type(l) != list, layout))):

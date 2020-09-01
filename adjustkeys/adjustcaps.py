@@ -29,7 +29,7 @@ if blender_available():
 
 def main(*args: [[str]]) -> int:
     pargs: Namespace = parse_args(args)
-    init_logging(pargs.verbosity)
+    init_logging(pargs)
     if not exists(pargs.output_dir):
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
