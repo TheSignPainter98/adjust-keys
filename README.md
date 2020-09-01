@@ -26,7 +26,140 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of [`python3`][python] and its package manager, [`pip3`][pip].
+### Blender Addon
+
+### Calling from other scripts
+
+## Custom Setup
+
+It's a fair assumption that the user will not be contented with just re-making the examples all day—they should probably want to do something cool themselves.
+There are a few important files which are combined to make the layout you see before you; it's important that the user has some notion of what each does and what they should look like as otherwise `adjustkeys` won't be able to work.
+There's not too much to each, but some understanding should help avoid errors.
+
+### Using a custom layout
+
+This is probably the easy bit—just head on over to [KLE,][kle] configure a layout (a grid-like one like a standard 104 key ANSI layout will do, angling isn't explicitly supported just yet) then click the _Download > Download JSON._
+It's important to note that [KLE][kle] interactive editor **doesn't use JSON, it's just JSON-like**, so simply copy-pasting might not work.
+
+Here's the first few lines of a valid file as an example:
+
+```json
+[
+  [
+    "Esc",
+    {
+      "x": 1
+    },
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+```
+
+### Changing keycap profiles
+
+To change keycap profiles, you need a few things.
+(Please note that in the `profiles/kat/` folder everything is supplied for KAT-profiles keycaps.
+
+If a profile you want isn't in the repo, you'll need two things:
+
+1. A folder containing one `obj` file for each keycap width and row combination, named as `row-width.obj`, e.g. the model `r5-1_0u.obj` would be used for a 100%-layout escape key. Note how the radix/decimal point in `1.0` is replaced with an underscore.
+	- If a homing bump is present, the `-homing` suffix is added, for example `r2-1.0u-homing.obj`
+	- Special keys have special names: `iso-enter.obj`, `num-plus.obj`, `num-enter.obj`, `stepped-caps.obj`
+2. A `yaml` file containing information on the location of the centre of a keycap as a fraction of a unit from the top left of the space it occupies (i.e. including margins)
+
+Then to point `adjustkeys` to these through the relevant for keycap models and centres file.
+
+### Using custom glyphs / fonts
+
+To change the glyphs/images on top of the keycaps, you'll firstly need a folder full of svgs (each containing exactly one image to be applied) and a mapping from the names of the keys in your layout to the name of the file (without the svg extension) which you wish to apply to that key.
+
+An example folder of glyphs is seen in `glyphs/red-hat-display/` which contains an svg for each legend in some keycap set design which uses the [Red Hat Display][red-hat-display] font.
+
+You'll need to tell `adjustkeys` where in your layout you want each legend to be placed.
+For this you need a mapping such as that in `examples/ansi-example-map.yml`, where some of the lines are below:
+
+```yaml
+'@-2': 2-at
+'A': a
+'Alt': alt
+'B': b
+'Backspace': backspace
+'C': c
+'Caps Lock': caps-lock
+'Ctrl': ctrl
+'D': d
+'Delete': delete
+'E': e
+'End': end
+```
+
+Each line is like an instruction which tells `adjustkeys` that keycap named to the _left_ of the colon is to have the svg named to the _right_ of the colon applied to it.
+The keycap names are derived from the [KLE][kle] input JSON; taken as either the text of the key or, if there is more than one symbol on it, the name of each from the top with new-lines `\n` replaced by dashes (such as `@-2` above).
+The glyph names are just the final part of the svg path without the extension—for an svg in `C:/Users/kcza/Downloads/some-glyph.svg` can be referred to simply as `some-glyph` (assuming `adjustkeys` has been told to look for glyphs in `C:/Users/kcza/Downloads/` in the first place).
+The lines don't need to be alphabetical order; they are here just for cleanliness.
+
+If you want, you can keep a guide to represent the keycap in the svg which you can have automatically removed when adjustment is performed (this is designed to help with the trial-and-error process of getting things the right size).
+If a curve in your svg has the id `cap-guide` (by default, although the id to exclude can be different), then it will be automatically discarded when combining the svg data.
+
+### Setting layout-row profiles
+
+As [KLE][kle] doesn't include any information on the profile used in each row, we must add it in ourselves.
+For simplicity, this is done in a separate file so that the user doesn't have to alter the contents of a [KLE][kle] JSON file once downloaded.
+The contents of a layout-row profile file is a list of profile rows to be applied in order to each row of keys represented in the [KLE][kle] file, such as the following.
+
+```yaml
+- r5
+- r4
+- r3
+- r2
+- r1
+```
+
+Importantly, these values will be used to construct the file-names which `adjustkeys` will attempt to find models in.
+For example, the `r5` in `r5-1_0u.obj` comes from this file.
+If there are insufficient rows in the file, the last one is take to represent all subsequent rows (e.g. the bottom two rows on a Cherry set are the same, so `r1` need only be specified once.
+
+Regardless of the keycap manufacturer's choices (e.g. Cherry), the bottom row of a 100% layout should be labelled `r1`.
+This means that the row-number can only increase with greater distance from the user's wrists, and that the same data files can be used across different keycap model sets without needing to arbitrarily reverse the order.
+
+### Setting colours (via KLE or name-matching)
+
+There are two ways of colouring keycaps: either from raw [KLE][kle] input or from a colour map file.
+The first way is always active and is just a matter of adjusting RGB colours through the website; the second way can be deactivated but is on by default.
+
+A colour map file is a list of objects, each of which specifies a colour, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
+The file is scanned from top to bottom, so if there are two places a keycap can be matched from, then only one nearest the top of the file will be used.
+Here's an example:
+
+```yaml
+- name: green
+  colour: '32a852'
+  keys:
+  - Esc
+  - F4
+  - Alt
+- name: purple
+  colour: 'ad1aad'
+  keys:
+  - .*
+```
+
+Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.
+
+Secondly, note the quote marks—these are used to force the yaml parser to consider what's inside them as a string of letters as otherwise, the hex code `001100` would be considered a number and have the preceding zeros stripped away (leaving `1100`, which isn't good).
+
+Finally, observe how you can also use [Python regular expressions][regex-help] to specify keycap names in more general terms.
+If you aren't too comfortable using regular expressions, `adjustkeys` takes a list of keys, so you can more simply copy the names of the keycaps you wish to colour into the appropriate `keys` list, whilst being mindful of indentation and putting the `-` character at the start of each key-name as above.
+These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of 'any character,' so `.*` is just a concise way of telling `adjustkeys` to match _anything._
+It's not essential to know regular expressions, but a few basics can make things a little more streamlined.
+The cheatsheet and playground on [regexr][regex-playground] may be helpful.
+
+Please note that the RGB colour must be six characters long.
+
+<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
+
+You’ll need a working installation of [`python3`][python] and its package manager, [`pip3`][pip], and a a little familiarity with the YAML syntax (although this can be easily picked up, it's designed to be relatively human-friendly).
 
 1. Go to the [releases page][releases], download and unzip the code so the `adjustkeys` binary is next to where you’ll have your `.blend` file
 2. Check everything is working—in a terminal, `cd` into the directory above then run `python3 ./adjustkeys -h` (or for macOS &amp; Linux, `./adjustkeys -h` is both equivalent and shorter)
@@ -96,9 +229,9 @@ See [`Makefile`][makefile] for more information.
 Contributions are welcome!
 Please see the [contribution note,][contrib-note] abide by the [code of conduct][code-of-conduct] and the note following:
 
-- To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root
+- To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root (the `x` should be lower-case)
 - To add keycap models for a profile _y,_
-	1. Place the related `obj` files in `./profiles/y/` relative to the project root
+	1. Place the related `obj` files in `./profiles/y/` relative to the project root (the `y` should be lower-case and spaces should be replaced by dashes)
 	2. List the order of row profiles in a file `./profiles/y/layout_row_profiles.yml`
 	3. (The annoying one) Compute the centres of the faces of the each keycap in units relative to the top left corner of the area occupied by the keycap, see [standard 1u keycap size diagram][keycap-info] for reference, and place the result in `./profiles/y/centres.yml`
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code you’ve written!
@@ -112,7 +245,7 @@ The [licensing section](#author-and-acknowledgements) section below should be up
 I wrote this in Python for two reasons:
 
 1. There exists a large, well-documented Python API for Blender
-2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I've written in a decent while, please if anyone's out there, look upon this work as the kind of mess which can arise when records aren't a proper part of the type system
+2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I've written in a decent while, please if anyone's out there, look upon this work as the kind of mess which can arise when records aren't a proper part of the type system and take note of the silly security measures which are required when a language allows module-imports to have side-effects.
 
 Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
 My sanity would have been better-off had I instead done this in [Haskell][haskell], but I guess everyone has their regrets, eh?
@@ -120,16 +253,18 @@ My sanity would have been better-off had I instead done this in [Haskell][haskel
 ## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
+
+Thanks to Swishy for suggesting that `adjustkeys` could benefit from also being a Blender extension.
+
 All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
-- The typeface used in `glyphs/red-hat-display.svg` is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
+- The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
 - The keycap representation used in `examples/menacing.svg` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The example layouts, `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
 
 Please ensure that credit is given where it is due.
-Thanks to Swishy for suggesting that `adjustkeys` could benefit from also being a Blender extension.
 
 [blender]: https://www.blender.org
 [contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md
@@ -148,5 +283,7 @@ Thanks to Swishy for suggesting that `adjustkeys` could benefit from also being 
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
 [red-hat-display]: https://fonts.google.com/specimen/Red+Hat+Display
+[regex-help]: https://docs.python.org/3/howto/regex.html
+[regex-playground]: https://regexr.com
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
 [zfrontier]: https://en.zfrontier.com
