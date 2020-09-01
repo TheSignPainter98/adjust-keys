@@ -4,6 +4,7 @@
   - .-.+
   - '[^+/*-]'
   - ''
+  - F[1-49][0-2]?
 - name: purple
   colour: 'ad1aad'
   keys:
