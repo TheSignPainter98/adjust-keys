@@ -91,6 +91,15 @@ args: [dict] = [{
     'type': str,
     'str-type': 'file'
 }, {
+    'dest': 'fatal_warnings',
+    'short': '-E',
+    'long': '--fatal-errors',
+    'action': 'store_true',
+    'help': 'Treat any warnings as fatal, halting execution immediately',
+    'default': False,
+    'label': 'Make warnings fatal',
+    'type': bool,
+}, {
     'dest': 'global_x_offset',
     'short': '-X',
     'long': '--glyph-x-offset',

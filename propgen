@@ -82,8 +82,12 @@ def op(arg:dict) -> dict:
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
                     'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
-                    "adjustkeys(akargs, { '%s': True })" % arg['dest'],
+                    "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],
                     "print('=' * 80)",
+                    "if 'num_warnings' in inf and (num_warnings := inf['num_warnings']) > 0:",
+                    '    ' + '\n            '.join([
+                        "self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))",
+                    ]),
                     "return {'FINISHED'}"
                 ])
             ])

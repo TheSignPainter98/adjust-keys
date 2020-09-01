@@ -66,8 +66,9 @@ class AdjustKeysOperator(Operator):
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
-        print(akargs)
-        adjustkeys(akargs)
+        inf = adjustkeys(akargs)
+        if 'num_warnings' in inf and (num_warnings := inf['num_warnings']) > 0:
+            self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
         return {'FINISHED'}
 
 KCZA_CUSTOM_OPERATORS
