@@ -79,14 +79,15 @@ def parse_key(key: 'either str dict',
 
     if 'key-type' not in ret:
         ret_key: str = safe_get(ret, 'key')
-        if safe_get(ret, 'x') == 0.25 \
-            and safe_get(ret, 'a') == 7 \
+        x_in:float = safe_get(ret, 'x')
+        if x_in is not None and x_in >= 0.25 \
             and safe_get(ret, 'w') == 1.25 \
             and safe_get(ret, 'h') == 2 \
             and safe_get(ret, 'w2') == 1.5 \
             and safe_get(ret, 'h2') == 1 \
             and safe_get(ret, 'x2') == -0.25:
             ret['key-type'] = 'iso-enter'
+            ret['x'] -= 0.25
         elif ret_key == '+' and safe_get(ret, 'h') == 2:
             ret['key-type'] = 'num-plus'
         elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
