@@ -55,7 +55,7 @@ There’s two ways of interacting with `adjustkeys`, either through the Blender 
 You’ll need a working installation of Blender.
 
 1. Go to the [releases page][releases] and download `adjust-keys-blender-addon.zip`
-2. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded
+2. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded and activate the plugin (tick the tick-box)
 3. Go to _Properties > Scene Properties > Adjustkeys_ to see the menu
 4. Press _place caps and glyphs_
 5. Wait a moment, et voilà!
