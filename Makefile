@@ -43,7 +43,7 @@ endif
 adjustkeys/version.py:
 	(echo '# Copyright (C) Edward Jones&version: str = "$(VERSION)"' | tr '&' '\n') > $@
 
-dist: adjust-keys.zip adjust-keys-blender-addon.zip
+dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
 .PHONY: dist
 
 adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
