@@ -47,7 +47,7 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of Blender, [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
+You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
 
 ### Usage Through a Blender Addon (Regular)

@@ -73,7 +73,8 @@ examples/opts.yml: opts-header.txt adjustkeys-bin
 	((sed 's/^/# /' && ./adjustkeys-bin '-#') | sed 's/ $$//' | grep -v opt_file | sed 's/print_opts_yml: true/print_opts_yml: false/') < $< > $@
 
 requirements.txt: $(ADJUST_KEYS_SRCS)
-	(pipreqs --force --print 2>/dev/null | grep -v bpy) > $@
+	@# Assumes that Blender is already installed and has mathutils available
+	(pipreqs --force --print 2>/dev/null | grep -v bpy | grep -v mathutils) > $@
 
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
