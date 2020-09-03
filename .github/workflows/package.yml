@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v11
+name: Generate artifacts v12
 jobs:
   generate-artifacts:
     name: Generate artifacts

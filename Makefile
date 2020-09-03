@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 .DEFAULT_GOAL := all
-SHELL = /usr/bin/bash
+SHELL = bash
 
 ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys/adjustkeys.py) adjustkeys/version.py
 DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
