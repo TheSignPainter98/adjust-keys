@@ -10,6 +10,10 @@ match($1, /tag: [^,]*/) {
 	printf "\n## %s\n\n", substr(tagstr, RSTART, RLENGTH)
 }
 
+/\(user devices (not |un)affect?ed/ {
+	next
+}
+
 {
 	sub("^[^@]*@", "", $0)
 	printf "- %s\n", $0
