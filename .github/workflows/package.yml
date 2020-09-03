@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v13
+name: Generate artifacts v14
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -26,10 +26,17 @@ jobs:
         run: pip3 install wheel
       - name: Install pip-only dependencies
         run: pip3 install pipreqs mathutils
+      - name: Generate requirements.txt
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make requirements.txt
+      - name: Install required python dependencies
+        run: pip install -r requirements.txt
       - name: Generate artifacts
         run: |
           export PATH=$PATH:~/.local/bin
-          make dist NO_CYTHON=y VERSION=${{ steps.tag_name.outputs.tag }}
+          make clean
+          make dist -B NO_CYTHON=y VERSION=${{ steps.tag_name.outputs.tag }}
       - name: Attach artifacts to release
         uses: skx/github-action-publish-binaries@master
         env:
