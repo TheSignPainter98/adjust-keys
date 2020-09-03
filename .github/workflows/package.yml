@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v14
+name: Generate artifacts v15
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -31,7 +31,7 @@ jobs:
           export PATH=$PATH:~/.local/bin
           make requirements.txt
       - name: Install required python dependencies
-        run: pip install -r requirements.txt
+        run: pip3 install -r requirements.txt
       - name: Generate artifacts
         run: |
           export PATH=$PATH:~/.local/bin
