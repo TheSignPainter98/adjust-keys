@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v12
+name: Generate artifacts v13
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -25,7 +25,7 @@ jobs:
       - name: Install Python wheel package
         run: pip3 install wheel
       - name: Install pip-only dependencies
-        run: pip3 install pipreqs
+        run: pip3 install pipreqs mathutils
       - name: Generate artifacts
         run: |
           export PATH=$PATH:~/.local/bin
