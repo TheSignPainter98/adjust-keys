@@ -1,5 +1,7 @@
 # Copyright (C) Edward Jones
 
+from subprocess import PIPE, Popen
+
 have_run_dependency_handler:bool = False
 
 def handle_missing_dependencies():
@@ -16,7 +18,6 @@ def handle_missing_dependencies():
     requirements_file:str = join(adjustkeys_path, 'requirements.txt')
     if not exists(requirements_file):
         return
-    from subprocess import PIPE, Popen
     binary_path_python:str
     if find_spec('bpy') is None:
         from sys import executable
@@ -25,14 +26,18 @@ def handle_missing_dependencies():
         from bpy.app import binary_path_python as bpp
         binary_path_python = bpp
 
+    # Ensure that pip is installed
+    (ensurePipProc, _) = run_proc([binary_path_python, '-m', 'ensurepip'])
+    if ensurePipProc.returncode:
+        from .exceptions import AdjustKeysException
+        raise AdjustKeysException('Something went wrong when ensuring pip was installed, see console output for more details')
+
     # Get installed packages
-    pipListProc:Popen = Popen([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE)
-    o:tuple = pipListProc.communicate()
-    pstdout:str = o[0].decode()
+    (pipListProc, pipListProcOut) = run_proc([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE)
     if pipListProc.returncode:
         from .exceptions import AdjustKeysException
         raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
-    installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pstdout.split('\n'))))[2:]
+    installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pipListProcOut[0].decode().split('\n'))))[2:]
 
     # Get required packages
     req_lines:[str]
@@ -45,9 +50,13 @@ def handle_missing_dependencies():
 
     # Install any missing packages
     if missing_packages != []:
-        pipInstallProc:Popen = Popen([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
-        pipInstallProc.communicate()
+        (pipInstallProc, o) = run_proc([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
         if pipInstallProc.returncode:
             from .exceptions import AdjustKeysException
             raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
         print('Successfully installed adjustkeys dependencies')
+
+def run_proc(cmd:[str], **kwargs) -> ['Popen', [bytes, bytes]]:
+    proc:Popen = Popen(cmd, **kwargs)
+    o = proc.communicate()
+    return (proc, o)

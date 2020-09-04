@@ -5,15 +5,15 @@ from importlib import reload
 from sys import path
 from os.path import dirname
 from .adjustkeys.devtools import setup_addon_modules
+from .adjustkeys.dependency_handler import handle_missing_dependencies
+handle_missing_dependencies()
 #  reload(.adjustkeys.devtools)
 modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
 path.append(dirname(__file__))
+
 from .adjustkeys.args import arg_dict, configurable_args
 from .adjustkeys.adjustkeys import main as adjustkeys
 del path[path.index(dirname(__file__))]
-
-from .adjustkeys.dependency_handler import handle_missing_dependencies
-handle_missing_dependencies()
 
 bl_info = {
         'name': 'adjustkeys',
