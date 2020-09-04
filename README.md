@@ -50,6 +50,18 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
 
+**Important**: currently, you need to be able to view the console output for some features of `adjustkeys`, which can be done as follows.
+
+- Windows:
+	1. Open blender as usual
+	2. Go to _Window > Toggle System Console_
+- Linux:
+	1. Open up a terminal
+	2. Enter `blender`
+- MacOS:
+	1. Read and do [Blender’s very quick guide on how to get `blender` into your path][blender-path-guide] if step 2 doesn’t work.
+	2. Enter `blender` at the terminal
+
 ### Usage Through a Blender Addon (Regular)
 
 You’ll need a working installation of Blender.
