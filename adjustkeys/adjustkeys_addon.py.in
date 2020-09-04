@@ -12,6 +12,7 @@ modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
 path.append(dirname(__file__))
 
 from .adjustkeys.args import arg_dict, configurable_args
+from .adjustkeys.util import safe_get
 from .adjustkeys.adjustkeys import main as adjustkeys
 del path[path.index(dirname(__file__))]
 
@@ -67,7 +68,8 @@ class AdjustKeysOperator(Operator):
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
         inf = adjustkeys(akargs)
-        if 'num_warnings' in inf and (num_warnings := inf['num_warnings']) > 0:
+        num_warnings = safe_get(inf, 'num_warnings')
+        if num_warnings is not None and num_warnings > 0:
             self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
         return {'FINISHED'}
 

@@ -49,7 +49,7 @@ def prop(a:dict) -> str:
         maxval:float = a['max']
         return f"IntProperty(name={label}, description={description}, default={default}, min={minval}, max={maxval})"
     elif atype == str:
-        default = "d if ((d := %s) is not None) else 'None'" % default
+        default = "%s if (%s is not None) else 'None'" %(default, default)
         if 'str-type' in a:
             str_type:str = a['str-type']
             if str_type == 'file':
@@ -84,7 +84,8 @@ def op(arg:dict) -> dict:
                     "print('=' * 80)",
                     "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],
                     "print('=' * 80)",
-                    "if 'num_warnings' in inf and (num_warnings := inf['num_warnings']) > 0:",
+                    "num_warnings = safe_get(inf, 'num_warnings')",
+                    'if num_warnings is not None and num_warnings > 0:',
                     '    ' + '\n            '.join([
                         "self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))",
                     ]),
