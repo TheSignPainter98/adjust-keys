@@ -47,7 +47,7 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
+You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
 
 **Important**: currently, you need to be able to view the console output for some features of `adjustkeys`, which can be done as follows.
@@ -166,6 +166,7 @@ Then to point `adjustkeys` to these through the relevant for keycap models and c
 To change the glyphs/images on top of the keycaps, you’ll firstly need a folder full of svgs (each containing exactly one image to be applied) and a mapping from the names of the keys in your layout to the name of the file (without the svg extension) which you wish to apply to that key.
 
 An example folder of glyphs is seen in `glyphs/red-hat-display/` which contains an svg for each legend in some keycap set design which uses the [Red Hat Display][red-hat-display] font.
+(As an aside, I chose Red Hat Display as an example font specifically for the reason that I _haven’t_ seen it on a keycap set before—given the freedom of dye-sublimation, I believe that designers should be able to respect the desires of the others, but, when the occasion permits, to surprise them.)
 
 You’ll need to tell `adjustkeys` where in your layout you want each legend to be placed.
 For this you need a mapping such as that in `examples/ansi-example-map.yml`, where some of the lines are below:
