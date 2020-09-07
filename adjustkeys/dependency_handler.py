@@ -1,62 +1,75 @@
 # Copyright (C) Edward Jones
 
-from subprocess import PIPE, Popen
+from .path import adjustkeys_path
+from bpy.app import binary_path_python
+from ensurepip import bootstrap as bootstrap_pip
+from importlib import import_module as import_mod
+from importlib.util import find_spec
+from os import environ
+from os.path import exists, join
+#  from pip import main as pip
+from subprocess import CalledProcessError, check_output, run
 
-have_run_dependency_handler:bool = False
+pip:[str] = [binary_path_python, '-m', 'pip']
 
-def handle_missing_dependencies():
-    # Don't run the dependency handler multiple times in the same session
-    global have_run_dependency_handler
-    if have_run_dependency_handler:
-        return
-    have_run_dependency_handler = True
+#  have_run_dependency_handler:bool = False
 
-    # Get dependency list
-    from .path import adjustkeys_path
-    from importlib.util import find_spec
-    from os.path import exists, join
-    requirements_file:str = join(adjustkeys_path, 'requirements.txt')
-    if not exists(requirements_file):
-        return
-    binary_path_python:str
-    if find_spec('bpy') is None:
-        from sys import executable
-        binary_path_python = executable
-    else:
-        from bpy.app import binary_path_python as bpp
-        binary_path_python = bpp
+#  def handle_missing_dependencies():
+    #  # Don't run the dependency handler multiple times in the same session
+    #  global have_run_dependency_handler
+    #  if have_run_dependency_handler:
+        #  return
+    #  have_run_dependency_handler = True
 
-    # Ensure that pip is installed
-    (ensurePipProc, _) = run_proc([binary_path_python, '-m', 'ensurepip'])
-    if ensurePipProc.returncode:
-        from .exceptions import AdjustKeysException
-        raise AdjustKeysException('Something went wrong when ensuring pip was installed, see console output for more details')
+    #  # Get dependency list
+    #  requirements_file:str = join(adjustkeys_path, 'requirements.txt')
+    #  if not exists(requirements_file):
+        #  return
 
-    # Get installed packages
-    (pipListProc, pipListProcOut) = run_proc([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE)
-    if pipListProc.returncode:
-        from .exceptions import AdjustKeysException
-        raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
-    installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pipListProcOut[0].decode().split('\n'))))[2:]
+    #  ensure_pip()
 
-    # Get required packages
-    req_lines:[str]
-    with open(requirements_file, 'r') as rf:
-        req_lines = rf.readlines()
-    reqs:[str] = list(map(lambda l: l.split('==')[0], req_lines))
+    #  check_output(pip + ['install', '-r', requirements_file])
 
-    # Compute missing packages
-    missing_packages:[str] = [ pkg for pkg in reqs if pkg not in installed_packages ]
 
-    # Install any missing packages
-    if missing_packages != []:
-        (pipInstallProc, o) = run_proc([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
-        if pipInstallProc.returncode:
-            from .exceptions import AdjustKeysException
-            raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
-        print('Successfully installed adjustkeys dependencies')
+    #  #  binary_path_python:str
+    #  #  if find_spec('bpy') is None:
+        #  #  from sys import executable
+        #  #  binary_path_python = executable
+    #  #  else:
+        #  #  from bpy.app import binary_path_python as bpp
+        #  #  binary_path_python = bpp
 
-def run_proc(cmd:[str], **kwargs) -> ['Popen', [bytes, bytes]]:
-    proc:Popen = Popen(cmd, **kwargs)
-    o = proc.communicate()
-    return (proc, o)
+    #  #  # Ensure that pip is installed
+    #  #  (ensurePipProc, _) = run_proc([binary_path_python, '-m', 'ensurepip'])
+    #  #  if ensurePipProc.returncode:
+        #  #  from .exceptions import AdjustKeysException
+        #  #  raise AdjustKeysException('Something went wrong when ensuring pip was installed, see console output for more details')
+
+    #  #  # Install any missing packages
+    #  #  (pipInstallProc, _) = run_proc([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
+    #  #  if pipInstallProc.returncode:
+        #  #  from .exceptions import AdjustKeysException
+        #  #  raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
+    #  #  print('Successfully installed adjustkeys any missing dependencies')
+
+def ensure_pip():
+    try:
+        run(pip + ['--version'], check=True)
+    except CalledProcessError:
+        bootstrap_pip()
+        environ.pop('PIP_REQ_TRACKER', None)
+
+def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
+    if pkg_name is None:
+        pkg_name = mod_name
+    if global_name is None:
+        global_name = mod_name
+
+    run(pip + ['install', pkg_name])
+
+    import_module(mod_name, global_name)
+
+def import_module(mod_name:str, global_name:str=None):
+    if global_name is None:
+        global_name = mod_name
+    globals()[global_name] = import_mod(mod_name)

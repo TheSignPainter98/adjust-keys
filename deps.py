@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-from functools import reduce
 from adjustkeys.log import die
-from os.path import exists, join, dirname
 from adjustkeys.util import concat, list_diff, safe_get
+from functools import reduce
+from os.path import exists, join, dirname
 from sys import exit, argv
 
 
@@ -11,16 +11,24 @@ def main(args: [str]) -> int:
     if len(args) < 2:
         die('Please give at least one argument, got %s' %(len(args) - 1))
 
-    toExplore:[str] = [args[1] if not args[1].endswith('.py') else args[1][:-3]]
+    print(' '.join(internal_dependencies(args[1] if not args[1].endswith('.py') else args[1][:-3])))
+
+    return 0
+
+def internal_dependencies(file:str) -> [str]:
+    return list(filter(exists, get_project_deps(file)))
+
+def external_dependencies(file:str) -> [str]:
+    return set(map(lambda p: p[:-3].split('.')[0], filter(lambda f: not exists(f), get_project_deps(file))))
+
+def get_project_deps(file:str) -> [str]:
     seen:[str] = []
+    toExplore:[str] = [file]
     while toExplore != []:
         seen = list(set(seen + toExplore))
         newDeps:{str} = list(reduce(concat, map(get_deps, toExplore)))
         toExplore = list_diff(newDeps, seen)
-    print(' '.join(list(filter(exists, map(lambda d: d + '.py', seen)))))
-
-    return 0
-
+    return list(map(lambda d: d + '.py', seen))
 
 def get_deps(mod: str) -> [str]:
     fname: str = mod + '.py'
@@ -31,10 +39,11 @@ def get_deps(mod: str) -> [str]:
     else:
         return []
 
+
     import_lines: [str] = list(
         filter(
-            lambda l: safe_get(l, 0) == 'import' or safe_get(l, 2) == 'import',
-            list(map(lambda l: l.split(' '), code))))
+            lambda l: safe_get(l, 0) == 'import' or (safe_get(l, 0) == 'from' and safe_get(l, 2) == 'import'),
+            list(map(lambda l: l.strip().split(' '), code))))
     return list(map(lambda i: resolve_local(mod, i), map(lambda l: l[1], import_lines)))
 
 def resolve_local(mod:str, dep:str) -> str:

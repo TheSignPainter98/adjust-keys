@@ -1,14 +1,21 @@
 #!/usr/bin/python3
 
 from adjustkeys.args import configurable_args, op_args
-from sys import stdin
+from adjustkeys.log import die
 from adjustkeys.util import rem
 from adjustkeys.version import version
+from adjustkeys.yaml_io import read_yaml
+from deps import external_dependencies
+from sys import argv, stdin
 
-def main() -> None:
+def main(progName:str) -> None:
+    if progName.endswith('.py'):
+        progName = progName[:-3]
+
     props:str = '\n    '.join(list(map(lambda a: a['dest'] + ':' + prop(a), configurable_args)))
     ops:[dict] = list(sorted(map(op, op_args), key=lambda op: (op['icon'], op['label'])))
     tuple_version:tuple = tuple(version[1:].split('.')) if len(version) != 0 else (0, 0, 1)
+    deps:[[str, str]] = dependencies(progName)
     file:str = stdin.read()
 
     replacements:dict = {
@@ -16,11 +23,13 @@ def main() -> None:
         'KCZA_CUSTOM_OPERATORS': '\n\n'.join(list(map(lambda op: op['src'], ops))),
         'KCZA_CUSTOM_OPERATOR_HEADERS': ', '.join(list(map(lambda op: str(rem(op, 'src')), ops))),
         'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops))),
-        'VERSION': str(tuple_version)
+        'VERSION': str(tuple_version),
+        'DEPENDENCIES': ', '.join(list(map(lambda dp: "Dependency(module='%s', package='%s', name=None)" %(dp[0], dp[1]), deps)))
     }
 
     for p in replacements.items():
         file = file.replace(p[0], p[1])
+    print("# If this file is difficult to read, that's because it was auto-generated")
     print(file)
 
 def prop(a:dict) -> str:
@@ -80,6 +89,7 @@ def op(arg:dict) -> dict:
                 'def execute(self, context):',
                 '    ' + '\n        '.join([
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
+                    'from .adjustkeys.adjustkeys import main as adjustkeys',
                     'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
                     "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],
@@ -98,6 +108,12 @@ def op(arg:dict) -> dict:
 def op_name(dest:str) -> str:
     return 'akminiop' + dest.title().replace('_', '')
 
+def dependencies(insertion_file:str) -> [[str, str]]:
+    ext_deps:[str] = external_dependencies(insertion_file)
+    dep_origin_map:[str] = { v:k for k,v in read_yaml('pipreqs_module_map.yml').items() }
+    return [ (pkg, dep_origin_map[pkg]) for pkg in ext_deps if pkg in dep_origin_map ]
 
 if __name__ == '__main__':
-    main()
+    if len(argv) < 2:
+        die('Please enter the name of the main file for %s to search for dependencies' % argv[0])
+    main(argv[1])

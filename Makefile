@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := all
 SHELL = bash
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys/adjustkeys.py) adjustkeys/version.py
+ADJUST_KEYS_SRCS = $(shell ./deps.py adjustkeys/adjustkeys.py) adjustkeys/version.py adjustkeys/dependency_handler.py
 DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 BLENDER_ADDON_CONTENT = $(ADJUST_KEYS_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
 
@@ -79,8 +79,8 @@ requirements.txt: $(ADJUST_KEYS_SRCS)
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
 
-adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py propgen
-	./propgen < $< > $@
+adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS)
+	./addongen adjustkeys/adjustkeys.py < $< > $@
 
 profiles/%/centres.yml: profiles/%/centres.csv centres.yml.in centres.awk
 	(awk -F, -f centres.awk | m4 -P - centres.yml.in) < $< > $@
