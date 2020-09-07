@@ -50,6 +50,10 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as, it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
 
+Regardless of how you choose to use `adjustkeys`, you’ll need a text editor to edit the configuration files.
+Notepad or Blender’s editor work okay, but they don’t have syntax highlighting (which makes things _much_ easier).
+If you’re new around text-editors, I’d recommend [VSCodium][codium], a minimalistic editor which is just Microsoft’s excellent VSCode compiled from the source and hence without the snooping nonsense present in Microsoft’s closed-source binary.
+
 ### Usage Through a Blender Addon (Regular)
 
 You’ll need a working installation of Blender.
@@ -325,6 +329,7 @@ Please ensure that credit is given where it is due.
 [blender]: https://www.blender.org
 [contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
+[codium]: https://github.com/VSCodium/vscodium
 [cython]: https://cython.org
 [github]: https://www.github.com/TheSignPainter98/adjust-keys
 [lgpl3]: https://choosealicense.com/licenses/lgpl-3.0/
