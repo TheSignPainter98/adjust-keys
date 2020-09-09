@@ -30,18 +30,11 @@ bl_info = {
 if 'bpy' in locals():
     import importlib
     if 'adjustkeys' in locals():
-        importlib.reload(adjustkeys)
-
-from bpy.utils import register_class, unregister_class
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import AddonPreferences, Context, Panel, Operator, PropertyGroup, Scene
-from inspect import getmembers
-from math import ceil, log10
+        importlib.reload(locals()['adjustkeys'])
 
 arg_dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
-from collections import namedtuple
 Dependency = namedtuple('Dependency', ['module', 'package', 'name'])
 
 dependencies = [ DEPENDENCIES ]
@@ -102,7 +95,6 @@ class KCZA_PT_AdjustKeysPanel(Panel):
             row = layout.row()
             row.prop(context.scene.adjustkeys_custom_props, carg['dest'])
 
-from subprocess import CalledProcessError
 dependencies_installed = False
 class KCZA_OT_InstallDependencies(Operator):
     bl_idname = 'kcza.install_dependencies'
