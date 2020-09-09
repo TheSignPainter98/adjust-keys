@@ -90,6 +90,7 @@ def op(arg:dict) -> dict:
                 '    ' + '\n        '.join([
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
                     'from .adjustkeys.adjustkeys import main as adjustkeys',
+                    'from .adjustkeys.util import safe_get',
                     'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
                     "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],

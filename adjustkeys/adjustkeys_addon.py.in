@@ -68,6 +68,7 @@ class AdjustKeysOperator(Operator):
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
         from .adjustkeys.adjustkeys import main as adjustkeys
+        from .adjustkeys.util import safe_get
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
