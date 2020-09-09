@@ -3,7 +3,7 @@
 
 from .adjustcaps import adjust_caps, get_caps
 from .adjustglyphs import adjust_glyphs, glyph_files
-from .args import adjustkeys_path,parse_args, Namespace
+from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name

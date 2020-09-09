@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from adjustkeys.args import configurable_args, op_args
+from adjustkeys.arg_defs import configurable_args, op_args
 from adjustkeys.log import die
 from adjustkeys.util import rem
 from adjustkeys.version import version
