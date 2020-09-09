@@ -13,8 +13,8 @@ all: adjustkeys-bin
 
 ifndef NO_CYTHON
 define runCython
-	cython3 -X language_level=3 $^
-	@$(RM) $(^:.py=.c)
+	cython3 -X language_level=3 $(filter %.py,$^)
+	$(RM) $(patsubst %.py,%.c,$(filter %.py,$^))
 endef
 endif
 
@@ -48,6 +48,7 @@ dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
 .PHONY: dist
 
 adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
+	$(runCython)
 	mkdir -p adjust_keys_blender_addon
 	cp --parents $(foreach file,$^,"$(file)") adjust_keys_blender_addon/
 	cp adjust_keys_blender_addon/adjustkeys/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
@@ -101,7 +102,6 @@ LICENSE:
 opts-header.txt:
 	@# Do nothing
 
-
 clean:
-	$(RM) -r bin_*/ __pycache__/ bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
+	$(RM) -r bin_*/ $(wildcard **/__pycache__/) bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
 .PHONY: clean
