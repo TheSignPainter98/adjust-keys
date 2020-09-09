@@ -134,18 +134,17 @@ class KCZA_PT_DependencyWarningPanel(Panel):
         return not dependencies_installed
 
     def draw(self, context):
+        from .adjustkeys.util import dumb_wrap_text
         layout = self.layout
         warningLines = [
-                "If you’re seeing this, it means that adjustkeys is missing some dependencies.",
-                "Before asking your permission to install these, you should note the following.",
-                "1. An internet connection will be used to download the necessary packages.",
-                "2. Depending on the your setup, you may need to run Blender with elevated privileges.",
-                "    This is not advisable in the general case, so please don’t do this if you don’t need to.",
+                "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before asking your permission to install these, you should note the following.",
+                "Firstly, an internet connection will be used to download the necessary packages.",
+                "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
                 "The following dependencies are required:"
-            ] + list(map(lambda d: '- %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
-                "To install the dependencies, press the button below and this message should disappear."
+            ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
+                "To install these dependencies, press the button below and this message should disappear."
             ]
-        for line in warningLines:
+        for line in dumb_wrap_text(warningLines, 50):
             layout.label(text=line)
         layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
 

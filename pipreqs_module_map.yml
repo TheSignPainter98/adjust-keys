@@ -548,6 +548,7 @@ google_api_python_client: googleapiclient
 google_apitools: apitools
 grace_dizmo: grace-dizmo
 graphenelib: grapheneapi
+grequests: grequests
 grokcore.component: grokcore
 gsconfig: geoserver
 gsutil: gslib
