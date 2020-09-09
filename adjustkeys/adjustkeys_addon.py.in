@@ -131,12 +131,11 @@ class KCZA_OT_InstallDependencies(Operator):
         return {'FINISHED'}
 
 class KCZA_PT_DependencyWarningPanel(Panel):
-    bl_label = 'Adjustkeys warning'
-    bl_category = 'Adjustkeys'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    #  bl_context = 'object'
+    bl_context = 'scene'
     bl_icon = 'MOD_MESHDEFORM'
+    bl_label = 'Adjustkeys'
+    bl_region_type = 'WINDOW'
+    bl_space_type = 'PROPERTIES'
 
     @classmethod
     def poll(self, context):
