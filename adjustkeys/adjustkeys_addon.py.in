@@ -20,7 +20,7 @@ bl_info = {
         'blender': (2, 83, 0),
         'location': 'Properties > Scene Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
-        'warning': 'Adjustkeys is still in development so please play nice :P',
+        'warning': 'Adjustkeys requires some python dependencies. It’s also new so please play nice :P',
         'support': 'COMMUNITY',
         'category': 'Import-Export',
         'tracker_url': 'https://github.com/TheSignPainter98/adjust-keys/issues',
@@ -37,7 +37,7 @@ configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
 Dependency = namedtuple('Dependency', ['module', 'package', 'name'])
 
-dependencies = [ DEPENDENCIES ]
+dependencies = [ DEPENDENCY_LIST ]
 
 class KczaCustomPropertyGroup(PropertyGroup):
     # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by addongen when building
@@ -142,7 +142,7 @@ class KCZA_PT_DependencyWarningPanel(Panel):
                 "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
                 "The following dependencies are required:"
             ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
-                "To install these dependencies, press the button below and this message should disappear."
+                "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined."
             ]
         for line in dumb_wrap_text(warningLines, 50):
             layout.label(text=line)
@@ -150,10 +150,24 @@ class KCZA_PT_DependencyWarningPanel(Panel):
 
 class KCZA_Preferences(AddonPreferences):
     bl_idname = __name__
+    message_width = 80
 
     def draw(self, context):
+        from .adjustkeys.util import dumb_wrap_text
         layout = self.layout
-        layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
+        if not dependencies_installed:
+            updateMessageText = [
+                    'Dependency status: some missing',
+                    'For more details and how to fix this, in the main window, please see Preferences > Scene Preferences > Adjustkeys.'
+                ]
+            for line in dumb_wrap_text(updateMessageText, self.message_width):
+                layout.label(text=line)
+        else:
+            messageText = [
+                    'Dependency status: OK'
+                ]
+            for line in dumb_wrap_text(messageText, self.message_width):
+                layout.label(text=line)
 
 preference_classes = [ KCZA_OT_InstallDependencies, KCZA_Preferences, KCZA_PT_DependencyWarningPanel ]
 classes = [

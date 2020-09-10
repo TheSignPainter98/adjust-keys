@@ -24,7 +24,7 @@ def main(progName:str) -> None:
         'KCZA_CUSTOM_OPERATOR_HEADERS': ', '.join(list(map(lambda op: str(rem(op, 'src')), ops))),
         'KCZA_CUSTOM_OPERATOR_TYPES': ', '.join(list(map(lambda op: op['name'], ops))),
         'VERSION': str(tuple_version),
-        'DEPENDENCIES': ', '.join(list(map(lambda dp: "Dependency(module='%s', package='%s', name=None)" %(dp[0], dp[1]), deps)))
+        'DEPENDENCY_LIST': ', '.join(list(map(lambda dp: "Dependency(module='%s', package='%s', name=None)" %(dp[0], dp[1]), deps)))
     }
 
     for p in replacements.items():
