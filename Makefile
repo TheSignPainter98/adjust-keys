@@ -14,7 +14,7 @@ all: adjustkeys-bin
 ifndef NO_CYTHON
 define runCython
 	cython3 -X language_level=3 $(filter %.py,$^)
-	$(RM) $(patsubst %.py,%.c,$(filter %.py,$^))
+	@$(RM) $(patsubst %.py,%.c,$(filter %.py,$^))
 endef
 endif
 
