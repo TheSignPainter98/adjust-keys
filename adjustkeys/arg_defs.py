@@ -303,15 +303,6 @@ args: [dict] = [{
     'type': str,
     'str-type': 'dir'
 }, {
-    'dest': 'output_prefix',
-    'short': '-O',
-    'long': '--output-prefix',
-    'action': 'store',
-    'help': 'Specify a prefix to be applied to all output names',
-    'metavar': 'str',
-    'default': 'adjustedkeys',
-    'type': str
-}, {
     'dest': 'print_opts_yml',
     'short': '-#',
     'long': '--print-opts-yml',
