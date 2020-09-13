@@ -89,8 +89,10 @@ def op(arg:dict) -> dict:
                 'def execute(self, context):',
                 '    ' + '\n        '.join([
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
+                    'push_dependency_path()',
                     'from .adjustkeys.adjustkeys import main as adjustkeys',
                     'from .adjustkeys.util import safe_get',
+                    'pop_dependency_path()',
                     'akargs = get_args_from_ui(context)',
                     "print('=' * 80)",
                     "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],

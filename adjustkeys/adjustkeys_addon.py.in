@@ -2,6 +2,7 @@
 # Type annotations have been removed as they seem to interfere with importing into Blender. I'm sorry, but my hands have been forced :(
 
 from .adjustkeys.arg_defs import arg_dict, configurable_args
+from .adjustkeys.dependency_handler import pop_dependency_path, push_dependency_path
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
 from bpy.types import AddonPreferences, Context, Panel, Operator, PropertyGroup, Scene
 from bpy.utils import register_class, unregister_class
@@ -60,8 +61,10 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
+        push_dependency_path()
         from .adjustkeys.adjustkeys import main as adjustkeys
         from .adjustkeys.util import safe_get
+        pop_dependency_path()
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
@@ -134,7 +137,9 @@ class KCZA_PT_DependencyWarningPanel(Panel):
         return not dependencies_installed
 
     def draw(self, context):
+        push_dependency_path()
         from .adjustkeys.util import dumb_wrap_text
+        pop_dependency_path()
         layout = self.layout
         warningLines = [
                 "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before asking your permission to install these, you should note the following.",
@@ -153,7 +158,9 @@ class KCZA_Preferences(AddonPreferences):
     message_width = 80
 
     def draw(self, context):
+        push_dependency_path()
         from .adjustkeys.util import dumb_wrap_text
+        pop_dependency_path()
         layout = self.layout
         if not dependencies_installed:
             updateMessageText = [
@@ -185,6 +192,7 @@ def register():
 
     # Check dependencies are installed
     try:
+        push_dependency_path()
         from .adjustkeys.dependency_handler import import_module
         for dependency in dependencies:
             import_module(dependency.module, global_name=dependency.name)
@@ -194,6 +202,8 @@ def register():
         print('Adjustkeys addon detected missing dependencies detected, showing install button and warning panel.', str(mnferr))
         # Don't register everything else
         return
+    finally:
+        pop_dependency_path()
 
     for cls in classes:
         print('Registering', str(cls), '...')
