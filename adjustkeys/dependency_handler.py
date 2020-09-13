@@ -54,11 +54,11 @@ def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
         environ['PIP_TARGET'] = prev_pip_target
 
     # Check that the import worked.
-    push_dependency_path()
     import_module(mod_name, global_name)
-    pop_dependency_path()
 
 def import_module(mod_name:str, global_name:str=None):
+    push_dependency_path()
     if global_name is None:
         global_name = mod_name
     globals()[global_name] = import_mod(mod_name)
+    pop_dependency_path()

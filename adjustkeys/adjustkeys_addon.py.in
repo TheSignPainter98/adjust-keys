@@ -192,7 +192,6 @@ def register():
 
     # Check dependencies are installed
     try:
-        push_dependency_path()
         from .adjustkeys.dependency_handler import import_module
         for dependency in dependencies:
             import_module(dependency.module, global_name=dependency.name)
@@ -202,8 +201,6 @@ def register():
         print('Adjustkeys addon detected missing dependencies detected, showing install button and warning panel.', str(mnferr))
         # Don't register everything else
         return
-    finally:
-        pop_dependency_path()
 
     for cls in classes:
         print('Registering', str(cls), '...')
