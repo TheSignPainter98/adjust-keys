@@ -118,8 +118,8 @@ class KCZA_OT_InstallDependencies(Operator):
         global dependencies_installed
         dependencies_installed = True
         for cls in classes:
-            print('Registering', str(cls), '...')
             register_class(cls)
+        self.report({'INFO'}, 'Finished installing Adjustkeys dependencies')
         return {'FINISHED'}
 
 class KCZA_PT_DependencyWarningPanel(Panel):
@@ -142,7 +142,7 @@ class KCZA_PT_DependencyWarningPanel(Panel):
                 "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
                 "The following dependencies are required:"
             ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
-                "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined."
+                "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Look at the system console to see what’s happening behind the scenes."
             ]
         for line in dumb_wrap_text(warningLines, 50):
             layout.label(text=line)

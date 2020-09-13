@@ -68,6 +68,7 @@ You’ll need a working installation of Blender.
 
 1. Go to the [releases page][releases] and download `adjust-keys-blender-addon.zip`
 2. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded and activate the plugin (tick the tick-box)
+	- (Optional) If it doesn’t already appear, you may need to search the preferences window for `Adjustkeys`.
 3. Go to _Properties > Scene Properties > Adjustkeys_ to see the menu
 4. Press _place caps and glyphs_
 5. Wait a moment, et voilà!
@@ -251,30 +252,6 @@ It’s not essential to know regular expressions, but a few basics can make thin
 The cheatsheet and playground on [regexr][regex-playground] may be helpful.
 
 Please note that the RGB colour must be six characters long.
-
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
-<!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
 
 ## Building from Source
 
