@@ -1,6 +1,6 @@
 - name: green
   cap-colour: '32a852'
-  glyph-colour: 'ad1aad'
+  glyph-style: 'fill:#ad1aad;'
   keys:
   - .-.+
   - '[^+/*-]'
@@ -8,6 +8,6 @@
   - F[1-49][0-2]?
 - name: purple
   cap-colour: 'ad1aad'
-  glyph-colour: '32a852'
+  glyph-style: '32a852'
   keys:
   - .*

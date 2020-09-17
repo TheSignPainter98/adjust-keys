@@ -10,12 +10,12 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import walk
 from .positions import resolve_glyph_positions
 from .scale import get_scale
-from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
+from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
 from os.path import exists, join
-from re import match
+from re import IGNORECASE, match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
 if blender_available():
@@ -43,9 +43,10 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
         remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
+        style:str = get_style(placed_glyphs[i])
         placed_glyphs[i]['vector'] = [
-            '<g transform="translate(%f %f)">' %
-            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])
+            '<g transform="translate(%f %f)"%s>' %
+            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'], ' ' + style if style else '')
         ] + list(
             map(lambda c: c.toxml(),
                 (filter(lambda c: type(c) == Element,
@@ -72,8 +73,6 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     objectsPreImport: [str] = data.objects.keys()
     ops.import_curve.svg(filepath=output_location)
     objectsPostImport: [str] = data.objects.keys()
-
-    # Rename the svg
     svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
 
     # Apprpriately scale the objects
@@ -148,6 +147,21 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
             profile_x_y_offset_keys))
 
     return data
+
+def get_style(key:dict) -> str:
+    if safe_get(key, 'glyph-style') is not None:
+        raw_style:str = key['glyph-style']
+        if match('^[0-9a-f]{6}$', key['glyph-style'], IGNORECASE) is not None:
+            # Apply RGB colour
+            style = 'fill="%s"' % raw_style.upper()
+        else:
+            # Otherwise assume CSS has been written
+            if not raw_style.endswith(';'):
+                raw_style += ';'
+            style = 'style="%s"' % raw_style.replace('\\', '\\\\').replace('"', '\\"')
+        return style
+    return ''
+
 
 def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
     if special_offset[0] == 'iso-enter':

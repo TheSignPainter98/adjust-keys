@@ -5,7 +5,7 @@ from re import IGNORECASE, match
 def colourise_layout(layout:[dict], colour_map:[dict]) -> [dict]:
     for key in layout:
         apply_colouring(key, colour_map, 'cap-colour', 'cap-colour-raw')
-        apply_colouring(key, colour_map, 'glyph-colour', 'glyph-colour-raw')
+        apply_colouring(key, colour_map, 'glyph-style', 'glyph-colour-raw')
     return layout
 
 def apply_colouring(key:dict, colour_map:[dict], target_key:str, raw_key:str):
