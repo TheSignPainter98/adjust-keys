@@ -27,34 +27,17 @@ if blender_available():
     data = LazyImport('bpy', 'data')
     context = LazyImport('bpy', 'context')
 
-def main(*args: [[str]]) -> int:
-    pargs: Namespace = parse_args(args)
-    init_logging(pargs)
-    if not exists(pargs.output_dir):
-        printi('Making non-existent directory "%s"' % pargs.output_dir)
-        makedirs(pargs.output_dir, exist_ok=True)
-    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
-    if not blender_available():
-        die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
 
-    adjust_caps(layout, pargs)
-
-    print_warnings()
-
-    return 0
-
-
-def adjust_caps(layout: [dict], pargs:Namespace) -> dict:
+def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map)
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset, colour_map)
+        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
 
-    # Sequentially import the models (for thread-safety)
+    # Sequentially import the models
     printi('Preparing materials')
     colourMaterials:dict = {}
     if colour_map is not None:
@@ -137,8 +120,6 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
             cap_data['cap-obj'] = new_obj
             context.scene.collection.objects.link(new_obj)
 
-    layout_with_caps = list(map(lambda cap: apply_colour(cap, colour_map), layout_with_caps))
-
     # Warn about missing models
     missing_models: [str] = list_diff(
         set(map(lambda cap: cap['cap-name'], layout)),
@@ -150,27 +131,12 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
     return layout_with_caps
 
 
-def handle_cap(cap: dict, unit_length: float, cap_x_offset: float,
-        cap_y_offset: float, colour_map:[dict]):
+def handle_cap(cap: dict, unit_length: float, cap_x_offset: float, cap_y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
     move_object_origin_to_global_origin(cap['cap-obj'])
     cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
     cap = apply_cap_position(cap)
     printi('Resolving colour of cap %s' % cap['cap-name'])
-
-
-def apply_colour(cap:dict, colour_map:[dict]) -> dict:
-    cap_name:str = cap['key']
-    if 'cap-colour-raw' in cap:
-        cap['cap-colour'] = cap['cap-colour-raw']
-        return cap
-    if colour_map is not None:
-        for mapping in colour_map:
-            if any(list(map(lambda r: match('^' + r + '$', cap_name, IGNORECASE) is not None, mapping['keys']))):
-                cap['cap-colour'] = mapping['name']
-                return cap
-    cap['cap-colour'] = None
-    return cap
 
 
 def apply_cap_position(cap: dict) -> dict:
@@ -185,10 +151,3 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-name': basename(c)[:-4],
             'cap-source': c,
         }, capFiles))
-
-
-if __name__ == '__main__':
-    try:
-        exit(main(argv))
-    except KeyboardInterrupt:
-        exit(1)

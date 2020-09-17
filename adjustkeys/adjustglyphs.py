@@ -29,21 +29,6 @@ if blender_available():
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def main(*args: [str]) -> int:
-    pargs: Namespace = parse_args(args)
-    init_logging(pargs)
-
-    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
-    if not blender_available():
-        die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
-
-    svgObjNames: [str] = adjust_glyphs(layout, pargs)
-
-    print_warnings()
-
-    return 0
-
-
 def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
@@ -187,10 +172,3 @@ def glyph_files(dname: str) -> [str]:
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
-
-
-if __name__ == '__main__':
-    try:
-        exit(main(argv))
-    except KeyboardInterrupt:
-        exit(1)

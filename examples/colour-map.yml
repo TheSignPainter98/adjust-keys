@@ -1,11 +1,13 @@
 - name: green
-  colour: '32a852'
+  cap-colour: '32a852'
+  glyph-colour: 'ad1aad'
   keys:
   - .-.+
   - '[^+/*-]'
   - ''
   - F[1-49][0-2]?
 - name: purple
-  colour: 'ad1aad'
+  cap-colour: 'ad1aad'
+  glyph-colour: '32a852'
   keys:
   - .*
