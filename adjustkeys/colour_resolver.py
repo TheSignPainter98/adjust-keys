@@ -15,7 +15,7 @@ def apply_colouring(key:dict, colour_map:[dict], target_key:str, raw_key:str):
         if colour_map is not None:
             key_name = key['key']
             for mapping in colour_map:
-                if any(map(lambda r: match('^' + r + '$', key_name, IGNORECASE) is not None, mapping['keys'])):
+                if target_key in mapping and any(map(lambda r: match('^' + r + '$', key_name, IGNORECASE) is not None, mapping['keys'])):
                     key[target_key] = mapping['name']
                     return
         key[target_key] = None
