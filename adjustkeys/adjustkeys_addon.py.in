@@ -192,9 +192,9 @@ def register():
 
     # Check dependencies are installed
     try:
-        from .adjustkeys.dependency_handler import import_module
+        from .adjustkeys.dependency_handler import test_module_available
         for dependency in dependencies:
-            import_module(dependency.module, global_name=dependency.name)
+            test_module_available(dependency.module)
         global dependencies_installed
         dependencies_installed = True
     except ModuleNotFoundError as mnferr:

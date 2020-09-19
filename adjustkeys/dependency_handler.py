@@ -3,7 +3,7 @@
 from .path import adjustkeys_path
 from bpy.app import binary_path_python
 from ensurepip import bootstrap as bootstrap_pip
-from importlib import import_module as import_mod
+from importlib import import_module, invalidate_caches
 from importlib.util import find_spec
 from os import _Environ, environ, makedirs
 from os.path import dirname, exists, join
@@ -48,12 +48,11 @@ def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
     if prev_pip_target is not None:
         environ['PIP_TARGET'] = prev_pip_target
 
-    # Check that the import worked.
-    import_module(mod_name, global_name)
+    # Invalidate the finder caches as a module has been installed since the python interpreter began
+    invalidate_caches()
 
-def import_module(mod_name:str, global_name:str=None):
-    push_dependency_path()
-    if global_name is None:
-        global_name = mod_name
-    globals()[global_name] = import_mod(mod_name)
-    pop_dependency_path()
+    # Check that the import worked.
+    test_module_available(mod_name)
+
+def test_module_available(mod_name:str):
+    __import__(mod_name) # Import the module without adding it to the current namespace
