@@ -31,7 +31,9 @@ bl_info = {
 if 'bpy' in locals():
     import importlib
     if 'adjustkeys' in locals():
+        push_dependency_path()
         importlib.reload(locals()['adjustkeys'])
+        pop_dependency_path()
 
 arg_dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
@@ -61,10 +63,9 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
-        push_dependency_path()
         from .adjustkeys.adjustkeys import main as adjustkeys
         from .adjustkeys.util import safe_get
-        pop_dependency_path()
+        print('=' * 80)
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
@@ -72,6 +73,7 @@ class AdjustKeysOperator(Operator):
         num_warnings = safe_get(inf, 'num_warnings')
         if num_warnings is not None and num_warnings > 0:
             self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
+        print('=' * 80)
         return {'FINISHED'}
 
 KCZA_CUSTOM_OPERATORS
@@ -110,6 +112,7 @@ class KCZA_OT_InstallDependencies(Operator):
         return not dependencies_installed
 
     def execute(self, context):
+        print('=' * 80)
         try:
             from .adjustkeys.dependency_handler import ensure_pip, install_module
             ensure_pip()
@@ -123,6 +126,7 @@ class KCZA_OT_InstallDependencies(Operator):
         for cls in classes:
             register_class(cls)
         self.report({'INFO'}, 'Finished installing Adjustkeys dependencies')
+        print('=' * 80)
         return {'FINISHED'}
 
 class KCZA_PT_DependencyWarningPanel(Panel):
@@ -137,9 +141,7 @@ class KCZA_PT_DependencyWarningPanel(Panel):
         return not dependencies_installed
 
     def draw(self, context):
-        push_dependency_path()
         from .adjustkeys.util import dumb_wrap_text
-        pop_dependency_path()
         layout = self.layout
         warningLines = [
                 "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before asking your permission to install these, you should note the following.",
@@ -158,9 +160,7 @@ class KCZA_Preferences(AddonPreferences):
     message_width = 80
 
     def draw(self, context):
-        push_dependency_path()
         from .adjustkeys.util import dumb_wrap_text
-        pop_dependency_path()
         layout = self.layout
         if not dependencies_installed:
             updateMessageText = [
@@ -183,11 +183,11 @@ classes = [
 ] + generatedOperatorClasses
 
 def register():
+    push_dependency_path()
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
 
     for cls in preference_classes:
-        print('Registering', str(cls), '...')
         register_class(cls)
 
     # Check dependencies are installed
@@ -203,19 +203,17 @@ def register():
         return
 
     for cls in classes:
-        print('Registering', str(cls), '...')
         register_class(cls)
 
 def unregister():
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
     for cls in preference_classes:
-        print('Unregistering', str(cls), '...')
         unregister_class(cls)
     if dependencies_installed:
         for cls in classes:
-                print('Unregistering', str(cls), '...')
-                unregister_class(cls)
+           unregister_class(cls)
+    pop_dependency_path()
 
 if __name__ == '__main__':
     register()

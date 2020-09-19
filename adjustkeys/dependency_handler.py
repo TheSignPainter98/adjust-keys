@@ -7,13 +7,10 @@ from importlib import import_module as import_mod
 from importlib.util import find_spec
 from os import _Environ, environ, makedirs
 from os.path import dirname, exists, join
-#  from pip import main as pip
 from subprocess import CalledProcessError, check_output, run
 from sys import path
 
 pip:[str] = [binary_path_python, '-m', 'pip']
-#  pip:[str] = [join(dirname(binary_path_python), 'pip3')] # Windows version doesn't seem to ship with the PIP binary... hooray...
-dependency_path_modified:bool = False
 dependency_install_dir:str = join(dirname(__file__), 'site-packages')
 
 def ensure_pip():
@@ -43,7 +40,6 @@ def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
     environ['PYTHONUSERBASE'] = dependency_install_dir
     environ['PIP_TARGET'] = dependency_install_dir
 
-    # '--force-reinstall',
     if not exists(dependency_install_dir):
         makedirs(dependency_install_dir)
     run(pip + ['install', '--target', dependency_install_dir, '--upgrade', '--force-reinstall', pkg_name], env=environ)
