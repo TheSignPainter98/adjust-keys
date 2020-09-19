@@ -2,6 +2,7 @@
 
 from os import walk as owalk
 from os.path import abspath, dirname, join, normpath
+from tempfile import NamedTemporaryFile
 
 adjustkeys_path:str = normpath(abspath(dirname(__file__)))
 if adjustkeys_path.endswith('adjustkeys'):
@@ -14,3 +15,9 @@ def walk(dname:str) -> [str]:
     for (r,_,fs) in owalk(dname):
         ret.extend(map(lambda f: join(r,f), fs))
     return ret
+
+def get_temp_file_name() -> str:
+    name:str
+    with NamedTemporaryFile() as f:
+        name = f.name
+    return name

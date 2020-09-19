@@ -3,17 +3,18 @@
 .DEFAULT_GOAL := all
 SHELL = bash
 
-ADJUST_KEYS_SRCS = $(shell ./deps adjustkeys/adjustkeys.py) adjustkeys/version.py
+ADJUST_KEYS_SRCS = $(shell ./deps.py adjustkeys/adjustkeys.py) adjustkeys/version.py
 DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
-BLENDER_ADDON_CONTENT = $(ADJUST_KEYS_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
+BLENDER_ADDON_SRCS = $(shell ./deps.py adjustkeys/adjustkeys_addon.py.in)
+BLENDER_ADDON_CONTENT = $(BLENDER_ADDON_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
 
 all: adjustkeys-bin
 .PHONY: all
 
 ifndef NO_CYTHON
 define runCython
-	cython3 -X language_level=3 $^
-	@$(RM) $(^:.py=.c)
+	cython3 -X language_level=3 $(filter %.py,$^)
+	@$(RM) $(patsubst %.py,%.c,$(filter %.py,$^))
 endef
 endif
 
@@ -47,6 +48,7 @@ dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
 .PHONY: dist
 
 adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
+	$(runCython)
 	mkdir -p adjust_keys_blender_addon
 	cp --parents $(foreach file,$^,"$(file)") adjust_keys_blender_addon/
 	cp adjust_keys_blender_addon/adjustkeys/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
@@ -79,8 +81,8 @@ requirements.txt: $(ADJUST_KEYS_SRCS)
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
 
-adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py propgen
-	./propgen < $< > $@
+adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS)
+	./addongen adjustkeys/adjustkeys.py < $< > $@
 
 profiles/%/centres.yml: profiles/%/centres.csv centres.yml.in centres.awk
 	(awk -F, -f centres.awk | m4 -P - centres.yml.in) < $< > $@
@@ -100,7 +102,6 @@ LICENSE:
 opts-header.txt:
 	@# Do nothing
 
-
 clean:
-	$(RM) -r bin_*/ __pycache__/ bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
+	$(RM) -r bin_*/ $(wildcard **/__pycache__/) bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
 .PHONY: clean
