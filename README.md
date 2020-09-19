@@ -8,10 +8,10 @@ Gone will be the days of manually placing caps into the correct locations and sp
 
 This script can be used to create a _single source of truth_ for glyph alignment on caps and—as an added bonus—colourway-config, so later changes and fixes can be more easily propagated.
 
-Please note that for many of the steps below, default configuration files are provided (obtained through the zip on the [releases page][releases]).
-Also, command-line options can be saved and automatically read from the file `opts.yml` for later use.
+Please note that for the steps below, default configuration files are provided (and obtained through the zip on the [releases page][releases]), so the annoying in-the-dark stage of getting the thing working for the first time should be largely avoided.
+Configuration can optionally be saved and read from a file.
 
-The [python][python] API of `adjustkeys` also allows a coder to be notified of the objects it creates, thereby enabling it to form part of a larger keyboard-render build-system, should the user be that-way inclined.
+The [python][python] API of `adjustkeys` also allows a coder to be notified of the objects it creates, thereby allowing it to form part of a larger keyboard-render build-system, should the user be that-way inclined.
 
 ## Table of Contents
 
@@ -21,6 +21,7 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 * [Usage](#usage)
 	* [Usage Through a Blender Addon (Regular)](#usage-through-a-blender-addon-regular)
 	* [Usage Through Other Scripts (Advanced)](#usage-through-other-scripts-advanced)
+	* [Uninstalling](#uninstalling)
 * [Custom Setup](#custom-setup)
 	* [Using a custom layout](#using-a-custom-layout)
 	* [Changing keycap profiles](#changing-keycap-profiles)
@@ -47,10 +48,10 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of Blender (v2.8x or v2.9x work), [`python3`][python] and its package manager, [`pip3`][pip] (these probably came with Blender) and a little familiarity with the YAML syntax (although this can be picked up as it’s designed to be relatively human-friendly).
-There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python.
+You’ll need a working installation of [Blender][blender] (v2.8x or v2.9x work) and a little familiarity with the [yaml][yaml-intro] syntax (although this can be picked up as it’s designed to be relatively human-friendly).
+There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python, both are explained here.
 
-**Important**: currently, you need to be able to view the console output for some features of `adjustkeys`, which can be done as follows.
+**Important**: currently, you need to be able to view the console output for certain features of `adjustkeys`, which can be done as follows depending on your operating system.
 
 - Windows:
 	1. Open blender as usual
@@ -111,6 +112,20 @@ inf:dict = adjustkeys(adjustkeys_args)
 
 Assuming that the `my-super-cool-glyphs` folder is full of (super cool) glyphs, that the `adjustkeys.zip` has been extracted into the same folder as the script above (hence `examples/` is next to it) and that `my-exotic-layout.json` exists and contains a valid [KLE][kle] layout.
 
+### Uninstalling
+
+You should be able to uninstall through the usual Blender UI, that is, _Edit > Preferences > Add-ons > Adjustkeys > Remove,_ but in some cases this may not work some python binary files can get marked as read-only during the installation process, and Blender’s delete function doesn’t force-delete to override this condition.
+As a result, if the ‘remove’ button doesn’t work you may need to do the following:
+
+1. Close Blender
+2. Go to the directory where extensions are installed, for a standard setup, this will probably be of the form:
+	- **Windows**: `C:\\Users\\<username>\\AppData\\Roaming\\Blender Foundation\\Blender\\2.XX\\scripts\\addons\\`
+	- **macOS**: `/Users/<username>/Library/Application Support/Blender/2.XX/scripts/addons/`
+	- **Linux**: `~/.config/blender/2.XX/scripts/addons/`
+3. Delete the `adjust_keys_blender_addon` folder
+
+There are no configuration files or python dependencies located outside of this folder, so after step 3, your Blender installation will be completely free of any `adjustkeys` related material.
+
 ## Custom Setup
 
 It’s a fair assumption that the user will not be contented with just re-making the examples all day—they should probably want to do something cool themselves.
@@ -125,7 +140,6 @@ They’ll be explained in this section, but as an overview, `adjustkeys` takes:
 - A `yaml` file which lists the profiles of each row in order top to bottom
 - A `yaml` file which specifies the location of the centre of a key in a particular profile
 - A `yaml` file which specifies a mapping from key names to glyph names
-
 
 ### Using a custom layout
 
@@ -232,13 +246,13 @@ Here’s an example:
 - name: green
   colour: '32a852'
   keys:
-  - Esc
-  - F4
-  - Alt
+  - .-.+
+  - '[^+/*-]'
+  - ''
+  - F[1-49][0-2]?
 - name: purple
   colour: 'ad1aad'
   keys:
-  - .*
 ```
 
 Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.
@@ -324,7 +338,6 @@ Please ensure that credit is given where it is due.
 [kle]: http://www.keyboard-layout-editor.com "Keyboard layout editor"
 [kle-ansi-104]: https://github.com/ijprest/keyboard-layout-editor/blob/master/layouts.json
 [makefile]: https://github.com/TheSignPainter98/adjust-keys/blob/master/Makefile
-[menacing]: https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/examples/menacing.svg
 [ofl]: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
@@ -332,4 +345,5 @@ Please ensure that credit is given where it is due.
 [regex-help]: https://docs.python.org/3/howto/regex.html
 [regex-playground]: https://regexr.com
 [releases]: https://www.github.com/TheSignPainter98/adjust-keys/releases
+[yaml-intro]: https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
 [zfrontier]: https://en.zfrontier.com
