@@ -22,11 +22,10 @@ def ensure_pip():
 
 def push_dependency_path():
     if dependency_install_dir not in path:
-        dependency_path_modified = True
         path.append(dependency_install_dir)
 
 def pop_dependency_path():
-    if dependency_path_modified:
+    if dependency_install_dir in path:
         del path[path.index(dependency_install_dir)]
 
 def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
