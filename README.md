@@ -211,24 +211,27 @@ This means that the row-number can only increase with greater distance from the 
 
 ### Setting colours (via KLE or name-matching)
 
-There are two ways of colouring keycaps: either from raw [KLE][kle] input or from a colour map file.
+There are two ways of colouring keycaps and glyphs: either from raw [KLE][kle] input or from a colour map file.
 The first way is always active and is just a matter of adjusting RGB colours through the website; the second way can be deactivated but is on by default.
 
-A colour map file is a list of objects, each of which specifies a colour, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
+A colour map file is a list of objects, each of which possibly specifies a keycap colour and/or a glyph style, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
 The file is scanned from top to bottom, so if there are two places a keycap can be matched from, then only one nearest the top of the file will be used.
-Here’s an example:
+The `cap-colour` field is always a 6-digit hex number, available from any reputable colour picker.
+The `glyph-style` field is a little more interesting—it can either be a 6-digit hex colour like `cap-colour`, _or,_ it can be a section of CSS code which is applied directly to the svg data.
+
+Here’s an example of the first ten lines of the [example colour-map file](https://github.com/TheSignPainter98/adjust-keys/blob/master/examples/colour-map.yml) in the repo:
 
 ```yaml
 - name: green
-  colour: '32a852'
+  cap-colour: '32a852'
+  glyph-style: 'fill:#ad1aad;'
   keys:
-  - Esc
-  - F4
-  - Alt
+  - .-.+
+  - '[^+/*-]'
+  - ''
+  - F[1-49][0-2]?
 - name: purple
-  colour: 'ad1aad'
-  keys:
-  - .*
+  cap-colour: 'ad1aad'
 ```
 
 Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.
@@ -240,8 +243,6 @@ If you aren’t too comfortable using regular expressions, `adjustkeys` takes a 
 These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of ‘any character,’ so `.*` is just a concise way of telling `adjustkeys` to match _anything._
 It’s not essential to know regular expressions, but a few basics can make things a little more streamlined.
 The cheatsheet and playground on [regexr][regex-playground] may be helpful.
-
-Please note that the RGB colour must be six characters long.
 
 <!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
 <!-- TODO: remove this nonsense #### fdhjkfhjdskafhjdkslafs[bb -->
