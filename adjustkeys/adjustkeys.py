@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from .dependency_handler import handle_missing_dependencies
-handle_missing_dependencies()
-
 from .adjustcaps import adjust_caps, get_caps
 from .adjustglyphs import adjust_glyphs, glyph_files
-from .args import adjustkeys_path,parse_args, Namespace
+from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .colour_resolver import colourise_layout
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit

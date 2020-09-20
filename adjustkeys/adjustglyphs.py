@@ -7,7 +7,7 @@ from .glyphinf import glyph_inf
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
-from .path import walk
+from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_positions
 from .scale import get_scale
 from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem, safe_get
@@ -22,6 +22,7 @@ if blender_available():
     from bpy import ops
     data = LazyImport('bpy', 'data')
 
+adjusted_svg_file_name:str = get_temp_file_name()
 
 ##
 # @brief Entry point function, should be treated as the first thing called
@@ -63,27 +64,27 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
-    output_location: str = pargs.output_prefix + '.svg'
-    printi('Writing to file "%s"' % output_location)
-    svgObjectNames: str = None
-    with open(output_location, 'w+') as f:
-        print(svg, file=f)
+    # Cheeky way of making a temporary file, which avoids permissions issue when Windows tries to open the same tempfile named file twice. Isn't great but at least it's OS-independent.
+    printi('Writing svg to file "%s"' % adjusted_svg_file_name)
+    with open(adjusted_svg_file_name, 'w+') as f:
+        f.write(svg)
 
     printi('Importing svg into blender')
     objectsPreImport: [str] = data.objects.keys()
-    ops.import_curve.svg(filepath=output_location)
+    ops.import_curve.svg(filepath=adjusted_svg_file_name)
     objectsPostImport: [str] = data.objects.keys()
-    svgObjectNames = list_diff(objectsPostImport, objectsPreImport)
+    svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
 
     # Apprpriately scale the objects
     printi('Scaling glyphs')
     for svgObjectName in svgObjectNames:
         data.objects[svgObjectName].scale *= scale
 
-    # Clean output
-    if exists(output_location):
-        printi('Deleting file "%s"' % output_location)
-        remove(output_location)
+    # Clean away temporary files.
+    if exists(adjusted_svg_file_name):
+        printi('Cleaning away the placed-glyph svg file')
+        remove(adjusted_svg_file_name)
+
     printi('Successfully imported svg objects')
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}

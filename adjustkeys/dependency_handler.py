@@ -1,53 +1,58 @@
 # Copyright (C) Edward Jones
 
-have_run_dependency_handler:bool = False
+from .path import adjustkeys_path
+from bpy.app import binary_path_python
+from ensurepip import bootstrap as bootstrap_pip
+from importlib import import_module, invalidate_caches
+from importlib.util import find_spec
+from os import _Environ, environ, makedirs
+from os.path import dirname, exists, join
+from subprocess import CalledProcessError, check_output, run
+from sys import path
 
-def handle_missing_dependencies():
-    # Don't run the dependency handler multiple times in the same session
-    global have_run_dependency_handler
-    if have_run_dependency_handler:
-        return
-    have_run_dependency_handler = True
+pip:[str] = [binary_path_python, '-m', 'pip']
+dependency_install_dir:str = join(dirname(__file__), 'site-packages')
 
-    # Get dependency list
-    from .path import adjustkeys_path
-    from importlib.util import find_spec
-    from os.path import exists, join
-    requirements_file:str = join(adjustkeys_path, 'requirements.txt')
-    if not exists(requirements_file):
-        return
-    from subprocess import PIPE, Popen
-    binary_path_python:str
-    if find_spec('bpy') is None:
-        from sys import executable
-        binary_path_python = executable
-    else:
-        from bpy.app import binary_path_python as bpp
-        binary_path_python = bpp
+def ensure_pip():
+    try:
+        run(pip + ['--version'], check=True)
+    except CalledProcessError:
+        bootstrap_pip()
+        environ.pop('PIP_REQ_TRACKER', None)
 
-    # Get installed packages
-    pipListProc:Popen = Popen([binary_path_python, '-m', 'pip', 'list'], stdout=PIPE)
-    o:tuple = pipListProc.communicate()
-    pstdout:str = o[0].decode()
-    if pipListProc.returncode:
-        from .exceptions import AdjustKeysException
-        raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
-    installed_packages:[str] = list(map(lambda l: l.split(' ')[0], filter(lambda l: l, pstdout.split('\n'))))[2:]
+def push_dependency_path():
+    if dependency_install_dir not in path:
+        path.append(dependency_install_dir)
 
-    # Get required packages
-    req_lines:[str]
-    with open(requirements_file, 'r') as rf:
-        req_lines = rf.readlines()
-    reqs:[str] = list(map(lambda l: l.split('==')[0], req_lines))
+def pop_dependency_path():
+    if dependency_install_dir in path:
+        del path[path.index(dependency_install_dir)]
 
-    # Compute missing packages
-    missing_packages:[str] = [ pkg for pkg in reqs if pkg not in installed_packages ]
+def install_module(mod_name:str, pkg_name:str=None, global_name:str=None):
+    if pkg_name is None:
+        pkg_name = mod_name
+    if global_name is None:
+        global_name = mod_name
 
-    # Install any missing packages
-    if missing_packages != []:
-        pipInstallProc:Popen = Popen([binary_path_python, '-m', 'pip', 'install', '-r', requirements_file])
-        pipInstallProc.communicate()
-        if pipInstallProc.returncode:
-            from .exceptions import AdjustKeysException
-            raise AdjustKeysException('Something went wrong when getting the list of installed packages, see pip output for more details')
-        print('Successfully installed adjustkeys dependencies')
+    prev_python_user_base:str = environ.pop('PYTHONUSERBASE', None)
+    prev_pip_target:str = environ.pop('PIP_TARGET', None)
+    environ['PYTHONUSERBASE'] = dependency_install_dir
+    environ['PIP_TARGET'] = dependency_install_dir
+
+    if not exists(dependency_install_dir):
+        makedirs(dependency_install_dir)
+    run(pip + ['install', '--target', dependency_install_dir, '--upgrade', '--force-reinstall', pkg_name], env=environ)
+
+    if prev_python_user_base is not None:
+        environ['PYTHONUSERBASE'] = prev_python_user_base
+    if prev_pip_target is not None:
+        environ['PIP_TARGET'] = prev_pip_target
+
+    # Invalidate the finder caches as a module has been installed since the python interpreter began
+    invalidate_caches()
+
+    # Check that the import worked.
+    test_module_available(mod_name)
+
+def test_module_available(mod_name:str):
+    __import__(mod_name) # Import the module without adding it to the current namespace

@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate artifacts v15
+name: Generate artifacts v16
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -42,4 +42,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
+          args: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md README.md

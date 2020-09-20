@@ -14,6 +14,17 @@ from .log import die
 def concat(a: list, b: list) -> list:
     return a + b
 
+##
+# @brief Concatenate a pair of lists by mutating the first (impure)
+#
+# @param a:list A list
+# @param b:list Another list
+#
+# @return The concatenation of `a` and `b`; `a` is now equal to the concatenation of the original values
+def iconcat(a: list, b:list) -> list:
+    a.extend(b)
+    return a
+
 
 ##
 # @brief Compute the intersection of a pair of same-type lists
@@ -167,3 +178,48 @@ def get_dicts_with_duplicate_field_values(data:[dict], key:object) -> dict:
         else:
             seens[value] = [datum]
     return { p:seens[p] for p in seens if len(seens[p]) > 1 }
+
+def dumb_wrap_text(text:[str], width:int) -> [str]:
+    indentText:str = '    '
+    bulletText:str = '∙ '
+
+    def indent(p:tuple) -> str:
+        parInd:int = p[0]
+        parText:str = p[1]
+
+        if parInd:
+            if parText.startswith(bulletText):
+                parText = indentText[:-len(bulletText)] + parText
+            else:
+                parText = indentText + parText
+        return parText
+
+    indentedText:[str] = map(indent, enumerate(text))
+
+    def clean_line(line:str) -> str:
+        if line.startswith(indentText) or line.startswith(indentText[:-len(bulletText)]):
+            return line
+        else:
+            return line.strip()
+
+    def dumb_wrap_paragraph(para:str, width:int) -> [str]:
+        spaceIndices:[int] = [ pos for (pos,char) in enumerate(para) if char == ' ' ]
+        splitPara:[str] = []
+        currIndex:int = 0
+        currLen:int = 0
+        prevSpaceIndex:int = 0
+        for spaceIndex in spaceIndices:
+            if spaceIndex - currIndex > width:
+                # Break
+                splitPara.append(clean_line(para[currIndex:prevSpaceIndex]))
+                currIndex = prevSpaceIndex
+            prevSpaceIndex = spaceIndex
+        if len(para) - 1 - currIndex > width:
+            splitPara.append(clean_line(para[currIndex:spaceIndex]))
+            splitPara.append(clean_line(para[spaceIndex:]))
+        else:
+            splitPara.append(clean_line(para[currIndex:]))
+
+        return splitPara
+
+    return list(reduce(iconcat, map(lambda l: dumb_wrap_paragraph(l, width), indentedText)))

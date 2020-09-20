@@ -1,19 +1,18 @@
 # Copyright (C) Edward Jones
-# Type annotations have been removed as they seem to interfere with importing into Blender. I'm sorry.
+# Type annotations have been removed as they seem to interfere with importing into Blender. I'm sorry, but my hands have been forced :(
 
+from .adjustkeys.arg_defs import arg_dict, configurable_args
+from .adjustkeys.dependency_handler import pop_dependency_path, push_dependency_path
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
+from bpy.types import AddonPreferences, Context, Panel, Operator, PropertyGroup, Scene
+from bpy.utils import register_class, unregister_class
+from collections import namedtuple
 from importlib import reload
-from sys import path
+from inspect import getmembers
+from math import ceil, log10
 from os.path import dirname
-from .adjustkeys.devtools import setup_addon_modules
-#  reload(.adjustkeys.devtools)
-modules = setup_addon_modules(__path__, __name__, 'bpy' in locals())
-path.append(dirname(__file__))
-from .adjustkeys.args import arg_dict, configurable_args
-from .adjustkeys.adjustkeys import main as adjustkeys
-del path[path.index(dirname(__file__))]
-
-from .adjustkeys.dependency_handler import handle_missing_dependencies
-handle_missing_dependencies()
+from subprocess import CalledProcessError
+from sys import path
 
 bl_info = {
         'name': 'adjustkeys',
@@ -22,28 +21,29 @@ bl_info = {
         'blender': (2, 83, 0),
         'location': 'Properties > Scene Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
-        'warning': 'Adjustkeys is still in development so please play nice :P',
+        'warning': 'Adjustkeys requires some python dependencies. It’s also new so please play nice :P',
         'support': 'COMMUNITY',
         'category': 'Import-Export',
         'tracker_url': 'https://github.com/TheSignPainter98/adjust-keys/issues',
+        'wiki_url': 'https://github.com/TheSignPainter98/adjust-keys/blob/master/README.md'
     }
 
 if 'bpy' in locals():
     import importlib
     if 'adjustkeys' in locals():
-        importlib.reload(adjustkeys)
-
-from bpy.utils import register_class, unregister_class
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty, StringProperty
-from bpy.types import Context, Panel, Operator, PropertyGroup, Scene
-from inspect import getmembers
-from math import ceil, log10
+        push_dependency_path()
+        importlib.reload(locals()['adjustkeys'])
+        pop_dependency_path()
 
 arg_dict = { a['dest']: a for a in configurable_args }
 configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
+Dependency = namedtuple('Dependency', ['module', 'package', 'name'])
+
+dependencies = [ DEPENDENCY_LIST ]
+
 class KczaCustomPropertyGroup(PropertyGroup):
-    # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by propgen when building
+    # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by addongen when building
     KCZA_CUSTOM_PROPERTIES
 
 
@@ -63,17 +63,22 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
+        from .adjustkeys.adjustkeys import main as adjustkeys
+        from .adjustkeys.util import safe_get
+        print('=' * 80)
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
         inf = adjustkeys(akargs)
-        if 'num_warnings' in inf and (num_warnings := inf['num_warnings']) > 0:
+        num_warnings = safe_get(inf, 'num_warnings')
+        if num_warnings is not None and num_warnings > 0:
             self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
+        print('=' * 80)
         return {'FINISHED'}
 
 KCZA_CUSTOM_OPERATORS
 
-# If you're seeing CUSTOM_OPERATOR_* things, note that they get replaced by propgen when building
+# If you're seeing CUSTOM_OPERATOR_* things, note that they get replaced by addongen when building
 generatedOperators = [ KCZA_CUSTOM_OPERATOR_HEADERS ]
 generatedOperatorClasses = [ KCZA_CUSTOM_OPERATOR_TYPES ]
 
@@ -95,22 +100,120 @@ class KCZA_PT_AdjustKeysPanel(Panel):
             row = layout.row()
             row.prop(context.scene.adjustkeys_custom_props, carg['dest'])
 
+dependencies_installed = False
+class KCZA_OT_InstallDependencies(Operator):
+    bl_idname = 'kcza.install_dependencies'
+    bl_label = 'Install dependencies'
+    bl_description = "Download and install the python packages required for adjustkeys, requires internet connection and maybe elevated permissions to install things depending on your setup"
+    bl_options = {'REGISTER', 'INTERNAL'}
+
+    @classmethod
+    def poll(self, context):
+        return not dependencies_installed
+
+    def execute(self, context):
+        print('=' * 80)
+        try:
+            from .adjustkeys.dependency_handler import ensure_pip, install_module
+            ensure_pip()
+            for dependency in dependencies:
+                install_module(mod_name=dependency.module, pkg_name=dependency.package)
+        except (CalledProcessError, ImportError) as err:
+            self.report({'ERROR'}, str(err))
+            return {'CANCELLED'}
+        global dependencies_installed
+        dependencies_installed = True
+        for cls in classes:
+            register_class(cls)
+        self.report({'INFO'}, 'Finished installing Adjustkeys dependencies')
+        print('=' * 80)
+        return {'FINISHED'}
+
+class KCZA_PT_DependencyWarningPanel(Panel):
+    bl_context = 'scene'
+    bl_icon = 'MOD_MESHDEFORM'
+    bl_label = 'Adjustkeys'
+    bl_region_type = 'WINDOW'
+    bl_space_type = 'PROPERTIES'
+
+    @classmethod
+    def poll(self, context):
+        return not dependencies_installed
+
+    def draw(self, context):
+        from .adjustkeys.util import dumb_wrap_text
+        layout = self.layout
+        warningLines = [
+                "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before asking your permission to install these, you should note the following.",
+                "Firstly, an internet connection will be used to download the necessary packages.",
+                "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
+                "The following dependencies are required:"
+            ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
+                "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Look at the system console to see what’s happening behind the scenes."
+            ]
+        for line in dumb_wrap_text(warningLines, 50):
+            layout.label(text=line)
+        layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
+
+class KCZA_Preferences(AddonPreferences):
+    bl_idname = __name__
+    message_width = 80
+
+    def draw(self, context):
+        from .adjustkeys.util import dumb_wrap_text
+        layout = self.layout
+        if not dependencies_installed:
+            updateMessageText = [
+                    'Dependency status: some missing',
+                    'For more details and how to fix this, in the main window, please see Preferences > Scene Preferences > Adjustkeys.'
+                ]
+            for line in dumb_wrap_text(updateMessageText, self.message_width):
+                layout.label(text=line)
+        else:
+            messageText = [
+                    'Dependency status: OK'
+                ]
+            for line in dumb_wrap_text(messageText, self.message_width):
+                layout.label(text=line)
+
+preference_classes = [ KCZA_OT_InstallDependencies, KCZA_Preferences, KCZA_PT_DependencyWarningPanel ]
 classes = [
     KCZA_PT_AdjustKeysPanel,
     AdjustKeysOperator
 ] + generatedOperatorClasses
 
 def register():
+    push_dependency_path()
     register_class(KczaCustomPropertyGroup)
     Scene.adjustkeys_custom_props = PointerProperty(type=KczaCustomPropertyGroup)
+
+    for cls in preference_classes:
+        register_class(cls)
+
+    # Check dependencies are installed
+    try:
+        from .adjustkeys.dependency_handler import test_module_available
+        for dependency in dependencies:
+            test_module_available(dependency.module)
+        global dependencies_installed
+        dependencies_installed = True
+    except ModuleNotFoundError as mnferr:
+        print('Adjustkeys addon detected missing dependencies detected, showing install button and warning panel.', str(mnferr))
+        # Don't register everything else
+        return
+
     for cls in classes:
         register_class(cls)
 
 def unregister():
     unregister_class(KczaCustomPropertyGroup)
     del Scene.adjustkeys_custom_props
-    for cls in classes:
+    for cls in preference_classes:
         unregister_class(cls)
+    if dependencies_installed:
+        for cls in classes:
+           unregister_class(cls)
+    pop_dependency_path()
 
 if __name__ == '__main__':
     register()
