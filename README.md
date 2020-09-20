@@ -65,7 +65,7 @@ There’s two ways of interacting with `adjustkeys`, either through the Blender 
 
 Regardless of how you choose to use `adjustkeys`, you’ll need a text editor to edit the configuration files.
 Notepad or Blender’s editor work okay, but they don’t have syntax highlighting (which makes things _much_ easier).
-If you’re new around text-editors, I’d recommend [VSCodium][codium], a minimalistic editor which is just Microsoft’s excellent VSCode compiled from the source and hence without the snooping nonsense present in Microsoft’s closed-source binary.
+If you’re new around text-editors, I’d recommend [VSCodium][codium], a minimalistic editor which is just Microsoft’s excellent VSCode compiled from the source and hence without the snooping nonsense present in the canonical closed-source binary.
 
 ### Usage Through a Blender Addon (Regular)
 
