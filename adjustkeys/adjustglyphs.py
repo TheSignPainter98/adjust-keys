@@ -45,6 +45,8 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
                 {'svg': parseString(f.read()).documentElement})
         remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
         style:str = get_style(placed_glyphs[i])
+        if style:
+            remove_fill_from_svg(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = [
             '<g transform="translate(%f %f)"%s>' %
             (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'], ' ' + style if style else '')
@@ -164,6 +166,11 @@ def get_style(key:dict) -> str:
     else:
         return None
 
+def remove_fill_from_svg(node:Element):
+    if node.attributes and 'fill' in node.attributes.keys():
+        node.removeAttribute('fill')
+    for child in node.childNodes:
+        remove_fill_from_svg(child)
 
 def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
     if special_offset[0] == 'iso-enter':
