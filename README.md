@@ -19,8 +19,8 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 
 * [Why Bother?](#why-bother)
 * [Usage](#usage)
-	* [Usage Through a Blender Addon (Regular)](#usage-through-a-blender-addon-regular)
-	* [Usage Through Other Scripts (Advanced)](#usage-through-other-scripts-advanced)
+	* [Usage Through a Blender Addon (Regular difficulty)](#usage-through-a-blender-addon-regular-difficulty)
+	* [Usage Through Other Scripts (Masochist difficulty)](#usage-through-other-scripts-masochist-difficulty)
 	* [Uninstalling](#uninstalling)
 * [Custom Setup](#custom-setup)
 	* [Using a custom layout](#using-a-custom-layout)
@@ -67,7 +67,7 @@ Regardless of how you choose to use `adjustkeys`, you’ll need a text editor to
 Notepad or Blender’s editor work okay, but they don’t have syntax highlighting (which makes things _much_ easier).
 If you’re new around text-editors, I’d recommend [VSCodium][codium], a minimalistic editor which is just Microsoft’s excellent VSCode compiled from the source and hence without the snooping nonsense present in the canonical closed-source binary.
 
-### Usage Through a Blender Addon (Regular)
+### Usage Through a Blender Addon (Regular difficulty)
 
 You’ll need a working installation of Blender.
 
@@ -80,7 +80,7 @@ You’ll need a working installation of Blender.
 
 See the [custom setup section](#custom-setup) for how to change the stock settings into your own keycap set.
 
-### Usage Through Other Scripts (Advanced)
+### Usage Through Other Scripts (Masochist difficulty)
 
 If you want to use `adjustkeys` through another python script for the purpose of automating something a script:
 
