@@ -30,7 +30,7 @@ def main(progName:str) -> None:
     for p in replacements.items():
         file = file.replace(p[0], p[1])
     print("# If this file is difficult to read, that's because it was auto-generated")
-    print(file)
+    print(file, end='')
 
 def prop(a:dict) -> str:
     atype:type = a['type']
