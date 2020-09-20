@@ -53,7 +53,7 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             # Move col to next position
             col += key['width']
 
-            # Move to the next pair
+            # Move to the keycap representation
             i += shift
         if len(line) > 1 and 'shift-y' not in line[-1]:
             row += 1
@@ -107,6 +107,8 @@ def parse_key(key: 'either str dict',
         ret = key_subst(ret, 'y', 'shift-y')
     if 'c' in ret:
         ret = key_subst(ret, 'c', 'cap-colour-raw')
+    if 't' in ret:
+        ret = key_subst(ret, 't', 'glyph-colour-raw')
     if 'w' in ret:
         ret = key_subst(ret, 'w', 'width')
     else:

@@ -5,6 +5,7 @@ from .adjustcaps import adjust_caps, get_caps
 from .adjustglyphs import adjust_glyphs, glyph_files
 from .args import parse_args, Namespace
 from .blender_available import blender_available
+from .colour_resolver import colourise_layout
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .layout import get_layout, parse_layout
@@ -68,8 +69,6 @@ def adjustkeys(*args: [[str]]) -> dict:
         print('\n'.join(list(map(lambda kc: kc[0] + ' @ ' + kc[1], knownCaps))))
         return {}
 
-    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
-
     if not blender_available():
         die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
@@ -77,10 +76,14 @@ def adjustkeys(*args: [[str]]) -> dict:
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
 
+    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+    colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
+    coloured_layout:[dict] = colourise_layout(layout, colour_map)
+
     # Adjust model positions
     model_data:dict = {}
     if not pargs.no_adjust_caps:
-        model_data = adjust_caps(layout, pargs)
+        model_data = adjust_caps(layout, colour_map, pargs)
 
     # Adjust glyph positions
     glyph_data:dict = {}

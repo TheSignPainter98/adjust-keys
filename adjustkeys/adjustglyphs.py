@@ -10,12 +10,12 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_positions
 from .scale import get_scale
-from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem
+from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
 from os.path import exists, join
-from re import match
+from re import IGNORECASE, match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
 if blender_available():
@@ -30,21 +30,6 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def main(*args: [str]) -> int:
-    pargs: Namespace = parse_args(args)
-    init_logging(pargs)
-
-    layout = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
-    if not blender_available():
-        die('bpy is not available, please run adjustcaps from within Blender (instructions should be in the supplied README.md file)')
-
-    svgObjNames: [str] = adjust_glyphs(layout, pargs)
-
-    print_warnings()
-
-    return 0
-
-
 def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
@@ -59,9 +44,12 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
                 placed_glyphs[i],
                 {'svg': parseString(f.read()).documentElement})
         remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
+        style:str = get_style(placed_glyphs[i])
+        if style:
+            remove_fill_from_svg(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = [
-            '<g transform="translate(%f %f)">' %
-            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'])
+            '<g transform="translate(%f %f)"%s>' %
+            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'], ' ' + style if style else '')
         ] + list(
             map(lambda c: c.toxml(),
                 (filter(lambda c: type(c) == Element,
@@ -87,8 +75,6 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     objectsPreImport: [str] = data.objects.keys()
     ops.import_curve.svg(filepath=adjusted_svg_file_name)
     objectsPostImport: [str] = data.objects.keys()
-
-    # Rename the svg
     svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
 
     # Apprpriately scale the objects
@@ -165,6 +151,27 @@ def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
 
     return data
 
+def get_style(key:dict) -> str:
+    if safe_get(key, 'glyph-style') is not None:
+        raw_style:str = key['glyph-style']
+        if match('^[0-9a-f]{6}$', key['glyph-style'], IGNORECASE) is not None:
+            # Apply RGB colour
+            style = 'style="fill:#%s;"' % raw_style.upper()
+        else:
+            # Otherwise assume CSS has been written
+            if not raw_style.endswith(';'):
+                raw_style += ';'
+            style = 'style="%s"' % raw_style.replace('\\', '\\\\').replace('"', '\\"')
+        return style
+    else:
+        return None
+
+def remove_fill_from_svg(node:Element):
+    if node.attributes and 'fill' in node.attributes.keys():
+        node.removeAttribute('fill')
+    for child in node.childNodes:
+        remove_fill_from_svg(child)
+
 def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
     if special_offset[0] == 'iso-enter':
         if iso_enter_glyph_pos not in special_offset[1].keys():
@@ -188,9 +195,3 @@ def glyph_files(dname: str) -> [str]:
     if svgs == []:
         die('Couldn\'t find any svgs in directory "%s"' % dname)
     return svgs
-
-if __name__ == '__main__':
-    try:
-        exit(main(argv))
-    except KeyboardInterrupt:
-        exit(1)
