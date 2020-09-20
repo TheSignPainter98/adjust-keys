@@ -43,7 +43,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
     if colour_map is not None:
         colourMaterials = { m['name'] : m for m in colour_map }
         for m in colourMaterials.values():
-            colourStr:str = str(m['colour'])
+            colourStr:str = str(m['cap-colour'])
             colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
             m['material'] = data.materials.new(name=m['name'])
             m['material'].diffuse_color = colour
