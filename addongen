@@ -37,14 +37,22 @@ def prop(a:dict) -> str:
     label:str = '"' + a['label'] + '"'
     description:str = '"' + a['help'] + '"'
     dest:str = a['dest']
-    default = "arg_dict['%s']['default']" % dest
+    default:object = "arg_dict['%s']['default']" % dest
     if 'choices' in a:
         choices:[[str, str, str, int]] = []
         rawChoices = a['choices']
         for i in range(len(rawChoices)):
             choice = rawChoices[i]
-            choices.append((choice.upper().replace('-', '_'), choice.title(), '', i))
-        default = default + ".upper().replace('-', '_')"
+            formattedChoice:[object,str,str,int]
+            if atype == str:
+                formattedChoice = (choice.upper().replace('-', '_'), choice.title(), '', i)
+            else:
+                formattedChoice = (str(choice), str(choice), '', i)
+            choices.append(formattedChoice)
+        if atype == str:
+            default = default + ".upper().replace('-', '_')"
+        else:
+            defailt = str(default)
         return f'EnumProperty(items={choices}, name={label}, default={default}, description={description})'
     elif atype == bool:
         return f"BoolProperty(name={label}, description={description}, default={default})"
