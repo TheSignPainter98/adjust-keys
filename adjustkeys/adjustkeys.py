@@ -76,7 +76,7 @@ def adjustkeys(*args: [[str]]) -> dict:
         printi('Making non-existent directory "%s"' % pargs.output_dir)
         makedirs(pargs.output_dir, exist_ok=True)
 
-    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys)
+    layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys, not pargs.no_apply_colour_map)
     colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
     coloured_layout:[dict] = colourise_layout(layout, colour_map)
 
