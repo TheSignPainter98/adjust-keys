@@ -28,6 +28,9 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
 	* [Setting layout-row profiles](#setting-layout-row-profiles)
 	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
+* [Pitfalls](#pitfalls)
+	* [Missing keycap models due to incorrect layout row profiles file](#missing-keycap-models-due-to-incorrect-layout-row-profiles-file)
+	* [Deactivation colours](#deactivation-colours)
 * [Building from Source](#building-from-source)
 * [Contributing](#contributing)
 * [Gripes](#gripes)
@@ -271,6 +274,39 @@ If you aren’t too comfortable using regular expressions, `adjustkeys` takes a 
 These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of ‘any character,’ so `.*` is just a concise way of telling `adjustkeys` to match _anything._
 It’s not essential to know regular expressions, but a few basics can make things a little more streamlined.
 The cheatsheet and playground on [regexr][regex-playground] may be helpful.
+
+## Pitfalls
+
+Although adjustkeys is designed to be reasonably lenient, there are a few places an unsuspecting user can be caught out, so here’s a few things to keep in mind.
+
+### Missing keycap models due to incorrect layout row profiles file
+
+If you’re finding that some keys are missing, it may be because adjustkeys is looking for keycap models of widths and heights which do not exist.
+This may be because the layout-row-profiles file doesn’t specify the right list of shapes for the layout you have.
+For example, on a 100% layout, the first layout-row-profile file entry might correctly say that the top row is r5 but if the same file is used for a 60%, or a 40% layout, the top row will still be considered to be r5, and worse, the rest of the model shapes will be incorrect too.
+
+This is fixed by making sure that the layout-row-profiles file contains appropriate data, for example for a 40% layout the following may be more appropriate:
+
+```yaml
+- r3
+- r2
+- r1
+- r1
+```
+
+### Deactivation colours
+
+Currently, adjustkeys combines colour information from a KLE input and through a colour-map but as KLE does not have an explicit ‘default’ colouring mode which would indicate when to fall-back on the colour-map, there is no perfect way of deciding when to do so.
+The heuristic used by adjustkeys is as follows:
+
+- If a colour-map is enabled then:
+	- If the keycap being parsed has a glyph colour of `#000000`, this is taken as an indication to fall back on the user’s colour-map rules
+	- Otherwise the given glyph colour is specified as the intended colour
+	- If the keycap being parsed has a cap colour of `#cccccc`, this is taken as an indication to fall back on the user’s colour-map rules
+	- Otherwise the given cap colour is specified as the intended colour
+- Otherwise, KLE colours are taken as an exact specification of the user’s desired colourway
+
+Therefore, if the user wishes to use a colour of `#cccccc` for caps, or `#000000` for glyphs in their design, it may be better to tell adjustkeys not to use the colour-map file through the appropriate option.
 
 ## Building from Source
 
