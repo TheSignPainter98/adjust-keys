@@ -3,14 +3,17 @@
 from .log import die, printi, printw
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
+from types import SimpleNamespace
 from re import match
 
+cap_deactivation_colour:str = '#cccccc'
+glyph_deactivation_colour:str = '#000000'
 
-def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str) -> [dict]:
-    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys)
+def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str, use_deactivation_colour:bool) -> [dict]:
+    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys, use_deactivation_colour)
 
 
-def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str) -> [dict]:
+def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:bool) -> [dict]:
     homing_keys:[str] = raw_homing_keys.split(',')
     printi('Reading layout information')
 
@@ -20,49 +23,66 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             )
 
     parsed_layout: [dict] = []
-    row: float = 0.0
-    lineInd: int = 0
+    parser_default_state_dict:dict = {
+            'lineInd': 0,
+            'row': 0.0,
+            'col': 0.0,
+            'prevCol': 0.0,
+            'c': cap_deactivation_colour if not use_deactivation_colour else None,
+            't': glyph_deactivation_colour if not use_deactivation_colour else None,
+            'i': 0,
+        }
+    parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:
-        col: float = 0.0
-        prevCol: float = 0.0
-        i: int = 0
-        while i < len(line):
+        parser_state.col = 0.0
+        parser_state.prevCol = 0.0
+        parser_state.i = 0
+        while parser_state.i < len(line):
             # Parse for the next key
             printi('Handling layout, looking at pair "%s" and "%s"' %
-                   (str(line[i]).replace('\n', '\\n'),
-                    str(safe_get(line, i + 1)).replace('\n', '\\n')))
-            (shift, line[i]) = parse_key(line[i], safe_get(line, i + 1))
-            key: dict = line[i]
+                   (str(line[parser_state.i]).replace('\n', '\\n'),
+                    str(safe_get(line, parser_state.i + 1)).replace('\n', '\\n')))
+            (shift, line[parser_state.i]) = parse_key(line[parser_state.i], safe_get(line, parser_state.i + 1), parser_state)
+            key: dict = line[parser_state.i]
+
+            # Handle colour changes
+            parser_state.c = key['cap-colour-raw']
+            if use_deactivation_colour and parser_state.c == cap_deactivation_colour:
+                parser_state.c = None
+                key['cap-colour-raw'] = None
+            parser_state.t = key['glyph-colour-raw']
+            if use_deactivation_colour and parser_state.t == glyph_deactivation_colour:
+                parser_state.t = None
+                key['glyph-colour-raw'] = None
 
             # Handle shifts
             if 'shift-y' in key:
-                row += key['shift-y']
-                col = 0
+                parser_state.row += key['shift-y']
+                parser_state.col = 0
             if 'shift-x' in key:
-                col += key['shift-x']
+                parser_state.col += key['shift-x']
 
             # Apply current position data
-            key['row'] = row
-            key['col'] = col
-            key['profile-part'] = layout_row_profiles[min(lineInd, len(layout_row_profiles) - 1)]
+            key['row'] = parser_state.row
+            key['col'] = parser_state.col
+            key['profile-part'] = layout_row_profiles[min(parser_state.lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
             if 'key' in key:
                 parsed_layout += [key]
 
             # Move col to next position
-            col += key['width']
+            parser_state.col += key['width']
 
             # Move to the keycap representation
-            i += shift
+            parser_state.i += shift
         if len(line) > 1 and 'shift-y' not in line[-1]:
-            row += 1
-        lineInd = min([lineInd + 1, len(layout_row_profiles) - 1])
+            parser_state.row += 1
+        parser_state.lineInd = min([parser_state.lineInd + 1, len(layout_row_profiles) - 1])
 
     return list(map(lambda c: add_cap_name(c, homing_keys), parsed_layout))
 
-def parse_key(key: 'either str dict',
-              nextKey: 'maybe (either str dict)') -> [int, dict]:
+def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser_state:SimpleNamespace) -> [int, dict]:
     ret: dict
     shift: int = 1
 
@@ -107,8 +127,12 @@ def parse_key(key: 'either str dict',
         ret = key_subst(ret, 'y', 'shift-y')
     if 'c' in ret:
         ret = key_subst(ret, 'c', 'cap-colour-raw')
+    else:
+        ret['cap-colour-raw'] = parser_state.c
     if 't' in ret:
         ret = key_subst(ret, 't', 'glyph-colour-raw')
+    else:
+        ret['glyph-colour-raw'] = parser_state.t
     if 'w' in ret:
         ret = key_subst(ret, 'w', 'width')
     else:
