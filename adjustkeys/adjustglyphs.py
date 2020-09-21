@@ -156,7 +156,7 @@ def get_style(key:dict) -> str:
         raw_style:str = key['glyph-style']
         if match('^[0-9a-f]{6}$', key['glyph-style'], IGNORECASE) is not None:
             # Apply RGB colour
-            style = 'style="fill:#%s;"' % raw_style.upper()
+            style = 'style="fill:#%s;"' % raw_style
         else:
             # Otherwise assume CSS has been written
             if not raw_style.endswith(';'):
