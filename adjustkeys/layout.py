@@ -77,8 +77,8 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
                 key = rem(key, 'ry')
 
             # Apply current position data
-            key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r)
-            key['row'] = parser_state.ry + parser_state.y * cos(parser_state.r)
+            key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r) + parser_state.y * sin(parser_state.r)
+            key['row'] = parser_state.ry - parser_state.x * sin(parser_state.r) + parser_state.y * cos(parser_state.r)
             key['profile-part'] = layout_row_profiles[min(parser_state.lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
