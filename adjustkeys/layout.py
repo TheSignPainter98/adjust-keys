@@ -3,6 +3,7 @@
 from .log import die, printi, printw
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
+from math import cos, radians, sin
 from types import SimpleNamespace
 from re import match
 
@@ -25,17 +26,18 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
     parsed_layout: [dict] = []
     parser_default_state_dict:dict = {
             'lineInd': 0,
-            'row': 0.0,
-            'col': 0.0,
-            'prevCol': 0.0,
             'c': cap_deactivation_colour if not use_deactivation_colour else None,
             't': glyph_deactivation_colour if not use_deactivation_colour else None,
             'i': 0,
+            'x': 0.0,
+            'y': 0.0,
+            'r': 0.0,
+            'rx': 0.0,
+            'ry': 0.0,
         }
     parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:
-        parser_state.col = 0.0
-        parser_state.prevCol = 0.0
+        parser_state.x = 0.0
         parser_state.i = 0
         while parser_state.i < len(line):
             # Parse for the next key
@@ -57,14 +59,26 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
 
             # Handle shifts
             if 'shift-y' in key:
-                parser_state.row += key['shift-y']
-                parser_state.col = 0
+                parser_state.y += key['shift-y']
+                parser_state.x = 0
             if 'shift-x' in key:
-                parser_state.col += key['shift-x']
+                parser_state.x += key['shift-x']
+
+            # Handle the angle
+            parser_state.r = key['rotation']
+            if 'ry' in key or 'ry' in key:
+                parser_state.x = 0
+                parser_state.y = 0
+                if 'rx' in key:
+                    parser_state.rx = key['rx']
+                    key = rem(key, 'rx')
+                if 'ry' in key:
+                    parser_state.ry = key['ry']
+                key = rem(key, 'ry')
 
             # Apply current position data
-            key['row'] = parser_state.row
-            key['col'] = parser_state.col
+            key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r) + parser_state.y * sin(parser_state.r)
+            key['row'] = parser_state.ry - parser_state.x * sin(parser_state.r) + parser_state.y * cos(parser_state.r)
             key['profile-part'] = layout_row_profiles[min(parser_state.lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
@@ -72,12 +86,12 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
                 parsed_layout += [key]
 
             # Move col to next position
-            parser_state.col += key['width']
+            parser_state.x += key['width']
 
             # Move to the keycap representation
             parser_state.i += shift
         if len(line) > 1 and 'shift-y' not in line[-1]:
-            parser_state.row += 1
+            parser_state.y += 1
         parser_state.lineInd = min([parser_state.lineInd + 1, len(layout_row_profiles) - 1])
 
     return list(map(lambda c: add_cap_name(c, homing_keys), parsed_layout))
@@ -141,6 +155,11 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret = key_subst(ret, 'h', 'height')
     else:
         ret['height'] = 1.0
+    if 'r' in ret:
+        ret['r'] = radians(-ret['r'])
+        ret = key_subst(ret, 'r', 'rotation')
+    else:
+        ret['rotation'] = parser_state.r
 
 
     if 'key' not in ret:

@@ -15,6 +15,7 @@ from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
 from os.path import exists, join
+from math import degrees
 from re import IGNORECASE, match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
@@ -34,9 +35,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length,
-                                                    pargs.global_x_offset,
-                                                    pargs.global_y_offset)
+    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -47,13 +46,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
         style:str = get_style(placed_glyphs[i])
         if style:
             remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = [
-            '<g transform="translate(%f %f)"%s>' %
-            (placed_glyphs[i]['pos-x'], placed_glyphs[i]['pos-y'], ' ' + style if style else '')
-        ] + list(
-            map(lambda c: c.toxml(),
-                (filter(lambda c: type(c) == Element,
-                        placed_glyphs[i]['svg'].childNodes)))) + ['</g>']
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
                         default=0) + pargs.glyph_unit_length
@@ -165,6 +158,21 @@ def get_style(key:dict) -> str:
         return style
     else:
         return None
+
+def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
+    # Prepare header content
+    transformations:[str] = [
+            'translate(%f %f)' % (glyph['pos-x'], glyph['pos-y'])
+        ]
+    if 'rotation' in glyph:
+        transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
+    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations), style ]
+
+    # Prepare svg content
+    svg_content:[str] = list(map(lambda c: c.toxml(), filter(lambda c: type(c) == Element, glyph['svg'].childNodes)))
+
+    # Combine and return
+    return [ '<g %s>' % ' '.join(header_content) ] + svg_content + [ '</g>' ]
 
 def remove_fill_from_svg(node:Element):
     if node.attributes and 'fill' in node.attributes.keys():

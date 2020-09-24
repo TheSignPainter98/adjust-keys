@@ -9,15 +9,15 @@ from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
-from .positions import move_object_origin_to_global_origin, resolve_cap_position
+from .positions import move_object_origin_to_global_origin_with_offset, resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from .yaml_io import read_yaml
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from functools import reduce
-from math import inf
-from mathutils import Matrix, Vector
+from math import inf, pi
+from mathutils import Euler, Matrix, Vector
 from os import makedirs, remove
 from os.path import basename, exists, join
 from re import IGNORECASE, match
@@ -65,7 +65,6 @@ def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
     if len(importedCapObjects) != 0:
         printi('Joining keycap models into a single object')
         ctx: dict = context.copy()
-
         ctx['object'] = ctx['active_object'] = importedCapObjects[0]
         ctx['selected_objects'] = ctx[
             'selected_editable_objects'] = importedCapObjects
@@ -80,10 +79,12 @@ def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
         printi('Keycap model renamed to "%s"' % importedModelName)
 
+        printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
         off:Vector = Vector(obj.bound_box[3]) - Vector([pargs.cap_x_offset, -pargs.cap_y_offset, 0.0])
         obj.data.transform(Matrix.Translation(-off))
         obj.matrix_world.translation += Vector(off)
+
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
@@ -133,14 +134,14 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
 
 def handle_cap(cap: dict, unit_length: float, cap_x_offset: float, cap_y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    move_object_origin_to_global_origin(cap['cap-obj'])
-    cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
-    cap = apply_cap_position(cap)
-    printi('Resolving colour of cap %s' % cap['cap-name'])
+    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], cap_x_offset, cap_y_offset)
+    cap = resolve_cap_position(cap, unit_length)
+    cap = apply_cap_pose(cap)
 
 
-def apply_cap_position(cap: dict) -> dict:
+def apply_cap_pose(cap: dict) -> dict:
     cap['cap-obj'].location = (cap['pos-x'], cap['pos-y'], cap['pos-z'])
+    cap['cap-obj'].rotation_euler = Euler((0.0, 0.0, cap['rotation']))
     return cap
 
 
