@@ -25,14 +25,14 @@ def resolve_glyph_position(data: dict, ulen: float, gx: float,
     return ret
 
 
-def resolve_cap_position(cap: dict, ulen: float, ox: float, oy: float) -> dict:
-    cap['pos-x'] = ulen * cap['col'] + ox
-    cap['pos-y'] = -1 * (ulen * cap['row'] + oy)
+def resolve_cap_position(cap: dict, ulen: float) -> dict:
+    cap['pos-x'] = ulen * cap['col']
+    cap['pos-y'] = ulen * cap['row'] * -1
     cap['pos-z'] = 0.0
-
     return cap
 
 
-def move_object_origin_to_global_origin(obj:object):
-    obj.data.transform(Matrix.Translation(-Vector(obj.bound_box[3])))
-    obj.matrix_world.translation += Vector(obj.bound_box[3])
+def move_object_origin_to_global_origin_with_offset(obj:object, cap_x_offset:float, cap_y_offset:float):
+    vec_from_origin:Vector = Vector([cap_x_offset, -cap_y_offset, 0.0]) - Vector(obj.bound_box[3])
+    obj.data.transform(Matrix.Translation(vec_from_origin))
+    obj.matrix_world.translation += -vec_from_origin
