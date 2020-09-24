@@ -84,30 +84,6 @@ args: [dict] = [{
     'label': 'Make warnings fatal',
     'type': bool,
 }, {
-    'dest': 'global_x_offset',
-    'short': '-X',
-    'long': '--glyph-x-offset',
-    'action': 'store',
-    'help': 'global offset which moves every glyph to the right',
-    'metavar': 'float',
-    'default': 0.0,
-    'label': 'Glyph global x-offset',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 100.0
-}, {
-    'dest': 'global_y_offset',
-    'short': '-Y',
-    'long': '--glyph-y-offset',
-    'action': 'store',
-    'help': 'global offset which moves every glyph downwards',
-    'metavar': 'float',
-    'default': 0.0,
-    'label': 'Glyph global z-offset',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 0.0
-}, {
     'dest': 'glyph_dir',
     'short': '-G',
     'long': '--glyph-dir',
