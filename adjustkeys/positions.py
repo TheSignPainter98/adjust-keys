@@ -1,27 +1,22 @@
 # Copyright (C) Edward Jones
 
 from .log import printw
-from math import inf
+from math import cos, inf, sin
 from mathutils import Matrix, Vector
 
 
-def resolve_glyph_positions(data: [dict], ulen: float, gx: float,
-                            gy: float) -> [dict]:
-    return list(map(lambda d: resolve_glyph_position(d, ulen, gx, gy), data))
+def resolve_glyph_positions(data: [dict], ulen: float) -> [dict]:
+    return list(map(lambda d: resolve_glyph_position(d, ulen), data))
 
 
-def resolve_glyph_position(data: dict, ulen: float, gx: float,
-                           gy: float) -> dict:
+def resolve_glyph_position(data: dict, ulen: float) -> dict:
     ret: dict = dict(data)
-    # Compute the centre of the keycap
-    kx: float = gx + ulen * (ret['p-off-x'] + ret['col'])
-    ky: float = gy + ulen * (ret['p-off-y'] + ret['row'])
-    # Compute the location of the top left corner of the glyph svg from the centre of a keycap
-    cx: float = -0.5 * ret['glyph-src-width']
-    cy: float = -0.5 * ret['glyph-src-height']
-    # Compute compute where to place the svg
-    ret['pos-x'] = kx + cx
-    ret['pos-y'] = ky + cy
+    # Compute offset from top-left if ret.rotation = 0
+    col_off:float = ulen * ret['p-off-x'] - 0.5 * ret['glyph-src-width']
+    row_off:float = ulen * ret['p-off-y'] - 0.5 * ret['glyph-src-height']
+    # Apply offset with the right rotation
+    ret['pos-x'] = ulen * ret['col'] + col_off * cos(ret['rotation']) + row_off * sin(ret['rotation'])
+    ret['pos-y'] = ulen * ret['row'] - col_off * sin(ret['rotation']) + row_off * cos(ret['rotation'])
     return ret
 
 

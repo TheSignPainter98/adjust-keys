@@ -35,9 +35,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length,
-                                                    pargs.global_x_offset,
-                                                    pargs.global_y_offset)
+    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -48,7 +46,7 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
         style:str = get_style(placed_glyphs[i])
         if style:
             remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.global_x_offset, pargs.global_y_offset)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
 
     svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
                         default=0) + pargs.glyph_unit_length
@@ -161,13 +159,13 @@ def get_style(key:dict) -> str:
     else:
         return None
 
-def get_glyph_vector_data(glyph:dict, style:str, global_x_offset:float, global_y_offset:float) -> [str]:
+def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
     # Prepare header content
     transformations:[str] = [
             'translate(%f %f)' % (glyph['pos-x'], glyph['pos-y'])
         ]
     if 'rotation' in glyph:
-        transformations.append('rotate(%f %f %f)' % (-degrees(glyph['rotation']), global_x_offset, global_y_offset))
+        transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
     header_content:[str] = [ 'transform="%s"' % ' '.join(transformations), style ]
 
     # Prepare svg content

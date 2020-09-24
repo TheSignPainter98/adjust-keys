@@ -9,7 +9,7 @@ from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
-from .positions import move_object_origin_to_global_origin, resolve_cap_position
+from .positions import move_object_origin_to_global_origin_with_offset, resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from .yaml_io import read_yaml
 from argparse import Namespace
@@ -134,8 +134,8 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
 
 def handle_cap(cap: dict, unit_length: float, cap_x_offset: float, cap_y_offset: float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    move_object_origin_to_global_origin(cap['cap-obj'])
-    cap = resolve_cap_position(cap, unit_length, cap_x_offset, cap_y_offset)
+    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], cap_x_offset, cap_y_offset)
+    cap = resolve_cap_position(cap, unit_length)
     cap = apply_cap_pose(cap)
 
 
