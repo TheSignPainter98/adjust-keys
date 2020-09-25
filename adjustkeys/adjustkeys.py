@@ -6,6 +6,7 @@ from .adjustglyphs import adjust_glyphs, glyph_files
 from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .colour_resolver import colourise_layout
+from .collections import make_collection
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .layout import get_layout, parse_layout
@@ -19,6 +20,8 @@ from os import makedirs
 from os.path import exists, join
 from sys import argv, exit
 from yaml import dump
+if blender_available():
+    from bpy.types import Collection
 
 
 def main(*args:[[str]]) -> dict:
@@ -80,21 +83,25 @@ def adjustkeys(*args: [[str]]) -> dict:
     colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
     coloured_layout:[dict] = colourise_layout(layout, colour_map)
 
+    # Make the collection
+    collection:Collection = make_collection('adjustkeys_caps_and_glyphs')
+    collection_data:dict = { 'containing_collection': collection }
+
     # Adjust model positions
     model_data:dict = {}
     if not pargs.no_adjust_caps:
-        model_data = adjust_caps(layout, colour_map, pargs)
+        model_data = adjust_caps(layout, colour_map, collection, pargs)
 
     # Adjust glyph positions
     glyph_data:dict = {}
     if not pargs.no_adjust_glyphs:
-        glyph_data = adjust_glyphs(layout, pargs)
+        glyph_data = adjust_glyphs(layout, collection, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:
         shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], pargs.cap_unit_length, pargs.shrink_wrap_offset)
 
-    return dict_union(model_data, glyph_data)
+    return dict_union(collection_data, model_data, glyph_data)
 
 if __name__ == '__main__':
     rc:int = 0

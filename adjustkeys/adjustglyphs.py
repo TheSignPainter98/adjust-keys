@@ -10,7 +10,7 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_positions
 from .scale import get_scale
-from .util import concat, dict_union, get_dicts_with_duplicate_field_values, inner_join, list_diff, rob_rem, safe_get
+from .util import concat, dict_union, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
@@ -19,8 +19,10 @@ from math import degrees
 from re import IGNORECASE, match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
+Collection:type = None
 if blender_available():
     from bpy import ops
+    from bpy.types import Collection
     data = LazyImport('bpy', 'data')
 
 adjusted_svg_file_name:str = get_temp_file_name()
@@ -31,7 +33,7 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], collection:Collection, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
@@ -65,10 +67,20 @@ def adjust_glyphs(layout:[dict], pargs:Namespace) -> [str]:
         f.write(svg)
 
     printi('Importing svg into blender')
+    collectionsPreImport:[str] = data.collections.keys()
     objectsPreImport: [str] = data.objects.keys()
     ops.import_curve.svg(filepath=adjusted_svg_file_name)
     objectsPostImport: [str] = data.objects.keys()
+    collectionsPostImport:[str] = data.collections.keys()
     svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
+    collectionName:str = get_only(list_diff(collectionsPostImport, collectionsPreImport), 'No collections added when importing glyphs', 'Multiple collections added whilst importing glyphs, got %d: %s')
+
+    printi('Adding svg into the right collection')
+    glyph_collection = data.collections.new('glyphs')
+    collection.children.link(glyph_collection)
+    for svgObjectName in svgObjectNames:
+        glyph_collection.objects.link(data.objects[svgObjectName])
+    data.collections.remove(data.collections[collectionName])
 
     # Apprpriately scale the objects
     printi('Scaling glyphs')

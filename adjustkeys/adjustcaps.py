@@ -22,16 +22,18 @@ from os import makedirs, remove
 from os.path import basename, exists, join
 from re import IGNORECASE, match
 from sys import argv, exit
+Collection:type = None
 if blender_available():
     from bpy import ops
+    from bpy.types import Collection
     data = LazyImport('bpy', 'data')
     context = LazyImport('bpy', 'context')
 
 
-def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
+def adjust_caps(layout: [dict], colour_map:[dict], collection:Collection, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map)
+    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection)
 
     printi('Adjusting keycaps...')
     for cap in caps:
@@ -79,6 +81,12 @@ def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
         printi('Keycap model renamed to "%s"' % importedModelName)
 
+        printi('Ensuring imported cap model object only linked in the new collection')
+        imp_obj:object = data.objects[importedModelName]
+        for coll in imp_obj.users_collection:
+            coll.objects.unlink(imp_obj)
+        collection.objects.link(imp_obj)
+
         printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
         off:Vector = Vector(obj.bound_box[3]) - Vector([pargs.cap_x_offset, -pargs.cap_y_offset, 0.0])
@@ -88,7 +96,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], pargs:Namespace) -> dict:
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
-def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
+def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection) -> [dict]:
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
@@ -109,6 +117,7 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
             cap_data['cap-obj-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap_data['cap-source'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap_data['cap-source'])
             cap_data['cap-obj'] = context.scene.objects[cap_data['cap-obj-name']]
             firsts[cap_data['cap-source']] = cap_data['cap-obj']
+            collection.objects.link(cap_data['cap-obj'])
         else:
             # Duplicate existing object
             printi('Duplicating existing "%s"...' % cap_data['cap-source'])
@@ -119,7 +128,7 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict]) -> [dict]:
             new_obj = original_obj.copy()
             new_obj.data = original_obj.data.copy()
             cap_data['cap-obj'] = new_obj
-            context.scene.collection.objects.link(new_obj)
+            collection.objects.link(new_obj)
 
     # Warn about missing models
     missing_models: [str] = list_diff(
