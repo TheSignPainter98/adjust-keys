@@ -76,12 +76,19 @@ def inner_join(las: [dict],
 ##
 # @brief Output the union of a pair of dictionaries
 #
-# @param a:dict A dictionary
-# @param b:dict Another dictionary
+# @param ds:dict A dictionary
 #
 # @return The union of `a` and `b`, where a key is present in both, the value from `b` is used
-def dict_union(a: dict, b: dict) -> dict:
-    return dict(a, **b)
+##
+# @brief Output the unoin of a list of dictionaries
+#
+# @param *ds:[dict] A list of dictionaries
+#
+# @return The union of all ds
+def dict_union(*ds:[dict]) -> dict:
+    def _dict_union(a:dict, b:dict) -> dict:
+        return dict(a, **b)
+    return dict(reduce(_dict_union, ds, {}))
 
 
 ##
