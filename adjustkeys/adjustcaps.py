@@ -30,14 +30,14 @@ if blender_available():
     context = LazyImport('bpy', 'context')
 
 
-def adjust_caps(layout: [dict], colour_map:[dict], collection:Collection, pargs:Namespace) -> dict:
+def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection)
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, pargs.cap_unit_length, pargs.cap_x_offset, pargs.cap_y_offset)
+        handle_cap(cap, pargs.cap_unit_length, profile_data['unit-margins']['horizontal'], profile_data['unit-margins']['vertical'])
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -89,7 +89,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], collection:Collection, pargs:
 
         printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
-        off:Vector = Vector(obj.bound_box[3]) - Vector([pargs.cap_x_offset, -pargs.cap_y_offset, 0.0])
+        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['unit-margins']['horizontal'], -profile_data['unit-margins']['vertical'], 0.0])
         obj.data.transform(Matrix.Translation(-off))
         obj.matrix_world.translation += Vector(off)
 

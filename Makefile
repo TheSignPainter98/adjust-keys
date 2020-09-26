@@ -4,9 +4,9 @@
 SHELL = bash
 
 ADJUST_KEYS_SRCS = $(shell ./deps.py adjustkeys/adjustkeys.py) adjustkeys/version.py
-DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
+DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/profile_data.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 BLENDER_ADDON_SRCS = $(shell ./deps.py adjustkeys/adjustkeys_addon.py.in)
-BLENDER_ADDON_CONTENT = $(BLENDER_ADDON_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/centres.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
+BLENDER_ADDON_CONTENT = $(BLENDER_ADDON_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/profile_data.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
 
 all: adjustkeys-bin
 .PHONY: all
@@ -84,8 +84,8 @@ ChangeLog.md: change-log.sh change-log-format.awk
 adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS)
 	./addongen adjustkeys/adjustkeys.py < $< > $@
 
-profiles/%/centres.yml: profiles/%/centres.csv centres.yml.in centres.awk
-	(awk -F, -f centres.awk | m4 -P - centres.yml.in) < $< > $@
+profiles/%/profile_data.yml: profiles/%/profile_data.csv profiles/%/keycap_data.yml profile_data.yml.in profile_data.awk
+	(awk -F, -f profile_data.awk | m4 -P - profile_data.yml.in | cat $(word 2,$^) -) < $< > $@
 
 adjustkeys/args.py:
 	@# Do nothing
@@ -103,5 +103,5 @@ opts-header.txt:
 	@# Do nothing
 
 clean:
-	$(RM) -r bin_*/ $(wildcard **/__pycache__/) bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/centres.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
+	$(RM) -r bin_*/ $(wildcard **/__pycache__/) bin/ *.c *.zip *.1.gz requirements.txt *.1 *.html ChangeLog.md examples/opts.yml adjust-keys.zip *.pdf $(wildcard profiles/**/profile_data.yml) adjust_keys_blender_addon/ adjustkeys/adjustkeys_addon.py adjustkeys-bin
 .PHONY: clean

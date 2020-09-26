@@ -75,13 +75,10 @@ def adjustkeys(*args: [[str]]) -> dict:
     if not blender_available():
         die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
-    if not exists(pargs.output_dir):
-        printi('Making non-existent directory "%s"' % pargs.output_dir)
-        makedirs(pargs.output_dir, exist_ok=True)
-
     layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, pargs.homing_keys, not pargs.no_apply_colour_map)
     colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
     coloured_layout:[dict] = colourise_layout(layout, colour_map)
+    profile_data:dict = read_yaml(join(pargs.cap_dir, 'profile_data.yml'))
 
     # Make the collection
     collection:Collection = make_collection('adjustkeys_caps_and_glyphs')
@@ -90,12 +87,12 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust model positions
     model_data:dict = {}
     if not pargs.no_adjust_caps:
-        model_data = adjust_caps(layout, colour_map, collection, pargs)
+        model_data = adjust_caps(layout, colour_map, profile_data, collection, pargs)
 
     # Adjust glyph positions
     glyph_data:dict = {}
     if not pargs.no_adjust_glyphs:
-        glyph_data = adjust_glyphs(layout, collection, pargs)
+        glyph_data = adjust_glyphs(layout, profile_data, collection, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:
