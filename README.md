@@ -330,14 +330,16 @@ See [`Makefile`][makefile] for more information.
 Contributions are welcome!
 Please see the [contribution note,][contrib-note] abide by the [code of conduct][code-of-conduct] and the note following:
 
-- To add glyphs for a font _x,_ please place the related `svg`s in `./glyphs/x/`, relative to the project root (the `x` should be lower-case)
-- To add keycap models for a profile _y,_
-	1. Place the related `obj` files in `./profiles/y/` relative to the project root (the `y` should be lower-case and spaces should be replaced by dashes)
-	2. List the order of row profiles in a file `./profiles/y/layout_row_profiles.yml`
-	3. (The annoying one) Compute the centres of the faces of the each keycap in units relative to the top left corner of the area occupied by the keycap, see [standard 1u keycap size diagram][keycap-info] for reference, and place the result in `./profiles/y/centres.yml`
-- When adding code, please use include type-annotations—they make it much easier to interface with the Python code you’ve written!
+- To add glyphs for a font _x,_ please place the related `svg`s in `glyphs/x/`, relative to the project root (the `x` should be lower-case)
+- To add keycap models and metadata for a profile _y,_
+	1. Place the related `obj` files in `profiles/y/` relative to the project root (the `y` should be lower-case and spaces should be replaced by dashes)
+	2. Measure the margin between the space occupied by the keycap and the model itself (see [1u keycap size example diagram][keycap-info]) and enter the value into `profiles/y/keycap_data.yml`
+	3. (The annoying one) measure the location of the centre of the face of the keycap model and the uppermost and leftmost extremes of the keycap model and enter the values into `profiles/y/centres.csv`
+- When adding code, please use include type-annotations—they make it much easier to interface with the Python code written before!
 Above all, please abide by the licenses of the relevant works!
-For example, the license for Gotham, a de-facto standard type family for KAT and KAM sets, would prohibit it’s inclusion in this repo.
+For example, the license for Gotham, a common type family in KAT and KAM sets, would prohibit it’s inclusion in this repo.
+In particular, some licenses state that the format of the contained glyphs may not be changed.
+For example, at the time of writing, the licence for Comic Sans MS would prohibit its use through adjustkeys... although one might argue this is a good thing as there are plenty of better families which do what Comic Sans tries to but better.
 
 The [licensing section](#author-and-acknowledgements) section below should be updated to acknowledge the original source of the material.
 
