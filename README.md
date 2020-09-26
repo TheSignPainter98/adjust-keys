@@ -370,6 +370,7 @@ All files written by contributors to this project are covered under the [GNU Les
 Please ensure that credit is given where it is due.
 
 [blender]: https://www.blender.org
+[blender-path-guide]: https://docs.blender.org/manual/en/latest/advanced/command_line/launch/macos.html
 [contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
 [codium]: https://github.com/VSCodium/vscodium
