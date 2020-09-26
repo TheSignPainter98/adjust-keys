@@ -1,3 +1,1 @@
-unit-margins:
-  horizontal: 0.525
-  vertical: 0.525
+margin_offset: 0.525

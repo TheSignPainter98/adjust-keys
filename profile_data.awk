@@ -2,7 +2,6 @@
 
 BEGIN {
 	unit_length = 19.05
-	top_offset = (unit_length - 18.2) / 2
 }
 
 # Ignore header
@@ -20,7 +19,7 @@ NR == 1 {
 	top = $2
 	centre_face = $3
 	offset = top - centre_face
-	abs_offset = top_offset + offset
+	abs_offset = margin_offset + offset
 	unit_offset = abs_offset / unit_length
 	if (unit_offset < 0)
 		unit_offset = -unit_offset
