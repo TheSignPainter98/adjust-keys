@@ -19,7 +19,7 @@ ChangeLog.md
 *.xcf
 *opts.yml
 adjustkeys_addon.py
-centres.yml
+profile_data.yml
 adjust_keys_blender_addon/
 adjustedkeys*
 tags

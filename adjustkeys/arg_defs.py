@@ -30,30 +30,6 @@ args: [dict] = [{
     'soft-min': 0.0,
     'soft-max': 100.0
 }, {
-    'dest': 'cap_x_offset',
-    'short': '-x',
-    'long': '--cap-x-offset',
-    'action': 'store',
-    'help': 'global offset which moves every keycap to the right',
-    'metavar': 'float',
-    'default': 0.525,
-    'label': 'Keycap global x-offset',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 100.0
-}, {
-    'dest': 'cap_y_offset',
-    'short': '-y',
-    'long': '--cap-y-offset',
-    'action': 'store',
-    'help': 'global offset which moves every keycap downwards',
-    'metavar': 'float',
-    'default': 0.525,
-    'label': 'Keycap global z-offset',
-    'type': float,
-    'soft-min': 0,
-    'soft-max': 100.0
-}, {
     'dest': 'check_update',
     'short': '-Vu',
     'long': '--check-updates',
@@ -81,7 +57,6 @@ args: [dict] = [{
     'action': 'store_true',
     'help': 'Treat any warnings as fatal, halting execution immediately',
     'default': False,
-    'label': 'Make warnings fatal',
     'type': bool,
 }, {
     'dest': 'glyph_dir',
@@ -268,17 +243,6 @@ args: [dict] = [{
     'str-type': 'file',
     'label': 'YAML option file'
 }, {
-    'dest': 'output_dir',
-    'short': '-o',
-    'long': '--output',
-    'action': 'store',
-    'help':
-    'Specify the location of any output files, if blender is loaded, this is just a temporary location and files are cleaned away before the script finishes',
-    'metavar': 'dir',
-    'default': adjustkeys_path,
-    'type': str,
-    'str-type': 'dir'
-}, {
     'dest': 'print_opts_yml',
     'short': '-#',
     'long': '--print-opts-yml',
@@ -288,17 +252,6 @@ args: [dict] = [{
     'type': bool,
     'label': 'Print opts.yml',
     'op': True
-}, {
-    'dest': 'profile_file',
-    'short': '-C',
-    'long': '--centres',
-    'action': 'store',
-    'help': 'specify the profile-centres YAML file to use',
-    'metavar': 'file',
-    'default': join(adjustkeys_path, 'profiles', 'kat', 'centres.yml'),
-    'label': 'Keycap profile centre file',
-    'type': str,
-    'str-type': 'file'
 }, {
     'dest': 'shrink_wrap_offset',
     'short': '-d',

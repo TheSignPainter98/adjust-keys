@@ -33,8 +33,8 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], collection:Collection, pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, pargs.profile_file, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
+def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> [str]:
+    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
@@ -114,9 +114,8 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     return cap
 
 
-def collect_data(layout: [dict], profile_file: str, glyph_dir: str,
+def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         glyph_map_file: str, iso_enter_glyph_pos:str) -> [dict]:
-    profile: dict = read_yaml(profile_file)
     profile_x_offsets_rel: [dict] = list(
         map(lambda m: {
             'width': m[0],
