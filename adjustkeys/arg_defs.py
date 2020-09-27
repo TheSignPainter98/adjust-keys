@@ -17,19 +17,6 @@ args: [dict] = [{
     'type': str,
     'str-type': 'dir'
 }, {
-    'dest': 'cap_unit_length',
-    'short': '-u',
-    'long': '--cap-unit-length',
-    'action': 'store',
-    'help':
-    'Specify the length of one unit (in mm) for use when placing keycap models',
-    'metavar': 'float',
-    'default': 19.05,
-    'label': 'Keycap model unit length',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 100.0
-}, {
     'dest': 'check_update',
     'short': '-Vu',
     'long': '--check-updates',

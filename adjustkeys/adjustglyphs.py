@@ -35,7 +35,7 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @return Zero if and only if the program is to exit successfully
 def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
-    scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
+    scale:float = get_scale(profile_data['unit_length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
 
