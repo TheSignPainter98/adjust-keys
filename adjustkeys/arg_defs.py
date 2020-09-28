@@ -113,7 +113,7 @@ args: [dict] = [{
     'store',
     'choices': [
         'top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right',
-        'bottom-left', 'bottom-right'
+        'bottom-centre', 'bottom-right'
     ],
     'help':
     'Specify the glyph location on an ISO enter key',
