@@ -62,21 +62,25 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             # Handle shifts
             if 'shift-y' in key:
                 parser_state.y += key['shift-y']
-                parser_state.x = 0
+                parser_state.x = 0.0
             if 'shift-x' in key:
                 parser_state.x += key['shift-x']
 
             # Handle the angle
             parser_state.r = key['rotation']
-            if 'ry' in key or 'ry' in key:
-                parser_state.x = 0
-                parser_state.y = 0
+            if 'rx' in key or 'ry' in key:
                 if 'rx' in key:
                     parser_state.rx = key['rx']
                     key = rem(key, 'rx')
+                else:
+                    parser_state.rx = -key['shift-x'] if 'shift-x' in key else 0.0
                 if 'ry' in key:
                     parser_state.ry = key['ry']
-                key = rem(key, 'ry')
+                    key = rem(key, 'ry')
+                else:
+                    parser_state.ry = -key['shift-y'] if 'shift-y' in key else 0.0
+                parser_state.x = key['shift-x'] if 'shift-x' in key else 0.0
+                parser_state.y = key['shift-y'] if 'shift-y' in key else 0.0
 
             # Apply current position data
             key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r) + parser_state.y * sin(parser_state.r)
