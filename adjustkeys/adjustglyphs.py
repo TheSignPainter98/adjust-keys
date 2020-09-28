@@ -37,7 +37,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(profile_data['unit_length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
+    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length, profile_data['unit_length'])
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -126,7 +126,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
             'profile-part': m[0],
             'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
+    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile['x-offsets'][1]), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
@@ -181,7 +181,6 @@ def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
 
     # Prepare svg content
     svg_content:[str] = list(map(lambda c: c.toxml(), filter(lambda c: type(c) == Element, glyph['svg'].childNodes)))
-
     # Combine and return
     return [ '<g %s>' % ' '.join(header_content) ] + svg_content + [ '</g>' ]
 
@@ -191,7 +190,7 @@ def remove_fill_from_svg(node:Element):
     for child in node.childNodes:
         remove_fill_from_svg(child)
 
-def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
+def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str, default_x_offset:float) -> dict:
     if special_offset[0] == 'iso-enter':
         if iso_enter_glyph_pos not in special_offset[1].keys():
             die('Could not find key %s in iso-enter offset spec' % iso_enter_glyph_pos)
@@ -203,8 +202,8 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> di
     else:
         return {
                 'key-type': special_offset[0],
-                'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else 0.5,
-                'p-off-y': special_offset[1]['y'] if 'y' in special_offset[1] else 0.5
+                'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else default_x_offset,
+                'p-off-y': special_offset[1]['y']
             }
 
 def glyph_files(dname: str) -> [str]:

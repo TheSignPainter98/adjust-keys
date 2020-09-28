@@ -1,0 +1,46 @@
+margin_offset: 0.525
+unit_length: 19.05
+x-offsets:
+  1: 9.52500000000000000000
+  1.25: 11.90625000000000000000
+  1.5: 14.28750000000000000000
+  1.75: 16.66875000000000000000
+  2: 19.05000000000000000000
+  2.25: 21.43125000000000000000
+  2.75: 26.19375000000000000000
+y-offsets:
+  r5: R5
+  r4: R4
+  r3: R3
+  r2: R2
+  r1: R1
+special-offsets:
+  iso-enter:
+    top-left:
+      x: 9.525
+      y: ISO_ENTER_TOP_LEFT_Y
+    top-centre:
+      x: 14.2875
+      y: ISO_ENTER_TOP_CENTRE_Y
+    top-right:
+      x: 19.05
+      y: ISO_ENTER_TOP_RIGHT_Y
+    middle-centre:
+      x: 16.66875
+      y: ISO_ENTER_MIDDLE_CENTRE_Y
+    middle-right:
+      x: 19.05
+      y: ISO_ENTER_MIDDLE_RIGHT_Y
+    bottom-centre:
+      x: 16.66875
+      y: ISO_ENTER_BOTTOM_CENTRE_Y
+    bottom-right:
+      x: 19.05
+      y: ISO_ENTER_BOTTOM_RIGHT_Y
+  num-enter:
+    y: NUM_ENTER
+  num-plus:
+    y: NUM_PLUS
+  stepped-caps:
+    x: 11.90625
+    y: STEPPED_CAPS

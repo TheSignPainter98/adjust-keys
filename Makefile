@@ -84,8 +84,8 @@ ChangeLog.md: change-log.sh change-log-format.awk
 adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS)
 	./addongen adjustkeys/adjustkeys.py < $< > $@
 
-profiles/%/profile_data.yml: profiles/%/profile_data.csv profiles/%/keycap_data.yml profile_data.yml.in profile_data.awk
-	(awk -F, -f profile_data.awk -v margin_offset=$$(yq -y .margin_offset <$(word 2, $^) | head -n 1)| m4 -P - profile_data.yml.in | cat $(word 2,$^) -) < $< > $@
+profiles/%/profile_data.yml: profiles/%/profile_data.csv profiles/%/profile_data.yml.in profile_data.awk
+	(awk -F, -f profile_data.awk -v margin_offset=$$(yq -y .margin_offset <$(word 2, $^) | head -n 1) | m4 -P - $(word 2, $^)) < $< > $@
 
 adjustkeys/args.py:
 	@# Do nothing

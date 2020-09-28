@@ -112,15 +112,15 @@ args: [dict] = [{
     'action':
     'store',
     'choices': [
-        'centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre',
-        'body-centre'
+        'top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right',
+        'bottom-left', 'bottom-right'
     ],
     'help':
     'Specify the glyph location on an ISO enter key',
     'metavar':
     'pos',
     'default':
-    'body-centre',
+    'middle-centre',
     'label':
     'ISO-enter glyph location',
     'type':
