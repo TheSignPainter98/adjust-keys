@@ -39,6 +39,8 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
     for line in layout:
         parser_state.x = 0.0
         parser_state.i = 0
+        if type(line) != list:
+            continue
         while parser_state.i < len(line):
             # Parse for the next key
             printi('Handling layout, looking at pair "%s" and "%s"' %
