@@ -68,7 +68,7 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
 
             # Handle the angle
             parser_state.r = key['rotation']
-            if 'rx' in key or 'ry' in key:
+            if 'r' in key or 'rx' in key or 'ry' in key:
                 if 'rx' in key:
                     parser_state.rx = key['rx']
                     key = rem(key, 'rx')
@@ -163,7 +163,7 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret['height'] = 1.0
     if 'r' in ret:
         ret['r'] = radians(-ret['r'])
-        ret = key_subst(ret, 'r', 'rotation')
+        ret['rotation'] = ret['r']
     else:
         ret['rotation'] = parser_state.r
 
