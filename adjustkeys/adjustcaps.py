@@ -74,8 +74,12 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         printi('Renaming keycap model')
         objectsPreRename: [str] = data.objects.keys()
-        importedCapObjects[0].name = importedCapObjects[
-            0].data.name = 'capmodel'
+        intended_name:str = 'capmodel'
+        i:int = 1
+        while intended_name in data.objects:
+            i += 1
+            intended_name = 'capmodel' + '-' + str(i)
+        importedCapObjects[0].name = importedCapObjects[0].data.name = intended_name
         objectsPostRename: [str] = data.objects.keys()
         importedModelName = get_only(
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')

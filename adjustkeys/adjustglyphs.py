@@ -3,6 +3,7 @@
 
 from .args import parse_args, Namespace
 from .blender_available import blender_available
+from .collections import make_collection
 from .glyphinf import glyph_inf
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
@@ -76,8 +77,8 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs
     collectionName:str = get_only(list_diff(collectionsPostImport, collectionsPreImport), 'No collections added when importing glyphs', 'Multiple collections added whilst importing glyphs, got %d: %s')
 
     printi('Adding svg into the right collection')
-    glyph_collection = data.collections.new('glyphs')
-    collection.children.link(glyph_collection)
+    glyph_collection = make_collection('glyphs', parent_collection=collection)
+    #  collection.children.link(glyph_collection)
     for svgObjectName in svgObjectNames:
         glyph_collection.objects.link(data.objects[svgObjectName])
     data.collections.remove(data.collections[collectionName])
@@ -173,17 +174,30 @@ def get_style(key:dict) -> str:
 def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
     # Prepare header content
     transformations:[str] = [
-            'translate(%f %f)' % (glyph['pos-x'], glyph['pos-y'])
+            'translate(%10.10f %10.10f)' % (glyph['pos-x'], glyph['pos-y'])
         ]
     if 'rotation' in glyph:
         transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
     header_content:[str] = [ 'transform="%s"' % ' '.join(transformations), style ]
 
     # Prepare svg content
-    svg_content:[str] = list(map(lambda c: c.toxml(), filter(lambda c: type(c) == Element, glyph['svg'].childNodes)))
+    svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
 
     # Combine and return
     return [ '<g %s>' % ' '.join(header_content) ] + svg_content + [ '</g>' ]
+
+def sanitise_ids(node:Element) -> Element:
+    if node.attributes and 'id' in node.attributes.keys():
+        original_name:str = node.getAttribute('id')
+        sanitised_id:str = original_name
+        i:int = 1
+        while sanitised_id in data.objects:
+            i += 1
+            sanitised_id = original_name + '-' + str(i)
+        node.setAttribute('id', sanitised_id)
+    for child in node.childNodes:
+        sanitise_ids(child)
+    return node
 
 def remove_fill_from_svg(node:Element):
     if node.attributes and 'fill' in node.attributes.keys():
