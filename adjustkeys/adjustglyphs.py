@@ -9,7 +9,7 @@ from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
-from .positions import resolve_glyph_positions
+from .positions import resolve_glyph_position
 from .scale import get_scale
 from .util import concat, dict_union, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
@@ -36,9 +36,9 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @return Zero if and only if the program is to exit successfully
 def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
-    scale:float = get_scale(pargs.cap_unit_length, pargs.glyph_unit_length, pargs.svg_units_per_mm)
+    scale:float = get_scale(profile_data['unit_length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = resolve_glyph_positions(glyph_data, pargs.glyph_unit_length)
+    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit_length'], profile_data['margin_offset']), glyph_data))
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -127,7 +127,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
             'profile-part': m[0],
             'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos), profile['special-offsets'].items()))
+    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile['x-offsets'][1]), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
@@ -205,7 +205,7 @@ def remove_fill_from_svg(node:Element):
     for child in node.childNodes:
         remove_fill_from_svg(child)
 
-def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> dict:
+def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str, default_x_offset:float) -> dict:
     if special_offset[0] == 'iso-enter':
         if iso_enter_glyph_pos not in special_offset[1].keys():
             die('Could not find key %s in iso-enter offset spec' % iso_enter_glyph_pos)
@@ -217,8 +217,8 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str) -> di
     else:
         return {
                 'key-type': special_offset[0],
-                'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else 0.5,
-                'p-off-y': special_offset[1]['y'] if 'y' in special_offset[1] else 0.5
+                'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else default_x_offset,
+                'p-off-y': special_offset[1]['y']
             }
 
 def glyph_files(dname: str) -> [str]:

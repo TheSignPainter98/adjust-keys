@@ -17,19 +17,6 @@ args: [dict] = [{
     'type': str,
     'str-type': 'dir'
 }, {
-    'dest': 'cap_unit_length',
-    'short': '-u',
-    'long': '--cap-unit-length',
-    'action': 'store',
-    'help':
-    'Specify the length of one unit (in mm) for use when placing keycap models',
-    'metavar': 'float',
-    'default': 19.05,
-    'label': 'Keycap model unit length',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 100.0
-}, {
     'dest': 'check_update',
     'short': '-Vu',
     'long': '--check-updates',
@@ -125,15 +112,15 @@ args: [dict] = [{
     'action':
     'store',
     'choices': [
-        'centre', 'top-left', 'top-centre', 'top-right', 'bottom-centre',
-        'body-centre'
+        'top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right',
+        'bottom-centre', 'bottom-right'
     ],
     'help':
     'Specify the glyph location on an ISO enter key',
     'metavar':
     'pos',
     'default':
-    'body-centre',
+    'middle-centre',
     'label':
     'ISO-enter glyph location',
     'type':

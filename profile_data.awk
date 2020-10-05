@@ -1,9 +1,5 @@
 #!/usr/bin/awk -MF, -f
 
-BEGIN {
-	unit_length = 19.05
-}
-
 # Ignore header
 NR == 1 {
 	next
@@ -16,14 +12,12 @@ NR == 1 {
 	gsub("-", "_", label)
 
 	# Compute unit fraction offset
-	top = $2
-	centre_face = $3
-	offset = top - centre_face
-	abs_offset = margin_offset + offset
-	unit_offset = abs_offset / unit_length
-	if (unit_offset < 0)
-		unit_offset = -unit_offset
+	cap_boundary = $2
+	cap_centre = $3
+	inside_cap_offset = cap_boundary - cap_centre
+	if (inside_cap_offset < 0)
+		inside_cap_offset *= -1
 
 	# Output
-	printf "m4_define(`%s', `%.10f')m4_dnl\n", label, unit_offset
+	printf "m4_define(`%s', `%.7f')m4_dnl\n", label, inside_cap_offset
 }

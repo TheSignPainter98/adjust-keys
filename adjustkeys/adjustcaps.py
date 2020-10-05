@@ -37,7 +37,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, pargs.cap_unit_length, profile_data['margin_offset'], profile_data['margin_offset'])
+        handle_cap(cap, profile_data['unit_length'], profile_data['margin_offset'], profile_data['margin_offset'])
 
     # Sequentially import the models
     printi('Preparing materials')
