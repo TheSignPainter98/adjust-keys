@@ -5,11 +5,7 @@ from math import cos, inf, sin
 from mathutils import Matrix, Vector
 
 
-def resolve_glyph_positions(data: [dict], glyph_ulen: float, cap_ulen: float) -> [dict]:
-    return list(map(lambda d: resolve_glyph_position(d, glyph_ulen, cap_ulen), data))
-
-
-def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float) -> dict:
+def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, margin:float) -> dict:
     ret: dict = dict(data)
     # Compute offset from top-left if ret.rotation = 0
     col_off: float = glyph_ulen * ret['p-off-x'] / cap_ulen - 0.5 * ret['glyph-src-width']
