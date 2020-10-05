@@ -1,0 +1,3 @@
+# Ignore obj files from line counts
+glyphs/*/*.svg linguist-vendored
+profiles/*/*.obj linguist-vendored
