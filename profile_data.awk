@@ -1,13 +1,5 @@
 #!/usr/bin/awk -MF, -f
 
-BEGIN {
-	unit_length = 19.05
-	if (!unit_length) {
-		print "Please specify a unit length" >"/dev/stderr"
-		exit 1
-	}
-}
-
 # Ignore header
 NR == 1 {
 	next
