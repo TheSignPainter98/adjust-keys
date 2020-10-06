@@ -65,7 +65,7 @@ args: [dict] = [{
     'specify the file containing the mapping from glyphs to the key ids they will appear upon',
     'metavar': 'file',
     'default': join(adjustkeys_path, 'examples', 'ansi-example-map.yml'),
-    'label': 'Glyph-keycap mapping file',
+    'label': 'Glyph map file',
     'type': str,
     'str-type': 'file'
 }, {
@@ -77,7 +77,7 @@ args: [dict] = [{
     'Specify an id for which nodes and their children should be removed from an input glyph svg',
     'metavar': 'id',
     'default': 'cap-guide',
-    'label': 'Glyph node strip regex',
+    'label': 'Glyph node id removal regex',
     'type': str
 }, {
     'dest': 'glyph_unit_length',
@@ -116,13 +116,13 @@ args: [dict] = [{
         'bottom-centre', 'bottom-right'
     ],
     'help':
-    'Specify the glyph location on an ISO enter key',
+    'Specify the glyph position on an ISO enter key',
     'metavar':
     'pos',
     'default':
     'middle-centre',
     'label':
-    'ISO-enter glyph location',
+    'ISO-enter glyph position',
     'type':
     str
 }, {
@@ -157,7 +157,6 @@ args: [dict] = [{
     'default': False,
     'label': 'List keycap model names',
     'type': bool,
-    'label': 'Print found keycap models',
     'op': True
 }, {
     'dest': 'list_cap_names',
@@ -168,7 +167,6 @@ args: [dict] = [{
     'default': False,
     'label': 'List keycap mapping-names',
     'type': bool,
-    'label': 'Print known keycap labels',
     'op': True
 }, {
     'dest': 'list_glyphs',
@@ -179,7 +177,6 @@ args: [dict] = [{
     'default': False,
     'label': 'List found glyph names',
     'type': bool,
-    'label': 'Print known glyph names',
     'op': True
 }, {
     'dest': 'no_adjust_caps',
@@ -237,7 +234,7 @@ args: [dict] = [{
     'help': 'Print the current options values in the YAML format for configuration purposes and exit',
     'default': False,
     'type': bool,
-    'label': 'Print opts.yml',
+    'label': 'List current options in YAML',
     'op': True
 }, {
     'dest': 'shrink_wrap_offset',
@@ -284,7 +281,7 @@ args: [dict] = [{
     'help': 'Print current version and exit',
     'default': False,
     'type': bool,
-    'label': 'Print version',
+    'label': 'Show version',
     'op': True
 }, {
     'dest': 'show_help',
