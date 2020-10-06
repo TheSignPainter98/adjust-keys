@@ -348,10 +348,11 @@ The [licensing section](#author-and-acknowledgements) section below should be up
 I wrote this in Python for two reasons:
 
 1. There exists a large, well-documented Python API for Blender
-2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ This is some of the most unmaintainable code I’ve written in a decent while, please if anyone’s out there, look upon this work as the kind of mess which can arise when records aren’t a proper part of the type system and take note of the silly security measures which are required when a language allows module-imports to have side-effects.
+2. ~~So that anyone learning to program could have an example of some reasonably complicated code and some reasonably clean methods to deal with challenges~~ Python is a popular but bad programming language.
 
-Of course, using Python was really annoying due to it’s basically useless type system and its failure to report errors ahead of time which made development a pain as usual.
-My sanity would have been better-off had I instead done this in [Haskell][haskell], but I guess everyone has their regrets, eh?
+Some languages like C are beautifully simple, others like [Haskell][haskell] are beautifully complex, but alas Python is neither.
+It’s type system (“duck typing”), it’s lack of native support for type annotations is bad, its import system caching when it can’t find packages is bad and that imported modules are allowed to have side-effects is bad.
+Although Python isn’t the only language to suffer these ailments, it’s the only one I’ve seen which lies at the intersection of all these problems and is also popular.
 
 ## Author and Acknowledgements
 

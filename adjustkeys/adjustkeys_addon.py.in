@@ -41,6 +41,14 @@ configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 Dependency = namedtuple('Dependency', ['module', 'package', 'name'])
 
 dependencies = [ DEPENDENCY_LIST ]
+dependencyWarningLines = [
+        "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before installing these, you should note the following.",
+        "Firstly, an internet connection will be used to download the necessary packages.",
+        "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
+        "The following dependencies (and their dependencies) are required:"
+    ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
+        "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Open the system console to see what’s happening behind the scenes."
+    ]
 
 class KczaCustomPropertyGroup(PropertyGroup):
     # If you're seening CUSTOM_PROPERTIES just here, it gets replaced by addongen when building
@@ -135,6 +143,7 @@ class KCZA_PT_DependencyWarningPanel(Panel):
     bl_label = 'Adjustkeys'
     bl_region_type = 'WINDOW'
     bl_space_type = 'PROPERTIES'
+    message_width = 50
 
     @classmethod
     def poll(self, context):
@@ -143,15 +152,7 @@ class KCZA_PT_DependencyWarningPanel(Panel):
     def draw(self, context):
         from .adjustkeys.util import dumb_wrap_text
         layout = self.layout
-        warningLines = [
-                "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before asking your permission to install these, you should note the following.",
-                "Firstly, an internet connection will be used to download the necessary packages.",
-                "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
-                "The following dependencies are required:"
-            ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
-                "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Look at the system console to see what’s happening behind the scenes."
-            ]
-        for line in dumb_wrap_text(warningLines, 50):
+        for line in dumb_wrap_text(dependencyWarningLines, self.message_width):
             layout.label(text=line)
         layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
 
@@ -163,16 +164,11 @@ class KCZA_Preferences(AddonPreferences):
         from .adjustkeys.util import dumb_wrap_text
         layout = self.layout
         if not dependencies_installed:
-            updateMessageText = [
-                    'Dependency status: some missing',
-                    'For more details and how to fix this, in the main window, please see Preferences > Scene Preferences > Adjustkeys.'
-                ]
-            for line in dumb_wrap_text(updateMessageText, self.message_width):
+            for line in dumb_wrap_text(dependencyWarningLines, self.message_width):
                 layout.label(text=line)
+            layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
         else:
-            messageText = [
-                    'Dependency status: OK'
-                ]
+            messageText = [ 'Dependency status: OK' ]
             for line in dumb_wrap_text(messageText, self.message_width):
                 layout.label(text=line)
 
