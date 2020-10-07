@@ -33,7 +33,7 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
             'r': 0.0,
             'rx': 0.0,
             'ry': 0.0,
-            'p': 'R3',
+            'p': 'R2',
         }
     parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:

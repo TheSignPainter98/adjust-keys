@@ -178,7 +178,7 @@ If a profile you want isn’t in the repo, you’ll need two things:
 	- If a homing bump is present, the `-homing` suffix is added, for example `R2-1.0u-homing.obj`
 	- Special keys have special names: `iso-enter.obj`, `num-plus.obj`, `num-enter.obj`, `stepped-caps.obj`
 	- The only vertices present in each of these files belong to the keycap model it holds, and the bottom of the cap is parallel to the x-y plane.
-	- If a uniform profile (e.g. KAM/DSA) is used, all keycap models should be considered to have profile `R3` (as this is the default `adjustkeys` uses).
+	- If a uniform profile (e.g. KAM/DSA) is used, all keycap models should be considered to have profile `R2` (as this is the default `adjustkeys` uses).
 2. A `yaml` file containing information on the location of the centre of a keycap as a fraction of a unit from the top left of the space it occupies (i.e. including margins)
 
 Then to point `adjustkeys` to these through the relevant for keycap models and centres file.
