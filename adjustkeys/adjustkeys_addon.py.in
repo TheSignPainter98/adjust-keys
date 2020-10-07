@@ -44,10 +44,10 @@ dependencies = [ DEPENDENCY_LIST ]
 dependencyWarningLines = [
         "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before installing these, you should note the following.",
         "Firstly, an internet connection will be used to download the necessary packages.",
-        "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case, so please don’t do this if you don’t need to.",
-        "The following dependencies (and their dependencies) are required:"
+        "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case as external code will be executed, so please don’t do this if you don’t need to.",
+        "The following python packages (and their respective dependencies) are required:"
     ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
-        "To install these dependencies, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Open the system console to see what’s happening behind the scenes."
+        "To install these, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Open the system console to see what’s happening behind the scenes."
     ]
 
 class KczaCustomPropertyGroup(PropertyGroup):
