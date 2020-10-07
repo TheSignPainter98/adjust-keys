@@ -28,7 +28,7 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
 	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
 * [Pitfalls](#pitfalls)
-	* [Missing keycap models due to incorrect layout row profiles file](#missing-keycap-models-due-to-incorrect-layout-row-profiles-file)
+	* [Missing keycap models due to incorrect key profile](#missing-keycap-models-due-to-incorrect-key-profile)
 	* [Deactivation colours](#deactivation-colours)
 * [Building from Source](#building-from-source)
 * [Contributing](#contributing)
@@ -258,20 +258,10 @@ The cheatsheet and playground on [regexr][regex-playground] may be helpful.
 
 Although adjustkeys is designed to be reasonably lenient, there are a few places an unsuspecting user can be caught out, so here’s a few things to keep in mind.
 
-### Missing keycap models due to incorrect layout row profiles file
+### Missing keycap models due to incorrect key profile
 
 If you’re finding that some keys are missing, it may be because adjustkeys is looking for keycap models of widths and heights which do not exist.
-This may be because the layout-row-profiles file doesn’t specify the right list of shapes for the layout you have.
-For example, on a 100% layout, the first layout-row-profile file entry might correctly say that the top row is r5 but if the same file is used for a 60%, or a 40% layout, the top row will still be considered to be r5, and worse, the rest of the model shapes will be incorrect too.
-
-This is fixed by making sure that the layout-row-profiles file contains appropriate data, for example for a 40% layout the following may be more appropriate:
-
-```yaml
-- r3
-- r2
-- r1
-- r1
-```
+Make sure that the [KLE][kle] layout file is referencing the right profile (in JSON this is the `p` key).
 
 ### Deactivation colours
 
