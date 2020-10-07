@@ -84,7 +84,7 @@ def op(arg:dict) -> dict:
     opIdLabel:str = arg['label']
     return {
         'name': opName,
-        'icon': arg['icon'] if 'icon' in arg else 'SCRIPT',
+        'icon': arg['icon'] if 'icon' in arg else 'CONSOLE',
         'idname': opIdName,
         'label': arg['label'],
         'src': '\n'.join([
