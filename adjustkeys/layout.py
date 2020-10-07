@@ -25,7 +25,6 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
 
     parsed_layout: [dict] = []
     parser_default_state_dict:dict = {
-            'lineInd': 0,
             'c': cap_deactivation_colour if not use_deactivation_colour else None,
             't': glyph_deactivation_colour if not use_deactivation_colour else None,
             'i': 0,
@@ -34,6 +33,7 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
             'r': 0.0,
             'rx': 0.0,
             'ry': 0.0,
+            'p': 'R3',
         }
     parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:
@@ -65,6 +65,9 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
                 parser_state.x = 0.0
             if 'shift-x' in key:
                 parser_state.x += key['shift-x']
+
+            # Handle the profile
+            parser_state.p = key['profile-part']
 
             # Handle the angle
             parser_state.r = key['rotation']
@@ -164,7 +167,10 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret['rotation'] = ret['r']
     else:
         ret['rotation'] = parser_state.r
-
+    if 'p' in ret:
+        ret = key_subst(ret, 'p', 'profile-part')
+    else:
+        ret['profile-part'] = parser_state.p
 
     if 'key' not in ret:
         printw("Key \"%s\" %s 'key' field, please put one in" %
