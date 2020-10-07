@@ -96,7 +96,7 @@ def adjustkeys(*args: [[str]]) -> dict:
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:
-        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit_length'], pargs.shrink_wrap_offset)
+        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit-length'], pargs.shrink_wrap_offset)
 
     return dict_union(collection_data, model_data, glyph_data)
 

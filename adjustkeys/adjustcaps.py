@@ -37,7 +37,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit_length'], profile_data['margin_offset'], profile_data['margin_offset'])
+        handle_cap(cap, profile_data['unit-length'], profile_data['margin-offset'], profile_data['margin-offset'])
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -93,7 +93,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
-        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['margin_offset'], -profile_data['margin_offset'], 0.0])
+        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['margin-offset'], -profile_data['margin-offset'], 0.0])
         obj.data.transform(Matrix.Translation(-off))
         obj.matrix_world.translation += Vector(off)
 
