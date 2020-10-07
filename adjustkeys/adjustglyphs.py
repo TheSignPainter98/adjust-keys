@@ -62,7 +62,6 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
-    # Cheeky way of making a temporary file, which avoids permissions issue when Windows tries to open the same tempfile named file twice. Isn't great but at least it's OS-independent.
     printi('Writing svg to file "%s"' % adjusted_svg_file_name)
     with open(adjusted_svg_file_name, 'w+') as f:
         f.write(svg)

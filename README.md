@@ -26,10 +26,9 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 	* [Using a custom layout](#using-a-custom-layout)
 	* [Changing keycap profiles](#changing-keycap-profiles)
 	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
-	* [Setting layout-row profiles](#setting-layout-row-profiles)
 	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
 * [Pitfalls](#pitfalls)
-	* [Missing keycap models due to incorrect layout row profiles file](#missing-keycap-models-due-to-incorrect-layout-row-profiles-file)
+	* [Missing keycap models due to incorrect key profile](#missing-keycap-models-due-to-incorrect-key-profile)
 	* [Deactivation colours](#deactivation-colours)
 * [Building from Source](#building-from-source)
 * [Contributing](#contributing)
@@ -175,10 +174,11 @@ To change keycap profiles, you need a few things.
 
 If a profile you want isn’t in the repo, you’ll need two things:
 
-1. A folder containing one `obj` file for each keycap width and row combination, named as `row-width.obj`, e.g. the model `r5-1_0u.obj` would be used for a 100%-layout escape key. Note how the radix/decimal point in `1.0` is replaced with an underscore.
-	- If a homing bump is present, the `-homing` suffix is added, for example `r2-1.0u-homing.obj`
+1. A folder containing one `obj` file for each keycap width and row combination, named as `row-width.obj`, e.g. the model `R5-1_0u.obj` would be used for a 100%-layout escape key. Note how the radix/decimal point in `1.0` is replaced with an underscore.
+	- If a homing bump is present, the `-homing` suffix is added, for example `R2-1.0u-homing.obj`
 	- Special keys have special names: `iso-enter.obj`, `num-plus.obj`, `num-enter.obj`, `stepped-caps.obj`
 	- The only vertices present in each of these files belong to the keycap model it holds, and the bottom of the cap is parallel to the x-y plane.
+	- If a uniform profile (e.g. KAM/DSA) is used, all keycap models should be considered to have profile `R2` (as this is the default `adjustkeys` uses).
 2. A `yaml` file containing information on the location of the centre of a keycap as a fraction of a unit from the top left of the space it occupies (i.e. including margins)
 
 Then to point `adjustkeys` to these through the relevant for keycap models and centres file.
@@ -219,27 +219,6 @@ If a curve in your svg has the id `cap-guide` (by default, although the id to ex
 For the most logical results, ensure that the value provided to the ‘unit-length’ option is the same as the height and width of a 1u-size input svg.
 (By default the unit length is 292, which is the same as the height of every svg in `glyphs/red-hat-display`.)
 
-### Setting layout-row profiles
-
-As [KLE][kle] doesn’t include any information on the profile used in each row, we must add it in ourselves.
-For simplicity, this is done in a separate file so that the user doesn’t have to alter the contents of a [KLE][kle] JSON file once downloaded.
-The contents of a layout-row profile file is a list of profile rows to be applied in order to each row of keys represented in the [KLE][kle] file, such as the following.
-
-```yaml
-- r5
-- r4
-- r3
-- r2
-- r1
-```
-
-Importantly, these values will be used to construct the file-names which `adjustkeys` will attempt to find models in.
-For example, the `r5` in `r5-1_0u.obj` comes from this file.
-If there are insufficient rows in the file, the last one is take to represent all subsequent rows (e.g. the bottom two rows on a Cherry set are the same, so `r1` need only be specified once.
-
-Regardless of the keycap manufacturer’s choices (e.g. Cherry), the bottom row of a 100% layout should be labelled `r1`.
-This means that the row-number can only increase with greater distance from the user’s wrists, and that the same data files can be used across different keycap model sets without needing to arbitrarily reverse the order.
-
 ### Setting colours (via KLE or name-matching)
 
 There are two ways of colouring keycaps and glyphs: either from raw [KLE][kle] input or from a colour map file.
@@ -279,20 +258,10 @@ The cheatsheet and playground on [regexr][regex-playground] may be helpful.
 
 Although adjustkeys is designed to be reasonably lenient, there are a few places an unsuspecting user can be caught out, so here’s a few things to keep in mind.
 
-### Missing keycap models due to incorrect layout row profiles file
+### Missing keycap models due to incorrect key profile
 
 If you’re finding that some keys are missing, it may be because adjustkeys is looking for keycap models of widths and heights which do not exist.
-This may be because the layout-row-profiles file doesn’t specify the right list of shapes for the layout you have.
-For example, on a 100% layout, the first layout-row-profile file entry might correctly say that the top row is r5 but if the same file is used for a 60%, or a 40% layout, the top row will still be considered to be r5, and worse, the rest of the model shapes will be incorrect too.
-
-This is fixed by making sure that the layout-row-profiles file contains appropriate data, for example for a 40% layout the following may be more appropriate:
-
-```yaml
-- r3
-- r2
-- r1
-- r1
-```
+Make sure that the [KLE][kle] layout file is referencing the right profile (in JSON this is the `p` key).
 
 ### Deactivation colours
 
