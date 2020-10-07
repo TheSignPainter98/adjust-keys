@@ -26,7 +26,6 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 	* [Using a custom layout](#using-a-custom-layout)
 	* [Changing keycap profiles](#changing-keycap-profiles)
 	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
-	* [Setting layout-row profiles](#setting-layout-row-profiles)
 	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
 * [Pitfalls](#pitfalls)
 	* [Missing keycap models due to incorrect layout row profiles file](#missing-keycap-models-due-to-incorrect-layout-row-profiles-file)
@@ -218,27 +217,6 @@ If a curve in your svg has the id `cap-guide` (by default, although the id to ex
 
 For the most logical results, ensure that the value provided to the ‘unit-length’ option is the same as the height and width of a 1u-size input svg.
 (By default the unit length is 292, which is the same as the height of every svg in `glyphs/red-hat-display`.)
-
-### Setting layout-row profiles
-
-As [KLE][kle] doesn’t include any information on the profile used in each row, we must add it in ourselves.
-For simplicity, this is done in a separate file so that the user doesn’t have to alter the contents of a [KLE][kle] JSON file once downloaded.
-The contents of a layout-row profile file is a list of profile rows to be applied in order to each row of keys represented in the [KLE][kle] file, such as the following.
-
-```yaml
-- r5
-- r4
-- r3
-- r2
-- r1
-```
-
-Importantly, these values will be used to construct the file-names which `adjustkeys` will attempt to find models in.
-For example, the `r5` in `r5-1_0u.obj` comes from this file.
-If there are insufficient rows in the file, the last one is take to represent all subsequent rows (e.g. the bottom two rows on a Cherry set are the same, so `r1` need only be specified once.
-
-Regardless of the keycap manufacturer’s choices (e.g. Cherry), the bottom row of a 100% layout should be labelled `r1`.
-This means that the row-number can only increase with greater distance from the user’s wrists, and that the same data files can be used across different keycap model sets without needing to arbitrarily reverse the order.
 
 ### Setting colours (via KLE or name-matching)
 

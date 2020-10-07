@@ -137,18 +137,6 @@ args: [dict] = [{
     'type': str,
     'str-type': 'file'
 }, {
-    'dest': 'layout_row_profile_file',
-    'short': '-R',
-    'long': '--profile-row-file',
-    'action': 'store',
-    'help':
-    'specify the file containing the mapping from rows of the layout to their profile row',
-    'metavar': 'file',
-    'default': join(adjustkeys_path, 'examples', 'layout_row_profiles.yml'),
-    'label': 'Layout row-profile list file',
-    'type': str,
-    'str-type': 'file'
-}, {
     'dest': 'list_cap_models',
     'short': '-Sc',
     'long': '--show-cap-models',

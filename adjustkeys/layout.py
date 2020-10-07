@@ -10,11 +10,11 @@ from re import match
 cap_deactivation_colour:str = '#cccccc'
 glyph_deactivation_colour:str = '#000000'
 
-def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str, use_deactivation_colour:bool) -> [dict]:
-    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys, use_deactivation_colour)
+def get_layout(layout_file:str, homing_keys:str, use_deactivation_colour:bool) -> [dict]:
+    return parse_layout(read_yaml(layout_file), homing_keys, use_deactivation_colour)
 
 
-def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:bool) -> [dict]:
+def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:bool) -> [dict]:
     homing_keys:[str] = raw_homing_keys.split(',')
     printi('Reading layout information')
 
@@ -85,7 +85,6 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             # Apply current position data
             key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r) + parser_state.y * sin(parser_state.r)
             key['row'] = parser_state.ry - parser_state.x * sin(parser_state.r) + parser_state.y * cos(parser_state.r)
-            key['profile-part'] = layout_row_profiles[min(parser_state.lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
             if 'key' in key:
@@ -98,7 +97,6 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:s
             parser_state.i += shift
         if len(line) > 1 and 'shift-y' not in line[-1]:
             parser_state.y += 1
-        parser_state.lineInd = min([parser_state.lineInd + 1, len(layout_row_profiles) - 1])
 
     return list(map(lambda c: add_cap_name(c, homing_keys), parsed_layout))
 
