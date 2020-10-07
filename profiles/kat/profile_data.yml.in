@@ -9,11 +9,11 @@ x-offsets:
   2.25: 20.90625000000000000000
   2.75: 25.66875000000000000000
 y-offsets:
-  r5: R5
-  r4: R4
-  r3: R3
-  r2: R2
-  r1: R1
+  R5: Y_OFF_R5
+  R4: Y_OFF_R4
+  R3: Y_OFF_R3
+  R2: Y_OFF_R2
+  R1: Y_OFF_R1
 special-offsets:
   iso-enter:
     top-left:
