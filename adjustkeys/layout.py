@@ -1,6 +1,7 @@
 # Copyright (C) Edward Jones
 
 from .log import die, printi, printw
+from .input_types import type_check_kle_layout
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
 from math import cos, radians, sin
@@ -10,12 +11,13 @@ from re import match
 cap_deactivation_colour:str = '#cccccc'
 glyph_deactivation_colour:str = '#000000'
 
-def get_layout(layout_file:str, layout_row_profile_file:str, homing_keys:str, use_deactivation_colour:bool) -> [dict]:
-    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), homing_keys, use_deactivation_colour)
+def get_layout(layout_file:str, layout_row_profile_file:str, use_deactivation_colour:bool) -> [dict]:
+    return parse_layout(read_yaml(layout_row_profile_file), read_yaml(layout_file), use_deactivation_colour)
 
 
-def parse_layout(layout_row_profiles: [str], layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:bool) -> [dict]:
-    homing_keys:[str] = raw_homing_keys.split(',')
+def parse_layout(layout_row_profiles: [str], layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
+    if not type_check_kle_layout(layout):
+        die('KLE layout failed type-checking, see console for more information')
     printi('Reading layout information')
 
     if type(layout) != list and any(

@@ -43,7 +43,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     printi('Preparing materials')
     colourMaterials:dict = {}
     if colour_map is not None:
-        colourMaterials = { m['name'] : m for m in colour_map }
+        colourMaterials = { m['name'] : m for m in colour_map if 'cap-colour' in m }
         for m in colourMaterials.values():
             colourStr:str = str(m['cap-colour'])
             colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])

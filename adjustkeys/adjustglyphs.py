@@ -5,6 +5,7 @@ from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .collections import make_collection
 from .glyphinf import glyph_inf
+from .input_types import type_check_glyph_map
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
@@ -34,8 +35,8 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, pargs.glyph_map_file, pargs.iso_enter_glyph_pos)
+def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['margin-offset']), glyph_data))
@@ -116,7 +117,7 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
 
 
 def collect_data(layout: [dict], profile: dict, glyph_dir: str,
-        glyph_map_file: str, iso_enter_glyph_pos:str) -> [dict]:
+        glyph_map: dict, iso_enter_glyph_pos:str) -> [dict]:
     profile_x_offsets_rel: [dict] = list(
         map(lambda m: {
             'width': m[0],
@@ -132,7 +133,6 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
         printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
-    glyph_map = read_yaml(glyph_map_file)
     glyph_map_rel = list(
         map(lambda m: {
             'key': str(m[0]),
