@@ -50,6 +50,7 @@ dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
 adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
 	$(runCython)
 	mkdir -p adjust_keys_blender_addon
+	mkdir -p $(sort $(foreach f,$^,"adjust_keys_blender_addon/$(dir $f)"))
 	cp --parents $(foreach file,$^,"$(file)") adjust_keys_blender_addon/
 	cp adjust_keys_blender_addon/adjustkeys/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
 	zip -q -MM $@ $(foreach file,$^,"adjust_keys_blender_addon/$(file)") adjust_keys_blender_addon/__init__.py
@@ -64,7 +65,7 @@ adjustkeys-bin: $(ADJUST_KEYS_SRCS)
 	$(mkTargetDir)
 	$(runCython)
 	mkdir bin_$(@F)
-	mkdir -p $(sort $(foreach f,$^,bin_$(@F)/$(dir $f)))
+	mkdir -p $(sort $(foreach f,$^,"bin_$(@F)/$(dir $f)"))
 	cp --parents $^ adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)
 	cp bin_$(@F)/adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)/__main__.py
 	touch bin_$(@F)/adjustkeys/__init__.py
