@@ -1,5 +1,5 @@
-margin_offset: 0.525
-unit_length: 19.05
+margin-offset: 0.525
+unit-length: 19.05
 x-offsets:
   1: 9.00000000000000000000
   1.25: 11.38125000000000000000
@@ -47,5 +47,5 @@ special-offsets:
   num-plus:
     y: NUM_PLUS
   stepped-caps:
-    x: 11.90625
+    x: 11.38125000000000000000
     y: STEPPED_CAPS

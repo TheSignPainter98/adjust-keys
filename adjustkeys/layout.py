@@ -1,6 +1,7 @@
 # Copyright (C) Edward Jones
 
 from .log import die, printi, printw
+from .input_types import type_check_kle_layout
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
 from math import cos, radians, sin
@@ -10,12 +11,13 @@ from re import match
 cap_deactivation_colour:str = '#cccccc'
 glyph_deactivation_colour:str = '#000000'
 
-def get_layout(layout_file:str, homing_keys:str, use_deactivation_colour:bool) -> [dict]:
-    return parse_layout(read_yaml(layout_file), homing_keys, use_deactivation_colour)
+def get_layout(layout_file:str, use_deactivation_colour:bool) -> [dict]:
+    return parse_layout(read_yaml(layout_file), use_deactivation_colour)
 
 
-def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:bool) -> [dict]:
-    homing_keys:[str] = raw_homing_keys.split(',')
+def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
+    if not type_check_kle_layout(layout):
+        die('KLE layout failed type-checking, see console for more information')
     printi('Reading layout information')
 
     if type(layout) != list and any(
@@ -90,7 +92,7 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
             key['row'] = parser_state.ry - parser_state.x * sin(parser_state.r) + parser_state.y * cos(parser_state.r)
 
             # Add to layout
-            if 'key' in key:
+            if 'key' in key and (not 'd' in key or not key['d']):
                 parsed_layout += [key]
 
             # Move col to next position
@@ -101,7 +103,7 @@ def parse_layout(layout: [[dict]], raw_homing_keys:str, use_deactivation_colour:
         if len(line) > 1 and 'shift-y' not in line[-1]:
             parser_state.y += 1
 
-    return list(map(lambda c: add_cap_name(c, homing_keys), parsed_layout))
+    return list(map(add_cap_name, parsed_layout))
 
 def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser_state:SimpleNamespace) -> [int, dict]:
     ret: dict
@@ -134,10 +136,6 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
                                                                  'h') == 2:
             ret['key-type'] = 'num-enter'
-        elif ret_key and ret_key.lower() == 'caps lock' and safe_get(
-                ret, 'w') == 1.25 and safe_get(ret, 'w2') == 1.75 and safe_get(
-                    ret, 'l') == True:
-            ret['key-type'] = 'stepped-caps'
 
     if 'a' in ret:
         ret = rem(ret, 'a')
@@ -167,6 +165,14 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret['rotation'] = ret['r']
     else:
         ret['rotation'] = parser_state.r
+    if 'n' in ret:
+        ret = key_subst(ret, 'n', 'homing')
+    else:
+        ret['homing'] = False
+    if 'l' in ret:
+        ret = key_subst(ret, 'l', 'stepped')
+    else:
+        ret['stepped'] = False
     if 'p' in ret:
         ret = key_subst(ret, 'p', 'profile-part')
     else:
@@ -184,21 +190,23 @@ def parse_name(txt: str) -> str:
     return '-'.join(txt.split('\n'))
 
 
-def add_cap_name(key:dict, homing_keys:[str]) -> dict:
-    key['cap-name'] = gen_cap_name(key, homing_keys)
+def add_cap_name(key:dict) -> dict:
+    key['cap-name'] = gen_cap_name(key)
     return key
     #  key['cap-name'] = key['key-type'] if 'key-type' in key else (
         #  key ['profile-part'] + '-' +
         #  str(float(key ['width'])).replace('.', '_') + 'u')
     #  return key
 
-def gen_cap_name(key:dict, homing_keys:[str]) -> str:
+def gen_cap_name(key:dict) -> str:
     if 'key-type' in key:
         return key['key-type']
     else:
         name:str = '%s-%su' %(key['profile-part'], str(float(key['width'])).replace('.', '_')) # I'm really hoping that python will behave reasonably w.r.t. floating point precision
-        if key['key'].lower() in homing_keys:
+        if key['homing']:
             name += '-homing'
+        if key['stepped']:
+            name += '-stepped'
         return name
 
 

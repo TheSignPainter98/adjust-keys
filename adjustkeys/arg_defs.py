@@ -93,16 +93,6 @@ args: [dict] = [{
     'soft-min': 0.0,
     'soft-max': 1000.0
 }, {
-    'dest': 'homing_keys',
-    'short': '-H',
-    'long': '--homing',
-    'nargs': '+',
-    'metavar': 'key',
-    'help': 'Specify which keys are homing keys in a comma-separated list',
-    'default': 'f,j',
-    'label': 'Homing keys',
-    'type': str
-}, {
     'dest':
     'iso_enter_glyph_pos',
     'short':

@@ -37,13 +37,13 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit_length'], profile_data['margin_offset'], profile_data['margin_offset'])
+        handle_cap(cap, profile_data['unit-length'], profile_data['margin-offset'], profile_data['margin-offset'])
 
     # Sequentially import the models
     printi('Preparing materials')
     colourMaterials:dict = {}
     if colour_map is not None:
-        colourMaterials = { m['name'] : m for m in colour_map }
+        colourMaterials = { m['name'] : m for m in colour_map if 'cap-colour' in m }
         for m in colourMaterials.values():
             colourStr:str = str(m['cap-colour'])
             colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
@@ -93,7 +93,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
-        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['margin_offset'], -profile_data['margin_offset'], 0.0])
+        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['margin-offset'], -profile_data['margin-offset'], 0.0])
         obj.data.transform(Matrix.Translation(-off))
         obj.matrix_world.translation += Vector(off)
 

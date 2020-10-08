@@ -9,6 +9,7 @@ from .colour_resolver import colourise_layout
 from .collections import make_collection
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
+from .input_types import type_check_colour_map, type_check_glyph_map, type_check_profile_data
 from .layout import get_layout, parse_layout
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
@@ -54,7 +55,7 @@ def adjustkeys(*args: [[str]]) -> dict:
             list(sorted(set(
                 map(
                     lambda k: k['key'],
-                    parse_layout(read_yaml(pargs.layout_file), pargs.homing_keys)))))))
+                    parse_layout(read_yaml(pargs.layout_file), not pargs.no_apply_colour_map)))))))
         return {}
     if pargs.list_glyphs:
         knownGlyphs:[[str,str]] = list(map(lambda g: [glyph_name(g), g], glyph_files(pargs.glyph_dir)))
@@ -74,10 +75,23 @@ def adjustkeys(*args: [[str]]) -> dict:
     if not blender_available():
         die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
-    layout:[dict] = get_layout(pargs.layout_file, pargs.homing_keys, not pargs.no_apply_colour_map)
-    colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
+    layout:[dict] = []
+    if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
+        layout:[dict] = get_layout(pargs.layout_file, not pargs.no_apply_colour_map)
+    colour_map:[dict] = []
+    if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
+        colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
+        if not type_check_colour_map(colour_map):
+            die('Colour map failed type-checking, see console for more information')
     coloured_layout:[dict] = colourise_layout(layout, colour_map)
-    profile_data:dict = read_yaml(join(pargs.cap_dir, 'profile_data.yml'))
+    if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
+        profile_data:dict = read_yaml(join(pargs.cap_dir, 'profile_data.yml'))
+        if not type_check_profile_data(profile_data):
+            die('Profile data failed type-checking, see console for more information')
+    if not pargs.no_adjust_glyphs:
+        glyph_map = read_yaml(pargs.glyph_map_file)
+        if not type_check_glyph_map(glyph_map):
+            die('Glyph map failed type-checking see the console for more information')
 
     # Make the collection
     collection:Collection = make_collection('adjustkeys_caps_and_glyphs')
@@ -91,11 +105,11 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust glyph positions
     glyph_data:dict = {}
     if not pargs.no_adjust_glyphs:
-        glyph_data = adjust_glyphs(layout, profile_data, collection, pargs)
+        glyph_data = adjust_glyphs(layout, profile_data, collection, glyph_map, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:
-        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit_length'], pargs.shrink_wrap_offset)
+        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit-length'], pargs.shrink_wrap_offset)
 
     return dict_union(collection_data, model_data, glyph_data)
 
