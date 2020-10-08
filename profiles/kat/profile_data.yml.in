@@ -8,12 +8,17 @@ x-offsets:
   2: 18.52500000000000000000
   2.25: 20.90625000000000000000
   2.75: 25.66875000000000000000
+  3: 28.05000000000000000000
+  6: 56.62500000000000000000
+  6.25: 59.00625000000000000000
+  7: 66.15000000000000000000
 y-offsets:
-  r5: R5
-  r4: R4
-  r3: R3
-  r2: R2
-  r1: R1
+  R5: Y_OFF_R5
+  R4: Y_OFF_R4
+  R3: Y_OFF_R3
+  R2: Y_OFF_R2
+  R1: Y_OFF_R1
+  SPACE: Y_OFF_SPACE
 special-offsets:
   iso-enter:
     top-left:
@@ -42,5 +47,5 @@ special-offsets:
   num-plus:
     y: NUM_PLUS
   stepped-caps:
-    x: 11.90625
+    x: 11.38125000000000000000
     y: STEPPED_CAPS

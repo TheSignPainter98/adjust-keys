@@ -55,8 +55,7 @@ def adjustkeys(*args: [[str]]) -> dict:
             list(sorted(set(
                 map(
                     lambda k: k['key'],
-                    parse_layout(read_yaml(pargs.layout_row_profile_file),
-                                 read_yaml(pargs.layout_file), not pargs.no_apply_colour_map)))))))
+                    parse_layout(read_yaml(pargs.layout_file), not pargs.no_apply_colour_map)))))))
         return {}
     if pargs.list_glyphs:
         knownGlyphs:[[str,str]] = list(map(lambda g: [glyph_name(g), g], glyph_files(pargs.glyph_dir)))
@@ -78,7 +77,7 @@ def adjustkeys(*args: [[str]]) -> dict:
 
     layout:[dict] = []
     if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
-        layout:[dict] = get_layout(pargs.layout_file, pargs.layout_row_profile_file, not pargs.no_apply_colour_map)
+        layout:[dict] = get_layout(pargs.layout_file, not pargs.no_apply_colour_map)
     colour_map:[dict] = []
     if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
         colour_map:[dict] = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
