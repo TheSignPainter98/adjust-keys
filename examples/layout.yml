@@ -123,9 +123,11 @@
   - A
   - S
   - D
+  - n: True
   - F
   - G
   - H
+  - n: True
   - J
   - K
   - L
@@ -231,10 +233,12 @@
     w: 1.25
     w2: 1.75
     l: true
+    p: R2
   - Caps Lock
   - x: 1
     a: 7
     w: 1.75
+    p: R1
   - Ctrl
 - - x: 4
     w: 6
