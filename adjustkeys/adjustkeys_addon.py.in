@@ -71,18 +71,31 @@ class AdjustKeysOperator(Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Adjustkeys is operating, might be a moments...')
+        push_dependency_path()
         from .adjustkeys.adjustkeys import main as adjustkeys
+        from .adjustkeys.exceptions import AdjustKeysException
+        from .adjustkeys.log import printe
         from .adjustkeys.util import safe_get
+        from traceback import format_exc
+        pop_dependency_path()
         print('=' * 80)
         akargs = get_args_from_ui(context)
         if akargs['opt_file'] != 'None':
             akargs = { 'opt_file': akargs['opt_file'] }
-        inf = adjustkeys(akargs)
-        num_warnings = safe_get(inf, 'num_warnings')
-        if num_warnings is not None and num_warnings > 0:
-            self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
-        print('=' * 80)
-        return {'FINISHED'}
+        try:
+            inf = adjustkeys(akargs)
+            num_warnings = safe_get(inf, 'num_warnings')
+            if num_warnings is not None and num_warnings > 0:
+                self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))
+            return {'FINISHED'}
+        except AdjustKeysException as akex:
+            self.report({'ERROR'}, str(akex))
+            printe(str(akex))
+            if int(akargs['verbosity']) >= 2:
+                printe(format_exc())
+            return {'CANCELLED'}
+        finally:
+            print('=' * 80)
 
 KCZA_CUSTOM_OPERATORS
 

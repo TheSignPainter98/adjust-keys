@@ -99,18 +99,37 @@ def op(arg:dict) -> dict:
                     "self.report({'INFO'}, 'Adjustkeys: See system console for output')",
                     'push_dependency_path()',
                     'from .adjustkeys.adjustkeys import main as adjustkeys',
+                    'from .adjustkeys.exceptions import AdjustKeysException',
+                    'from .adjustkeys.log import printe',
                     'from .adjustkeys.util import safe_get',
+                    'from traceback import format_exc',
                     'pop_dependency_path()',
+                    "print('=' * 80)",
                     'akargs = get_args_from_ui(context)',
-                    "print('=' * 80)",
-                    "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],
-                    "print('=' * 80)",
-                    "num_warnings = safe_get(inf, 'num_warnings')",
-                    'if num_warnings is not None and num_warnings > 0:',
+                    'try:',
                     '    ' + '\n            '.join([
-                        "self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))",
+                        "inf = adjustkeys(akargs, { '%s': True })" % arg['dest'],
+                        "num_warnings = safe_get(inf, 'num_warnings')",
+                        'if num_warnings is not None and num_warnings > 0:',
+                        '    ' + '\n            '.join([
+                            "self.report({'WARNING'}, 'There %s %d warning%s produced by adjustkeys, see system console for more information.' %('were' if num_warnings > 1 else 'was', num_warnings, 's' if num_warnings > 1 else ''))",
+                        ]),
+                        "return {'FINISHED'}"
                     ]),
-                    "return {'FINISHED'}"
+                    'except AdjustKeysException as akex:',
+                    '    ' + '\n            '.join([
+                        "self.report({'ERROR'}, str(akex))",
+                        'printe(str(akex))',
+                        "if int(akargs['verbosity']) >= 2:",
+                        '    ' + '\n                '.join([
+                            'printe(format_exc())',
+                        ]),
+                        "return {'CANCELLED'}",
+                    ]),
+                    'finally:',
+                    '    ' + '\n            '.join([
+                        "print('=' * 80)",
+                    ])
                 ])
             ])
         ])
