@@ -87,6 +87,7 @@ See the [custom setup section](#custom-setup) for how to change the stock settin
 If you want to use `adjustkeys` through another python script for the purpose of automating something a script:
 
 1. Go to the [releases page][releases], download `adjust-keys.zip` and unzip it so that the `adjustkeys-bin` binary somewhere you won’t accidentally delete it
+	- If you want to automate the process (e.g. through `git submodule`), running `make -C /path/to/adjust-keys/ devel` will make a binary and necessary data files
 2. Copy the path where `adjustkeys` now is (I have mine in `/home/kcza/Documents/keys/adjustkeys-bin`)
 3. In your existing Python script add the following lines, appropriately substituting the path from the previous step:
 

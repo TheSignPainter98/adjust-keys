@@ -4,7 +4,8 @@
 SHELL = bash
 
 ADJUST_KEYS_SRCS = $(shell ./deps.py adjustkeys/adjustkeys.py) adjustkeys/version.py
-DIST_CONTENT = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/profile_data.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
+DEVEL_SRCS = adjustkeys-bin $(foreach dir,$(shell ls profiles),profiles/$(dir)/profile_data.yml)
+DIST_CONTENT = $(DEVEL_SRCS) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt adjustkeys.1.gz adjustkeys.html ChangeLog.md adjustkeys_command_line_manual.pdf adjustkeys_yaml_manual.pdf
 BLENDER_ADDON_SRCS = $(shell ./deps.py adjustkeys/adjustkeys_addon.py.in)
 BLENDER_ADDON_CONTENT = $(BLENDER_ADDON_SRCS) $(foreach dir,$(shell ls profiles),profiles/$(dir)/profile_data.yml) $(wildcard profiles/**/*.obj) $(wildcard glyphs/**/*.svg) $(wildcard examples/*) examples/opts.yml README.md LICENSE requirements.txt ChangeLog.md adjustkeys_yaml_manual.pdf adjustkeys/adjustkeys_addon.py adjustkeys/devtools.py
 
@@ -43,6 +44,9 @@ endif
 
 adjustkeys/version.py:
 	(echo '# Copyright (C) Edward Jones&version: str = "$(VERSION)"' | tr '&' '\n') > $@
+
+devel: adjustkeys-bin
+.PHONY: devel
 
 dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
 .PHONY: dist
