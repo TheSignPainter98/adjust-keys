@@ -13,8 +13,8 @@ all: adjustkeys-bin
 
 ifndef NO_CYTHON
 define runCython
-	cython3 -X language_level=3 $(filter %.py,$^)
-	@$(RM) $(patsubst %.py,%.c,$(filter %.py,$^))
+	cython3 -X language_level=3 $(subst \,/,$(filter %.py,$^))
+	@$(RM) $(subst \,/,$(patsubst %.py,%.c,$(filter %.py,$^)))
 endef
 endif
 
@@ -51,13 +51,13 @@ adjust-keys-blender-addon.zip: $(BLENDER_ADDON_CONTENT)
 	$(runCython)
 	mkdir -p adjust_keys_blender_addon
 	mkdir -p $(subst \,/,$(sort $(foreach f,$^,"adjust_keys_blender_addon/$(dir $f)")))
-	cp --parents $(foreach file,$^,"$(file)") adjust_keys_blender_addon/
+	cp --parents $(subst \,/,$(foreach file,$^,"$(file)")) adjust_keys_blender_addon/
 	cp adjust_keys_blender_addon/adjustkeys/adjustkeys_addon.py adjust_keys_blender_addon/__init__.py
-	zip -q -MM $@ $(foreach file,$^,"adjust_keys_blender_addon/$(file)") adjust_keys_blender_addon/__init__.py
+	zip -q -MM $@ $(subst \,/,$(foreach file,$^,"adjust_keys_blender_addon/$(file)")) adjust_keys_blender_addon/__init__.py
 	touch $@
 
 adjust-keys.zip: $(DIST_CONTENT)
-	zip -q -MM $@ $(foreach file,$^,"$(file)")
+	zip -q -MM $@ $(subst \,/,$(foreach file,$^,"$(file)"))
 	touch $@
 
 adjustkeys-bin: $(ADJUST_KEYS_SRCS)
@@ -66,11 +66,11 @@ adjustkeys-bin: $(ADJUST_KEYS_SRCS)
 	$(runCython)
 	mkdir bin_$(@F)
 	mkdir -p $(subst \,/,$(sort $(foreach f,$^,"bin_$(@F)/$(dir $f)")))
-	cp --parents $^ adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)
+	cp --parents $(subst \,/,$^) adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)
 	cp bin_$(@F)/adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)/__main__.py
 	touch bin_$(@F)/adjustkeys/__init__.py
 	touch bin_$(@F)/__init__.py
-	cd bin_$(@F)/ && zip -q -MM $(@F).zip $^ adjustkeys/__init__.py __main__.py && cd ../
+	cd bin_$(@F)/ && zip -q -MM $(@F).zip $(subst \,/,$^) adjustkeys/__init__.py __main__.py && cd ../
 	echo '#!/usr/bin/python3' | cat - bin_$(@F)/$(@F).zip > $@
 	chmod 700 $@
 
