@@ -64,9 +64,11 @@ adjustkeys-bin: $(ADJUST_KEYS_SRCS)
 	$(mkTargetDir)
 	$(runCython)
 	mkdir bin_$(@F)
+	mkdir -p $(sort $(foreach f,$^,bin_$(@F)/$(dir $f)))
 	cp --parents $^ adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)
 	cp bin_$(@F)/adjustkeys/adjustkeys_shell_script_main.py bin_$(@F)/__main__.py
 	touch bin_$(@F)/adjustkeys/__init__.py
+	touch bin_$(@F)/__init__.py
 	cd bin_$(@F)/ && zip -q -MM $(@F).zip $^ adjustkeys/__init__.py __main__.py && cd ../
 	echo '#!/usr/bin/python3' | cat - bin_$(@F)/$(@F).zip > $@
 	chmod 700 $@
