@@ -41,9 +41,9 @@ def type_check_profile_data(pd:object) -> bool:
     if t:
         (okay, t) = assert_type(okay, pd['special-offsets'], dict, 'Special offsets should be a dictionary')
         if t:
-            for rkey in ['iso-enter', 'num-enter', 'num-plus', 'stepped-caps']:
+            for rkey in ['iso-enter', 'num-enter', 'num-plus']:
                 (okay, _) = assert_dict_key(okay, pd['special-offsets'], rkey, 'Special offsets is missing %s key' % rkey)
-            if 'stepped-caps' in pd['special-offsets']:
+            if 'iso-enter' in pd['special-offsets']:
                 for k in ['top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right', 'bottom-centre', 'bottom-right']:
                     (okay, _) = assert_dict_key(okay, pd['special-offsets']['iso-enter'], k, 'Special offsets for iso-enter is missing key %s' % k)
             for k,v in pd['special-offsets'].items():

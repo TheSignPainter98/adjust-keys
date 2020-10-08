@@ -46,6 +46,3 @@ special-offsets:
     y: NUM_ENTER
   num-plus:
     y: NUM_PLUS
-  stepped-caps:
-    x: 11.38125000000000000000
-    y: STEPPED_CAPS
