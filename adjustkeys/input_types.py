@@ -87,7 +87,7 @@ def type_check_kle_layout(kl:object) -> [[bool, bool]]:
                             for k,v in keypart.items():
                                 if k in ['c', 't']:
                                     (okay, _) = assert_cond(okay, match(r'^#[a-f0-9]$', v, IGNORECASE), 'Key %s must have values of the form: "#" + a six-digit hex value, got %s' %(k, str(v)))
-                                elif k in ['l', 'n']:
+                                elif k in ['l', 'n', 'd', 'g']:
                                     (okay, _) = assert_type(okay, v, bool, 'Key %s must be either true/false, for %s' %(k, str(v)))
                                 elif k == 'p':
                                     (okay, _) = assert_cond(okay, v in ['R1', 'R2', 'R3', 'R4', 'R5', 'SPACE'], 'Adjustkeys only recognises profiles R1-5 and SPACE, got value %s for p-key' % str(v))

@@ -90,7 +90,7 @@ def parse_layout(layout_row_profiles: [str], layout: [[dict]], use_deactivation_
             key['profile-part'] = layout_row_profiles[min(parser_state.lineInd, len(layout_row_profiles) - 1)]
 
             # Add to layout
-            if 'key' in key:
+            if 'key' in key and (not 'd' in key or not key['d']):
                 parsed_layout += [key]
 
             # Move col to next position
