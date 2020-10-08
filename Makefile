@@ -45,7 +45,7 @@ endif
 adjustkeys/version.py:
 	(echo '# Copyright (C) Edward Jones&version: str = "$(VERSION)"' | tr '&' '\n') > $@
 
-devel: adjustkeys-bin
+devel: $(DEVEL_SRCS)
 .PHONY: devel
 
 dist: adjust-keys.zip adjust-keys-blender-addon.zip ChangeLog.md
