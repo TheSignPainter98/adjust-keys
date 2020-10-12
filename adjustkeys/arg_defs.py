@@ -215,6 +215,18 @@ args: [dict] = [{
     'label': 'List current options in YAML',
     'op': True
 }, {
+    'dest': 'scaling',
+    'short': '-s',
+    'long': '--scaling',
+    'action': 'store',
+    'help': 'A factor by which to scale the output',
+    'metavar': 'factor',
+    'default': 1.0,
+    'label': 'Output scaling',
+    'type': float,
+    'soft-min': 0.001,
+    'soft-max': 1000.0,
+}, {
     'dest': 'shrink_wrap_offset',
     'short': '-d',
     'long': '--shrink-wrap-offset',
