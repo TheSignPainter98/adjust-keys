@@ -22,6 +22,11 @@ def type_check_profile_data(pd:object) -> bool:
     if t:
         assert_type(okay, pd['unit-length'], float, 'Unit length should be a number with a decimal point')
 
+    # scale
+    (okay, t) = assert_dict_key(okay, pd, 'scale', 'Profile data has no scale key')
+    if t:
+        assert_type(okay, pd['scale'], float, 'Scale should be a number with a decimal point')
+
     # x-offsets
     (okay, t) = assert_dict_key(okay, pd, 'x-offsets', 'Profile data has no x-offsets key')
     if t:

@@ -37,7 +37,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit-length'], profile_data['margin-offset'], profile_data['margin-offset'])
+        handle_cap(cap, profile_data['unit-length'], pargs.scaling)
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -93,9 +93,8 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         printi('Moving cap model origin')
         obj:Object = data.objects[importedModelName]
-        off:Vector = Vector(obj.bound_box[3]) - Vector([profile_data['margin-offset'], -profile_data['margin-offset'], 0.0])
-        obj.data.transform(Matrix.Translation(-off))
-        obj.matrix_world.translation += Vector(off)
+        move_object_origin_to_global_origin_with_offset(obj, 0.0, 0.0)
+        obj.scale *= profile_data['scale'] * pargs.scaling
 
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
@@ -145,15 +144,15 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
     return layout_with_caps
 
 
-def handle_cap(cap: dict, unit_length: float, cap_x_offset: float, cap_y_offset: float):
+def handle_cap(cap: dict, unit_length: float, output_scaling:float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], cap_x_offset, cap_y_offset)
+    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], 0.0, 0.0) # cap_x_offset, cap_y_offset)
     cap = resolve_cap_position(cap, unit_length)
-    cap = apply_cap_pose(cap)
+    cap = apply_cap_pose(cap, output_scaling)
 
 
-def apply_cap_pose(cap: dict) -> dict:
-    cap['cap-obj'].location = (cap['pos-x'], cap['pos-y'], cap['pos-z'])
+def apply_cap_pose(cap: dict, output_scaling:float) -> dict:
+    cap['cap-obj'].location = Vector((cap['pos-x'], cap['pos-y'], cap['pos-z']))
     cap['cap-obj'].rotation_euler = Euler((0.0, 0.0, cap['rotation']))
     return cap
 

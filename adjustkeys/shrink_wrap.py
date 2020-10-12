@@ -11,13 +11,13 @@ from .log import printi
 
 def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
                                cap_unit_length: float,
-                               shrink_wrap_offset: float) -> None:
+                               shrink_wrap_offset: float, scaling:float) -> None:
     # Shrink-wrap glyphs onto the keycaps
     printi('Shrink-wrapping glyphs onto "%s"' % keycap_model_name)
     for glyph_name in glyph_names:
         # Translate to favourable position (assuming no 3u tall keycaps)
         glyph:Obj = data.objects[glyph_name]
-        glyph.location.z += 3.0 * cap_unit_length
+        glyph.location.z += 3.0 * cap_unit_length * scaling
 
         #  # Shrink wrap glyph onto keycaps
         modName: str = 'shrink_wrap_' + glyph.name

@@ -10,7 +10,7 @@ from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
-from .positions import resolve_glyph_position
+from .positions import move_object_origin_to_global_origin_with_offset, resolve_glyph_position
 from .scale import get_scale
 from .util import concat, dict_union, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
@@ -18,6 +18,7 @@ from functools import reduce
 from os import remove
 from os.path import exists, join
 from math import degrees
+from mathutils import Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from xml.dom.minidom import Element, parseString
@@ -52,10 +53,10 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph
             remove_fill_from_svg(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
 
-    svgWidth: int = max(list(map(lambda p: p['pos-x'], placed_glyphs)),
-                        default=0) + pargs.glyph_unit_length
-    svgHeight: int = max(list(map(lambda p: p['pos-y'], placed_glyphs)),
-                         default=0) + pargs.glyph_unit_length
+    svgWidth: int = max(map(lambda p: p['pos-x'], placed_glyphs),
+                        default=0) + 10.0 * pargs.glyph_unit_length
+    svgHeight: int = max(map(lambda p: p['pos-y'], placed_glyphs),
+                         default=0) + 10.0 * pargs.glyph_unit_length
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgWidth, svgHeight, svgWidth, svgHeight)
@@ -84,9 +85,9 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph
     data.collections.remove(data.collections[collectionName])
 
     # Apprpriately scale the objects
-    printi('Scaling glyphs')
+    printi('Scaling glyphs and moving origins')
     for svgObjectName in svgObjectNames:
-        data.objects[svgObjectName].scale *= scale
+        data.objects[svgObjectName].scale *= scale * profile_data['scale'] * pargs.scaling
 
     # Clean away temporary files.
     if exists(adjusted_svg_file_name):
@@ -173,7 +174,7 @@ def get_style(key:dict) -> str:
 def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
     # Prepare header content
     transformations:[str] = [
-            'translate(%10.10f %10.10f)' % (glyph['pos-x'], glyph['pos-y'])
+            'translate(%f %f)' % (glyph['pos-x'], glyph['pos-y'])
         ]
     if 'rotation' in glyph:
         transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
