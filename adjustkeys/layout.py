@@ -11,11 +11,11 @@ from re import match
 cap_deactivation_colour:str = '#cccccc'
 glyph_deactivation_colour:str = '#000000'
 
-def get_layout(layout_file:str, use_deactivation_colour:bool) -> [dict]:
-    return parse_layout(read_yaml(layout_file), use_deactivation_colour)
+def get_layout(layout_file:str, profile_data:dict, use_deactivation_colour:bool) -> [dict]:
+    return parse_layout(read_yaml(layout_file), profile_data, use_deactivation_colour)
 
 
-def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
+def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bool) -> [dict]:
     if not type_check_kle_layout(layout):
         die('KLE layout failed type-checking, see console for more information')
     printi('Reading layout information')
@@ -24,6 +24,8 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
             list(map(lambda l: type(l) != list, layout))):
         die('Expected a list of lists in the layout (see the JSON output of KLE)'
             )
+
+    profile_row_map:dict = profile_data['profile-row-map']
 
     parsed_layout: [dict] = []
     parser_default_state_dict:dict = {
@@ -35,7 +37,7 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
             'r': 0.0,
             'rx': 0.0,
             'ry': 0.0,
-            'p': 'R2',
+            'p': profile_row_map['R2'] if profile_row_map is not None else 'R2',
         }
     parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:
@@ -48,7 +50,7 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
             printi('Handling layout, looking at pair "%s" and "%s"' %
                    (str(line[parser_state.i]).replace('\n', '\\n'),
                     str(safe_get(line, parser_state.i + 1)).replace('\n', '\\n')))
-            (shift, line[parser_state.i]) = parse_key(line[parser_state.i], safe_get(line, parser_state.i + 1), parser_state)
+            (shift, line[parser_state.i]) = parse_key(line[parser_state.i], safe_get(line, parser_state.i + 1), parser_state, profile_row_map)
             key: dict = line[parser_state.i]
 
             # Handle colour changes
@@ -105,7 +107,7 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
 
     return list(map(add_cap_name, parsed_layout))
 
-def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser_state:SimpleNamespace) -> [int, dict]:
+def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser_state:SimpleNamespace, profile_row_map:dict) -> [int, dict]:
     ret: dict
     shift: int = 1
 
@@ -182,6 +184,11 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
     else:
         ret['stepped'] = False
     if 'p' in ret:
+        if profile_row_map is not None:
+            if ret['p'] in profile_row_map:
+                ret['p'] = profile_row_map[ret['p']]
+            else:
+                printw('Profile row map does not contain key "%s" (this message appears once for each key which uses this profile)' % ret['p'])
         ret = key_subst(ret, 'p', 'profile-part')
     else:
         ret['profile-part'] = parser_state.p
@@ -206,13 +213,13 @@ def gen_cap_name(key:dict) -> str:
     if 'key-type' in key:
         return key['key-type']
     else:
-        name:str = '%s-%su' %(key['profile-part'], str(float(key['width'])).replace('.', '_')) # I'm really hoping that python will behave reasonably w.r.t. floating point precision
+        name:str = '%s-%su' %(key['profile-part'], ('%.2f' % float(key['width'])).replace('.', '_'))
         if key['stepped']:
-            name += '-%su' % str(float(key['secondary-height'])).replace('.', '_')
-            name += '-%su' % str(float(key['secondary-width'])).replace('.', '_')
+            name += '-%su' % ('%.2f' % float(key['secondary-height'])).replace('.', '_')
+            name += '-%su' % ('%.2f' % float(key['secondary-width'])).replace('.', '_')
             name += '-stepped'
         if key['homing']:
-            name += '-homing'
+            name += '-bar'
         return name
 
 

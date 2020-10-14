@@ -33,7 +33,7 @@ if blender_available():
 def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection)
+    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
 
     printi('Adjusting keycaps...')
     for cap in caps:
@@ -99,7 +99,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
-def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection) -> [dict]:
+def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
