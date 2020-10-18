@@ -144,7 +144,6 @@ They’ll be explained in this section, but as an overview, `adjustkeys` takes:
 - A directory containing `.obj` files each containing an individual keycap
 - A directory containing the glyphs to be placed, each in a separate `.svg` file
 - A `yaml` (or equivalently `json`) file containing the layout exported from [KLE][kle]
-- A `yaml` file which lists the profiles of each row in order top to bottom
 - A `yaml` file which specifies the location of the centre of a key in a particular profile
 - A `yaml` file which specifies a mapping from key names to glyph names
 
