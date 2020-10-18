@@ -130,6 +130,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         }, profile['y-offsets'].items()))
     profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile['x-offsets'][1]), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
+    glyph_names:{str} = set(map(lambda g: g['glyph'], glyph_offsets))
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
     if duplicate_glyphs != []:
         printw('Duplicate glyphs detected:\n\t' + '\n\t'.join(duplicate_glyphs))
@@ -138,6 +139,10 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
             'key': str(m[0]),
             'glyph': str(m[1])
         }, glyph_map.items()))
+
+    missing_glyphs:{str} = set(list_diff(map(str, glyph_map.values()), glyph_names))
+    if len(missing_glyphs) != 0:
+        printw('The following glyphs could not be found:\n\t' + '\n\t'.join(list(sorted(missing_glyphs))))
 
     key_offsets = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
     glyph_offset_layout = inner_join(key_offsets, 'key', layout, 'key')
@@ -153,6 +158,10 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
                     filter(lambda s: s['key-type'] == k['key-type'],
                            profile_special_offsets_rel))[0]),
             profile_x_y_offset_keys))
+
+    glyphs_lost_due_to_profile_data:{str} = set(list_diff(list_diff(map(lambda g: g['glyph'], profile_x_y_offset_keys), glyph_names), missing_glyphs))
+    if len(glyphs_lost_due_to_profile_data) != 0:
+        printw('The following glyphs were lost when inner-joining with the offset information\n\t' + '\n\t'.join(list(sorted(glyphs_lost_due_to_profile_data))))
 
     return data
 
