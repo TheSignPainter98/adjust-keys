@@ -22,9 +22,3 @@ def resolve_cap_position(cap: dict, ulen: float) -> dict:
     cap['pos-y'] = ulen * cap['row'] * -1
     cap['pos-z'] = 0.0
     return cap
-
-
-def move_object_origin_to_global_origin_with_offset(obj:object, x_offset:float, y_offset:float):
-    vec_from_origin:Vector = Vector([x_offset, -y_offset, 0.0]) - Vector(obj.bound_box[3])
-    obj.data.transform(Matrix.Translation(vec_from_origin))
-    obj.matrix_world.translation -= vec_from_origin

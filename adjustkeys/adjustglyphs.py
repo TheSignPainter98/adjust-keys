@@ -10,7 +10,7 @@ from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
-from .positions import move_object_origin_to_global_origin_with_offset, resolve_glyph_position
+from .positions import resolve_glyph_position
 from .scale import get_scale
 from .util import concat, dict_union, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml

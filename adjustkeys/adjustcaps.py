@@ -9,7 +9,7 @@ from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
-from .positions import move_object_origin_to_global_origin_with_offset, resolve_cap_position
+from .positions import resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from .yaml_io import read_yaml
 from argparse import Namespace
@@ -91,10 +91,12 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             coll.objects.unlink(imp_obj)
         collection.objects.link(imp_obj)
 
-        printi('Moving cap model origin')
+        printi('Updating scaling')
         obj:Object = data.objects[importedModelName]
-        move_object_origin_to_global_origin_with_offset(obj, 0.0, 0.0)
-        obj.scale *= profile_data['scale'] * pargs.scaling
+        obj.matrix_world = Matrix.Identity(4)
+        obj.matrix_world @= Matrix.Rotation(pi/2.0, 4, 'X')
+        obj.matrix_world @= Matrix.Scale(profile_data['scale'] * pargs.scaling, 4)
+        obj.matrix_world @= Matrix.Translation(-Vector(obj.bound_box[0]))
 
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
@@ -115,7 +117,7 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
             # Import new object
             printi('Importing "%s" into blender...' % cap_data['cap-source'])
             objectsPreSingleImport:[str] = data.objects.keys()
-            ops.import_scene.obj(filepath=cap_data['cap-source'], axis_up='Z', axis_forward='Y')
+            ops.import_scene.obj(filepath=cap_data['cap-source'])
             objectsPostSingleImport:[str] = data.objects.keys()
             cap_data['cap-obj-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap_data['cap-source'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap_data['cap-source'])
             cap_data['cap-obj'] = context.scene.objects[cap_data['cap-obj-name']]
@@ -146,14 +148,25 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
 
 def handle_cap(cap: dict, unit_length: float, output_scaling:float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], 0.0, 0.0) # cap_x_offset, cap_y_offset)
     cap = resolve_cap_position(cap, unit_length)
     cap = apply_cap_pose(cap, output_scaling)
 
 
 def apply_cap_pose(cap: dict, output_scaling:float) -> dict:
-    cap['cap-obj'].location = Vector((cap['pos-x'], cap['pos-y'], cap['pos-z']))
-    cap['cap-obj'].rotation_euler = Euler((0.0, 0.0, cap['rotation']))
+    obj:object = cap['cap-obj']
+
+    # Reset pose
+    obj.matrix_world = Matrix.Identity(4)
+
+    # Set rotation
+    obj.matrix_world @= Matrix.Rotation(pi/2.0, 4, 'X')
+    obj.matrix_world @= Matrix.Rotation(0.0, 4, 'Y')
+    obj.matrix_world @= Matrix.Rotation(cap['rotation'], 4, 'Z')
+
+    # Move to correct position from origin
+    obj.matrix_world @= Matrix.Translation(-Vector(obj.bound_box[0]))
+    obj.matrix_world @= Matrix.Translation(Vector((cap['pos-x'], cap['pos-z'], -cap['pos-y'])))
+
     return cap
 
 
