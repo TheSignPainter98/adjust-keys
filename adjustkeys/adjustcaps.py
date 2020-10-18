@@ -66,7 +66,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
     if len(importedCapObjects) != 0:
         printi('Joining keycap models into a single object')
-        ctx: dict = context.copy()
+        ctx: dict = {}
         ctx['object'] = ctx['active_object'] = importedCapObjects[0]
         ctx['selected_objects'] = ctx[
             'selected_editable_objects'] = importedCapObjects
