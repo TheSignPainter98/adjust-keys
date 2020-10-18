@@ -334,6 +334,7 @@ All files written by contributors to this project are covered under the [GNU Les
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord.
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
+- Cherry keycap models present were derived from step files kindly provided by hineybush and are available via [GitHub][cherry-keycap-model-github].
 - The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
 - The keycap representation used in `glyphs/red-hat-display` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE.][kle]
@@ -342,6 +343,7 @@ Please ensure that credit is given where it is due.
 
 [blender]: https://www.blender.org
 [blender-path-guide]: https://docs.blender.org/manual/en/latest/advanced/command_line/launch/macos.html
+[cherry-keycap-model-github]: https://github.com/hineybush/CherryMX
 [contrib-note]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CONTRIBUTING.md
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
 [codium]: https://github.com/VSCodium/vscodium
