@@ -181,7 +181,7 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret = key_subst(ret, 'l', 'stepped')
     else:
         ret['stepped'] = False
-    if 'p' in ret:
+    if 'p' in ret and ret['p']:
         ret = key_subst(ret, 'p', 'profile-part')
     else:
         ret['profile-part'] = parser_state.p
