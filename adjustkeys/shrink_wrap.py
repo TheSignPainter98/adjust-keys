@@ -6,12 +6,16 @@ if blender_available():
     from bpy import types
     data = LazyImport('bpy', 'data')
 
-from .log import printi
+from .log import printi, printw
 
 
 def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
                                cap_unit_length: float,
                                shrink_wrap_offset: float, scaling:float) -> None:
+    if keycap_model_name is None:
+        printw('Shrink-wrapping was aborted as no models were successfully imported into blender')
+        return
+
     # Shrink-wrap glyphs onto the keycaps
     printi('Shrink-wrapping glyphs onto "%s"' % keycap_model_name)
     for glyph_name in glyph_names:
