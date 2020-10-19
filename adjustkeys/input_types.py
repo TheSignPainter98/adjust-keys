@@ -27,14 +27,6 @@ def type_check_profile_data(pd:object) -> bool:
     if t:
         assert_type(okay, pd['scale'], float, 'Scale should be a number with a decimal point')
 
-    # x-offsets
-    (okay, t) = assert_dict_key(okay, pd, 'x-offsets', 'Profile data has no x-offsets key')
-    if t:
-        (okay, t) = assert_type(okay, pd['x-offsets'], dict, 'Profile data x-offsets should be a mapping')
-        if t:
-            for k,v in pd['x-offsets'].items():
-                (okay, _) = assert_type(okay, v, float, 'x-offset for %s should be a number with a decimal point' % k)
-
     # y-offsets
     (okay, t) = assert_dict_key(okay, pd, 'y-offsets', 'Profile data has no y-offsets key')
     if t:

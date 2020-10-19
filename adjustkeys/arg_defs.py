@@ -6,6 +6,17 @@ from os.path import join
 
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
+    'dest': 'alignment',
+    'short': '-a',
+    'long': '--alignment',
+    'action': 'store',
+    'help': 'Specify the alignment of glyphs on caps',
+    'metavar': 'direction',
+    'default': 'centre',
+    'choices': [ 'left', 'centre', 'right' ],
+    'type': str,
+    'label': 'Alignment direction'
+}, {
     'dest': 'cap_dir',
     'short': '-K',
     'long': '--key-cap-dir',
@@ -106,13 +117,13 @@ args: [dict] = [{
         'bottom-centre', 'bottom-right'
     ],
     'help':
-    'Specify the glyph position on an ISO enter key',
+    'Specify the alignment on an ISO enter key',
     'metavar':
     'pos',
     'default':
     'middle-centre',
     'label':
-    'ISO-enter glyph position',
+    'ISO-enter alignment',
     'type':
     str
 }, {

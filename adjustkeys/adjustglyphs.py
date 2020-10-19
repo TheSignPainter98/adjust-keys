@@ -12,7 +12,7 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import move_object_origin_to_global_origin_with_offset, resolve_glyph_position
 from .scale import get_scale
-from .util import concat, dict_union, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
+from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
@@ -21,6 +21,7 @@ from math import degrees
 from mathutils import Vector
 from re import IGNORECASE, match
 from sys import argv, exit
+from types import LambdaType
 from xml.dom.minidom import Element, parseString
 Collection:type = None
 if blender_available():
@@ -37,7 +38,7 @@ adjusted_svg_file_name:str = get_temp_file_name()
 #
 # @return Zero if and only if the program is to exit successfully
 def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos)
+    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['margin-offset']), glyph_data))
@@ -115,20 +116,30 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     _remove_guide_from_cap(cap, glyph_part_ignore_regex)
     return cap
 
+def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, margin_offset:float) -> dict:
+    cap_width:float = unit_length - 2.0 * margin_offset
+    alignment_funcs:dict = {
+            'left': lambda _: 0.5,
+            'centre': lambda w: w / 2.0,
+            'right': lambda w: w - 0.5
+        }
+    alignment_func:LambdaType = alignment_funcs[alignment]
+    return { o: cap_width * alignment_func(o) for o in frange(0.5, 14.0, 0.25) }
 
 def collect_data(layout: [dict], profile: dict, glyph_dir: str,
-        glyph_map: dict, iso_enter_glyph_pos:str) -> [dict]:
+        glyph_map: dict, iso_enter_glyph_pos:str, alignment:str) -> [dict]:
+    profile_x_offsets:dict = resolve_profile_x_offsets_with_alignment(alignment, profile['unit-length'], profile['margin-offset'])
     profile_x_offsets_rel: [dict] = list(
         map(lambda m: {
             'width': m[0],
             'p-off-x': m[1]
-        }, profile['x-offsets'].items()))
+        }, profile_x_offsets.items()))
     profile_y_offsets_rel: [dict] = list(
         map(lambda m: {
             'profile-part': m[0],
             'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile['x-offsets'][1]), profile['special-offsets'].items()))
+    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile_x_offsets[1]), profile['special-offsets'].items()))
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     glyph_names:{str} = set(map(lambda g: g['glyph'], glyph_offsets))
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
