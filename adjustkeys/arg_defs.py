@@ -12,8 +12,12 @@ args: [dict] = [{
     'action': 'store',
     'help': 'Specify the alignment of glyphs on caps',
     'metavar': 'direction',
-    'default': 'centre',
-    'choices': [ 'left', 'centre', 'right' ],
+    'default': 'middle-centre',
+    'choices': [
+       'top-left', 'top-centre', 'top-right',
+       'middle-left', 'middle-centre', 'middle-right',
+       'bottom-left', 'bottom-centre', 'bottom-right'
+    ],
     'type': str,
     'label': 'Alignment direction'
 }, {

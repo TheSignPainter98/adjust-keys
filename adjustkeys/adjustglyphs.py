@@ -125,6 +125,24 @@ def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, m
         }
     alignment_func:LambdaType = alignment_funcs[alignment]
     return { o: cap_width * alignment_func(o) for o in frange(0.5, 14.0, 0.25) }
+def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, margin_offset:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
+    resolved_offsets:dict = {}
+    resolved_offsets['iso-enter'] = special_y_offsets['iso-enter'][iso_enter_glyph_pos]
+
+    offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo }
+
+    alignment_direction:str = alignment.split('-')[0]
+    if alignment_direction == 'top':
+        resolved_offsets['num-plus'] = offgen(y_offsets['R3'])
+        resolved_offsets['num-enter'] = offgen(y_offsets['R1'])
+    elif alignment_direction == 'middle':
+        resolved_offsets['num-plus'] = offgen(special_y_offsets['num-plus']['y'])
+        resolved_offsets['num-enter'] = offgen(special_y_offsets['num-enter']['y'])
+    elif alignment_direction == 'bottom':
+        resolved_offsets['num-plus'] = offgen(unit_length + y_offsets['R2'])
+        resolved_offsets['num-enter'] = offgen(unit_length + y_offsets['R1'])
+
+    return resolved_offsets
 
 def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         glyph_map: dict, iso_enter_glyph_pos:str, alignment:str) -> [dict]:
@@ -139,7 +157,9 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
             'profile-part': m[0],
             'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets_rel: [dict] = list(map(lambda so: parse_special_pos(so, iso_enter_glyph_pos, profile_x_offsets[1]), profile['special-offsets'].items()))
+    profile_special_offsets:dict = resolve_special_profile_y_offsets_with_alignment(alignment, iso_enter_glyph_pos, profile['unit-length'], profile['margin-offset'], profile_x_offsets, profile['y-offsets'], profile['special-offsets'])
+    profile_special_offsets_rel: [dict] = list(map(lambda so: { 'key-type': so[0], 'p-off-x': so[1]['x'], 'p-off-y': so[1]['y'] }, profile_special_offsets.items()))
+
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
     glyph_names:{str} = set(map(lambda g: g['glyph'], glyph_offsets))
     duplicate_glyphs:[str] = list(map(lambda c: c[1][0]['glyph'] + ' @ ' + ', '.join(list(map(lambda c2: c2['src'], c[1]))), get_dicts_with_duplicate_field_values(glyph_offsets, 'glyph').items()))
