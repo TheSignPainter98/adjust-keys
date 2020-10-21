@@ -117,14 +117,15 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     return cap
 
 def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, margin_offset:float) -> dict:
-    cap_width:float = unit_length - 2.0 * margin_offset
+    unit_cap_width:float = unit_length - 2.0 * margin_offset
     alignment_funcs:dict = {
-            'left': lambda _: 0.5,
-            'centre': lambda w: w / 2.0,
-            'right': lambda w: w - 0.5
+            'left': lambda _: 0.5 * unit_cap_width,
+            'centre': lambda w: (w * unit_length - 2.0 * margin_offset) / 2.0,
+            'right': lambda w: (w * unit_length - 2.0 * margin_offset) - 0.5 * unit_cap_width
         }
-    alignment_func:LambdaType = alignment_funcs[alignment]
-    return { o: cap_width * alignment_func(o) for o in frange(0.5, 14.0, 0.25) }
+    alignment_func:LambdaType = alignment_funcs[alignment.split('-')[1]]
+    return { o: alignment_func(o) for o in frange(0.5, 14.0, 0.25) }
+
 def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, margin_offset:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
     resolved_offsets:dict = {}
     resolved_offsets['iso-enter'] = special_y_offsets['iso-enter'][iso_enter_glyph_pos]
