@@ -1,5 +1,6 @@
 # Copyright (C) Edward Jones
 
+from decimal import Decimal
 from functools import reduce
 from .log import die
 
@@ -230,3 +231,11 @@ def dumb_wrap_text(text:[str], width:int) -> [str]:
         return splitPara
 
     return list(reduce(iconcat, map(lambda l: dumb_wrap_paragraph(l, width), indentedText)))
+
+def frange(x, y, jump):
+    x = Decimal(x)
+    y = Decimal(y)
+    jump = Decimal(jump)
+    while x < y:
+        yield float(x)
+        x += jump
