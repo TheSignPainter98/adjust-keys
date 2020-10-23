@@ -1,6 +1,7 @@
 # Copyright (C) Edward Jones
 
 from .log import printe
+from .util import list_diff
 from re import IGNORECASE, match
 
 # The equivalent Haskell code to do all this would add a total of zero extra lines to the existing program. Thanks Python, get a type system.
@@ -30,40 +31,26 @@ def type_check_profile_data(pd:object) -> bool:
     # y-offsets
     (okay, t) = assert_dict_key(okay, pd, 'y-offsets', 'Profile data has no y-offsets key')
     if t:
-        for k,v in pd['y-offsets'].items():
-            (okay, _) = assert_type(okay, v, float, 'y-offset for %s should be a number with a decimal point' % k)
+        (okay, t) = assert_type(okay, pd, dict, 'y-offsets should be a dictionary')
+        if t:
+            for k,v in pd['y-offsets'].items():
+                (okay, _) = assert_type(okay, v, float, 'y-offset for %s should be a number with a decimal point' % k)
 
     # special-offsets
     (okay, t) = assert_dict_key(okay, pd, 'special-offsets', 'Profile data missing special-offsets key')
     if t:
         (okay, t) = assert_type(okay, pd['special-offsets'], dict, 'Special offsets should be a dictionary')
         if t:
-            for rkey in ['iso-enter', 'num-enter', 'num-plus']:
-                (okay, _) = assert_dict_key(okay, pd['special-offsets'], rkey, 'Special offsets is missing %s key' % rkey)
-            if 'iso-enter' in pd['special-offsets']:
-                for k in ['top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right', 'bottom-centre', 'bottom-right']:
-                    (okay, _) = assert_dict_key(okay, pd['special-offsets']['iso-enter'], k, 'Special offsets for iso-enter is missing key %s' % k)
+            (okay, t) = assert_cond(okay, set(pd['special-offsets'].keys()) == { 'iso-enter', 'num-enter', 'num-plus' }, 'Special offset keys must be exactly the set %s' % str(['iso-enter', 'num-enter', 'num-plus']))
+            if not t:
+                extra_keys:[str] = list_diff(pd['special-offsets'].keys(), ['iso-enter', 'num-enter', 'num-plus'])
+                missing_keys:[str]  = list_diff(['iso-enter', 'num-enter', 'num-plus'], pd['special-offsets'].keys())
+                if extra_keys != []:
+                    print('Got unexpected special offset keys, expected %s but got: \n\t%s' % (str(['iso-enter', 'num-enter', 'num-plus']), '\n\t'.join(extra_keys)))
+                if missing_keys != []:
+                    print('Missing special offset keys: \n\t%s' % '\n\t'.join(missing_keys))
             for k,v in pd['special-offsets'].items():
-                (okay, t) = assert_type(okay, v, dict, 'Special offset for %s must be a dictionary' % k)
-                if t:
-                    if k == 'iso-enter':
-                        (okay, t) = assert_type(okay, v, dict, 'iso-enter special offsets should be a dictionary')
-                        if t:
-                            for k2,v2 in v.items():
-                                (okay, t) = assert_type(okay, v2, dict, 'Iso-enter special offset for %s should be a dictionary' % k2)
-                                if t:
-                                    (okay, t) = assert_dict_key(okay, v2, 'x', 'Iso-enter special offset %s is missing x key' % k2)
-                                    if t:
-                                        (okay, _) = assert_type(okay, v2['x'], float, 'Iso-enter special offset %s\'s x key should be a number with a decimal point' % k2)
-                                    (okay, t) = assert_dict_key(okay, v2, 'y', 'Iso-enter special offset %s is missing y key' % k2)
-                                    if t:
-                                        (okay, _) = assert_type(okay, v2['y'], float, 'Iso-enter special offset %s\'s y key should be a number with a decimal point' % k2)
-                    else:
-                        (okay, t) = assert_dict_key(okay, v, 'y', 'Special offset %s is missing a y-value' % k)
-                        if t:
-                            (okay, _) = assert_type(okay, v['y'], float, 'special y-offset for %s\'s should be a number with a decimal point' % k)
-                        if 'x' in v:
-                            (okay, _) = assert_type(okay, v['x'], float, 'special x-offset for %s\'s should be a number with a decimal point' % k)
+                (okay, _) = assert_type(okay, v, float, 'Special offset for %s must be a number with a deciml point' % k)
     return okay
 
 def type_check_kle_layout(kl:object) -> [[bool, bool]]:

@@ -117,8 +117,9 @@ args: [dict] = [{
     'action':
     'store',
     'choices': [
-        'top-left', 'top-centre', 'top-right', 'middle-centre', 'middle-right',
-        'bottom-centre', 'bottom-right'
+        'top-left', 'top-centre', 'top-right',
+        'middle-left', 'middle-centre', 'middle-right',
+        'bottom-left', 'bottom-centre', 'bottom-right'
     ],
     'help':
     'Specify the alignment on an ISO enter key',

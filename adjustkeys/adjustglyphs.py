@@ -116,7 +116,7 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     _remove_guide_from_cap(cap, glyph_part_ignore_regex)
     return cap
 
-def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, margin_offset:float) -> dict:
+def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, margin_offset:float, smallest:float=0.5, largest:float=14.0, step:float=0.25) -> dict:
     unit_cap_width:float = unit_length - 2.0 * margin_offset
     alignment_funcs:dict = {
             'left': lambda _: 0.5 * unit_cap_width,
@@ -124,24 +124,43 @@ def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, m
             'right': lambda w: (w * unit_length - 2.0 * margin_offset) - 0.5 * unit_cap_width
         }
     alignment_func:LambdaType = alignment_funcs[alignment.split('-')[1]]
-    return { o: alignment_func(o) for o in frange(0.5, 14.0, 0.25) }
+    return { o: alignment_func(o) for o in frange(smallest, largest, step) }
 
 def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, margin_offset:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
     resolved_offsets:dict = {}
-    resolved_offsets['iso-enter'] = special_y_offsets['iso-enter'][iso_enter_glyph_pos]
 
-    offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo }
+    # Resolve aligned iso-enter glyph x-offsets
+    iso_enter_x_offsets:dict = resolve_profile_x_offsets_with_alignment(iso_enter_glyph_pos, unit_length, margin_offset, smallest=1.25, largest=1.5)
+    iso_enter_x:float
+    iso_enter_glyph_pos_parts:[str] = iso_enter_glyph_pos.split('-')
+    if iso_enter_glyph_pos_parts[0] == 'top':
+        iso_enter_x = iso_enter_x_offsets[1.5]
+    else:
+        iso_enter_x = 0.25 * unit_length + iso_enter_x_offsets[1.25]
 
+    # Resolve aligned iso-enter glyph y-offsets
+    iso_enter_y:float
+    if iso_enter_glyph_pos_parts[0] == 'top':
+        iso_enter_y = y_offsets['R3']
+    elif iso_enter_glyph_pos_parts[0] == 'middle':
+        iso_enter_y = special_y_offsets['iso-enter']
+    else:
+        iso_enter_y = unit_length + y_offsets['R2']
+
+    resolved_offsets['iso-enter'] = { 'x': iso_enter_x, 'y': iso_enter_y }
+
+    # Resolve num-plus and num-enter
+    unit_offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo }
     alignment_direction:str = alignment.split('-')[0]
     if alignment_direction == 'top':
-        resolved_offsets['num-plus'] = offgen(y_offsets['R3'])
-        resolved_offsets['num-enter'] = offgen(y_offsets['R1'])
+        resolved_offsets['num-plus'] = unit_offgen(y_offsets['R3'])
+        resolved_offsets['num-enter'] = unit_offgen(y_offsets['R1'])
     elif alignment_direction == 'middle':
-        resolved_offsets['num-plus'] = offgen(special_y_offsets['num-plus']['y'])
-        resolved_offsets['num-enter'] = offgen(special_y_offsets['num-enter']['y'])
+        resolved_offsets['num-plus'] = unit_offgen(special_y_offsets['num-plus'])
+        resolved_offsets['num-enter'] = unit_offgen(special_y_offsets['num-enter'])
     elif alignment_direction == 'bottom':
-        resolved_offsets['num-plus'] = offgen(unit_length + y_offsets['R2'])
-        resolved_offsets['num-enter'] = offgen(unit_length + y_offsets['R1'])
+        resolved_offsets['num-plus'] = unit_offgen(unit_length + y_offsets['R2'])
+        resolved_offsets['num-enter'] = unit_offgen(unit_length + y_offsets['R1'])
 
     return resolved_offsets
 

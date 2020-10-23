@@ -236,6 +236,6 @@ def frange(x, y, jump):
     x = Decimal(x)
     y = Decimal(y)
     jump = Decimal(jump)
-    while x < y:
+    while x <= y:
         yield float(x)
         x += jump
