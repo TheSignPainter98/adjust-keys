@@ -40,6 +40,8 @@
 'E': e
 'End': end
 'Enter': enter
+'Iso Enter': iso-enter
+'Num Enter': num-enter
 'Esc': esc
 'F': f
 'F1': f1

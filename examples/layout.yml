@@ -119,7 +119,7 @@
     w2: 1.5
     h2: 1
     x2: -0.25
-  - Enter
+  - Iso Enter
 - - a: 4
     w: 1.75
     p: R2
@@ -185,7 +185,7 @@
 
     PgDn'
   - h: 2
-  - Enter
+  - Num Enter
 - - w: 1.25
     p: R1
   - Ctrl

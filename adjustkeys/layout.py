@@ -133,9 +133,9 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
             and safe_get(ret, 'x2') == -0.25:
             ret['key-type'] = 'iso-enter'
             ret['x'] -= 0.25
-        elif ret_key == '+' and safe_get(ret, 'h') == 2:
+        elif ret_key.endswith('+') and safe_get(ret, 'h') == 2:
             ret['key-type'] = 'num-plus'
-        elif ret_key and ret_key.lower() == 'enter' and safe_get(ret,
+        elif ret_key and ret_key.lower().endswith('enter') and safe_get(ret,
                                                                  'h') == 2:
             ret['key-type'] = 'num-enter'
 
