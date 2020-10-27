@@ -8,18 +8,6 @@ profile-row-map:
   R2: R3
   R1: R4
   SPACE: SPACE
-x-offsets:
-  1: 0.8575
-  1.25: 0.8575
-  1.5: 0.8575
-  1.75: 0.8575
-  2: 0.8575
-  2.25: 0.8575
-  2.75: 0.8575
-  3: 0.8575
-  6: 0.8575
-  6.25: 0.8575
-  7: 0.8575
 y-offsets:
   R4: Y_OFF_R4
   R3: Y_OFF_R3
@@ -27,29 +15,6 @@ y-offsets:
   R1: Y_OFF_R1
   SPACE: Y_OFF_SPACE
 special-offsets:
-  iso-enter:
-    top-left:
-      x: 0.9000
-      y: ISO_ENTER_TOP_LEFT_Y
-    top-centre:
-      x: 1.37625
-      y: ISO_ENTER_TOP_CENTRE_Y
-    top-right:
-      x: 1.8525
-      y: ISO_ENTER_TOP_RIGHT_Y
-    middle-centre:
-      x: 1.614375
-      y: ISO_ENTER_MIDDLE_CENTRE_Y
-    middle-right:
-      x: 1.8525
-      y: ISO_ENTER_MIDDLE_RIGHT_Y
-    bottom-centre:
-      x: 1.614375
-      y: ISO_ENTER_BOTTOM_CENTRE_Y
-    bottom-right:
-      x: 1.8525
-      y: ISO_ENTER_BOTTOM_RIGHT_Y
-  num-enter:
-    y: NUM_ENTER
-  num-plus:
-    y: NUM_PLUS
+  iso-enter: ISO_ENTER_MIDDLE_Y
+  num-enter: NUM_ENTER
+  num-plus: NUM_PLUS
