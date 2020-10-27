@@ -67,7 +67,8 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     if len(importedCapObjects) != 0:
         printi('Joining keycap models into a single object')
         ctx: dict = context.copy()
-        ctx['object'] = ctx['active_object'] = importedCapObjects[0]
+        joinTarget:Object = min(caps, key=lambda c: (c['pos-x'], -c['pos-y']))['cap-obj']
+        ctx['object'] = ctx['active_object'] = joinTarget
         ctx['selected_objects'] = ctx[
             'selected_editable_objects'] = importedCapObjects
         ops.object.join(ctx)
@@ -79,7 +80,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         while intended_name in data.objects:
             i += 1
             intended_name = 'capmodel' + '-' + str(i)
-        importedCapObjects[0].name = importedCapObjects[0].data.name = intended_name
+        joinTarget.name = joinTarget.data.name = intended_name
         objectsPostRename: [str] = data.objects.keys()
         importedModelName = get_only(
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
