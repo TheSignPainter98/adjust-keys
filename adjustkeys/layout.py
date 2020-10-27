@@ -183,7 +183,7 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
         ret = key_subst(ret, 'l', 'stepped')
     else:
         ret['stepped'] = False
-    if 'p' in ret:
+    if 'p' in ret and ret['p']:
         if profile_row_map is not None:
             if ret['p'] in profile_row_map:
                 ret['p'] = profile_row_map[ret['p']]

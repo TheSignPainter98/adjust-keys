@@ -2,18 +2,6 @@ margin-offset: 0.525
 unit-length: 19.05
 scale: 0.001
 profile-row-map: null
-x-offsets:
-  1: 9.00000000000000000000
-  1.25: 11.38125000000000000000
-  1.5: 13.76250000000000000000
-  1.75: 16.14375000000000000000
-  2: 18.52500000000000000000
-  2.25: 20.90625000000000000000
-  2.75: 25.66875000000000000000
-  3: 28.05000000000000000000
-  6: 56.62500000000000000000
-  6.25: 59.00625000000000000000
-  7: 66.15000000000000000000
 y-offsets:
   R5: Y_OFF_R5
   R4: Y_OFF_R4
@@ -22,29 +10,6 @@ y-offsets:
   R1: Y_OFF_R1
   SPACE: Y_OFF_SPACE
 special-offsets:
-  iso-enter:
-    top-left:
-      x: 9.000
-      y: ISO_ENTER_TOP_LEFT_Y
-    top-centre:
-      x: 13.7625
-      y: ISO_ENTER_TOP_CENTRE_Y
-    top-right:
-      x: 18.525
-      y: ISO_ENTER_TOP_RIGHT_Y
-    middle-centre:
-      x: 16.14375
-      y: ISO_ENTER_MIDDLE_CENTRE_Y
-    middle-right:
-      x: 18.525
-      y: ISO_ENTER_MIDDLE_RIGHT_Y
-    bottom-centre:
-      x: 16.14375
-      y: ISO_ENTER_BOTTOM_CENTRE_Y
-    bottom-right:
-      x: 18.525
-      y: ISO_ENTER_BOTTOM_RIGHT_Y
-  num-enter:
-    y: NUM_ENTER
-  num-plus:
-    y: NUM_PLUS
+  iso-enter: ISO_ENTER_MIDDLE_Y
+  num-enter: NUM_ENTER
+  num-plus: NUM_PLUS
