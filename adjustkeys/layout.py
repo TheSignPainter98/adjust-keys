@@ -14,6 +14,11 @@ glyph_deactivation_colour:str = '#000000'
 def get_layout(layout_file:str, use_deactivation_colour:bool) -> [dict]:
     return parse_layout(read_yaml(layout_file), use_deactivation_colour)
 
+def simple_parse_layout_in_file(fpath:str) -> [dict]:
+    return get_layout(fpath, None, False)
+
+def simple_parse_layout(layout:[[dict]]) -> [dict]:
+    return parse_layout(layout, None, True)
 
 def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
     if not type_check_kle_layout(layout):
@@ -24,6 +29,8 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
             list(map(lambda l: type(l) != list, layout))):
         die('Expected a list of lists in the layout (see the JSON output of KLE)'
             )
+
+    profile_row_map:dict = safe_get(profile_data, 'profile-row-map')
 
     parsed_layout: [dict] = []
     parser_default_state_dict:dict = {
@@ -214,5 +221,3 @@ def gen_cap_name(key:dict) -> str:
         if key['homing']:
             name += '-homing'
         return name
-
-

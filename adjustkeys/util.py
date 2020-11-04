@@ -154,7 +154,9 @@ def list_diff(a: list, b: list) -> list:
 #
 # @return
 def safe_get(a: [object], i: object) -> object:
-    if type(a) == list:
+    if a is None:
+        return None
+    elif type(a) == list:
         return a[i] if len(a) > i else None
     elif type(a) == dict:
         return a[i] if i in a else None
