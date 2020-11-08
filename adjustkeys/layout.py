@@ -28,7 +28,7 @@ def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bo
         die('Expected a list of lists in the layout (see the JSON output of KLE)'
             )
 
-    profile_row_map:dict = profile_data['profile-row-map']
+    profile_row_map:dict = safe_get(profile_data, 'profile-row-map')
 
     parsed_layout: [dict] = []
     parser_default_state_dict:dict = {
