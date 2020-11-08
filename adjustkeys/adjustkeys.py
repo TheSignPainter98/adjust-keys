@@ -112,7 +112,8 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust glyph positions
     glyph_data:dict = {}
     if not pargs.no_adjust_glyphs:
-        glyph_data = adjust_glyphs(layout, profile_data, collection, glyph_map, pargs)
+        margin_offset:float = model_data['margin-offset'] if 'margin-offset' in model_data else 0.0
+        glyph_data = adjust_glyphs(layout, profile_data, margin_offset, collection, glyph_map, pargs)
 
     # If blender is loaded, shrink-wrap the glyphs onto the model
     if not pargs.no_shrink_wrap and not pargs.no_adjust_caps and not pargs.no_adjust_glyphs:

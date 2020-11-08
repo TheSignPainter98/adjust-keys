@@ -37,11 +37,11 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
+def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+    glyph_data: [dict] = collect_data(layout, profile_data, margin_offset, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['margin-offset'], profile_data['scale'] * pargs.scaling), glyph_data))
+    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), glyph_data))
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -116,21 +116,20 @@ def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:
     _remove_guide_from_cap(cap, glyph_part_ignore_regex)
     return cap
 
-def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, margin_offset:float, smallest:float=0.5, largest:float=14.0, step:float=0.25) -> dict:
-    unit_cap_width:float = unit_length - 2.0 * margin_offset
+def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, smallest:float=0.5, largest:float=14.0, step:float=0.25) -> dict:
     alignment_funcs:dict = {
-            'left': lambda _: 0.5 * unit_cap_width,
-            'centre': lambda w: (w * unit_length - 2.0 * margin_offset) / 2.0,
-            'right': lambda w: (w * unit_length - 2.0 * margin_offset) - 0.5 * unit_cap_width
+            'left': lambda _: 0.5,
+            'centre': lambda w: w / 2.0,
+            'right': lambda w: w - 0.5
         }
     alignment_func:LambdaType = alignment_funcs[alignment.split('-')[1]]
-    return { o: alignment_func(o) for o in frange(smallest, largest, step) }
+    return { w: unit_length * alignment_func(w) for w in frange(smallest, largest, step) }
 
 def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, margin_offset:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
     resolved_offsets:dict = {}
 
     # Resolve aligned iso-enter glyph x-offsets
-    iso_enter_x_offsets:dict = resolve_profile_x_offsets_with_alignment(iso_enter_glyph_pos, unit_length, margin_offset, smallest=1.25, largest=1.5)
+    iso_enter_x_offsets:dict = resolve_profile_x_offsets_with_alignment(iso_enter_glyph_pos, unit_length, smallest=1.25, largest=1.5)
     iso_enter_x:float
     iso_enter_glyph_pos_parts:[str] = iso_enter_glyph_pos.split('-')
     if iso_enter_glyph_pos_parts[0] == 'top':
@@ -147,10 +146,10 @@ def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_gl
     else:
         iso_enter_y = unit_length + y_offsets['R2']
 
-    resolved_offsets['iso-enter'] = { 'x': iso_enter_x, 'y': iso_enter_y }
+    resolved_offsets['iso-enter'] = { 'x': iso_enter_x, 'y': iso_enter_y + margin_offset }
 
     # Resolve num-plus and num-enter
-    unit_offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo }
+    unit_offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo + margin_offset }
     alignment_direction:str = alignment.split('-')[0]
     if alignment_direction == 'top':
         resolved_offsets['num-plus'] = unit_offgen(y_offsets['R3'])
@@ -164,9 +163,9 @@ def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_gl
 
     return resolved_offsets
 
-def collect_data(layout: [dict], profile: dict, glyph_dir: str,
+def collect_data(layout: [dict], profile: dict, margin_offset:float, glyph_dir: str,
         glyph_map: dict, iso_enter_glyph_pos:str, alignment:str) -> [dict]:
-    profile_x_offsets:dict = resolve_profile_x_offsets_with_alignment(alignment, profile['unit-length'], profile['margin-offset'])
+    profile_x_offsets:dict = resolve_profile_x_offsets_with_alignment(alignment, profile['unit-length'])
     profile_x_offsets_rel: [dict] = list(
         map(lambda m: {
             'width': m[0],
@@ -175,9 +174,9 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
     profile_y_offsets_rel: [dict] = list(
         map(lambda m: {
             'profile-part': m[0],
-            'p-off-y': m[1]
+            'p-off-y': m[1] + margin_offset
         }, profile['y-offsets'].items()))
-    profile_special_offsets:dict = resolve_special_profile_y_offsets_with_alignment(alignment, iso_enter_glyph_pos, profile['unit-length'], profile['margin-offset'], profile_x_offsets, profile['y-offsets'], profile['special-offsets'])
+    profile_special_offsets:dict = resolve_special_profile_y_offsets_with_alignment(alignment, iso_enter_glyph_pos, profile['unit-length'], margin_offset, profile_x_offsets, profile['y-offsets'], profile['special-offsets'])
     profile_special_offsets_rel: [dict] = list(map(lambda so: { 'key-type': so[0], 'p-off-x': so[1]['x'], 'p-off-y': so[1]['y'] }, profile_special_offsets.items()))
 
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))

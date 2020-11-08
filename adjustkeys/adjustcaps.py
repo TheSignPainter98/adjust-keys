@@ -15,7 +15,6 @@ from .yaml_io import read_yaml
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
-from functools import reduce
 from math import inf, pi
 from mathutils import Euler, Matrix, Vector
 from os import makedirs, remove
@@ -35,9 +34,11 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
 
+    margin_offset:float = get_margin_offset(caps, profile_data['unit-length'])
+
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit-length'], pargs.scaling)
+        handle_cap(cap, profile_data['unit-length'], margin_offset)
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -99,7 +100,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.matrix_world @= Matrix.Scale(profile_data['scale'] * pargs.scaling, 4)
         obj.matrix_world @= Matrix.Translation(-Vector(obj.bound_box[0]))
 
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': margin_offset }
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
@@ -147,13 +148,13 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
     return layout_with_caps
 
 
-def handle_cap(cap: dict, unit_length: float, output_scaling:float):
+def handle_cap(cap: dict, unit_length: float, margin_offset:float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    cap = resolve_cap_position(cap, unit_length)
-    cap = apply_cap_pose(cap, output_scaling)
+    cap = resolve_cap_position(cap, unit_length, margin_offset)
+    cap = apply_cap_pose(cap)
 
 
-def apply_cap_pose(cap: dict, output_scaling:float) -> dict:
+def apply_cap_pose(cap: dict) -> dict:
     obj:object = cap['cap-obj']
 
     # Reset pose
@@ -178,3 +179,15 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-name': basename(c)[:-4],
             'cap-source': c,
         }, capFiles))
+
+def get_margin_offset(caps:[dict], unit_length:float) -> float:
+    printi('Computing cap margin offset...')
+    sorted_caps:[dict] = sorted(caps, key=lambda c: c['width'] if c['width'] != 1 else -1)
+    margin:float = 0.0
+
+    if len(sorted_caps) >= 1:
+        probe_cap:dict = sorted_caps[0]
+        printi('Using key "%s" of width %.2f to compute margin offset' % (probe_cap['key'], probe_cap['width']))
+        margin = (unit_length * probe_cap['width'] - probe_cap['cap-obj'].dimensions.x) / 2.0
+
+    return margin

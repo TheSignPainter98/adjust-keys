@@ -13,11 +13,6 @@ def type_check_profile_data(pd:object) -> bool:
     if not t:
         return False
 
-    # margin-offset
-    (okay, t) = assert_dict_key(okay, pd, 'margin-offset', 'Profile data has no margin-offset key')
-    if t:
-        assert_type(okay, pd['margin-offset'], float, 'Margin offset should be a number with a decimal point')
-
     # unit_length
     (okay, t) = assert_dict_key(okay, pd, 'unit-length', 'Profile data has no unit-length key')
     if t:
