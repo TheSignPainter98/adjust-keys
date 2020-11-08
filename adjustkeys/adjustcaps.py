@@ -68,7 +68,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     if len(importedCapObjects) != 0:
         printi('Joining keycap models into a single object')
         ctx: dict = {}
-        joinTarget:Object = min(caps, key=lambda c: (c['pos-x'], -c['pos-y']))['cap-obj']
+        joinTarget:Object = min(caps, key=lambda c: (c['cap-pos'].x, c['cap-pos'].y))['cap-obj']
         ctx['object'] = ctx['active_object'] = joinTarget
         ctx['selected_objects'] = ctx[
             'selected_editable_objects'] = importedCapObjects
@@ -159,17 +159,19 @@ def handle_cap(cap: dict, unit_length: float, margin_offset:float):
 def apply_cap_pose(cap: dict) -> dict:
     obj:object = cap['cap-obj']
 
+    # Original offset
+    original_off:Vector = Vector(obj.bound_box[0])
+
     # Reset pose
     obj.matrix_world = Matrix.Identity(4)
 
     # Set rotation
     obj.matrix_world @= Matrix.Rotation(pi/2.0, 4, 'X')
-    obj.matrix_world @= Matrix.Rotation(0.0, 4, 'Y')
-    obj.matrix_world @= Matrix.Rotation(cap['rotation'], 4, 'Z')
+    obj.matrix_world @= Matrix.Rotation(cap['rotation'], 4, 'Y')
 
     # Move to correct position from origin
-    obj.matrix_world @= Matrix.Translation(-Vector(obj.bound_box[0]))
-    obj.matrix_world @= Matrix.Translation(Vector((cap['pos-x'], cap['pos-z'], -cap['pos-y'])))
+    obj.matrix_world @= Matrix.Translation(-original_off)
+    obj.matrix_world @= Matrix.Translation(Matrix.Rotation(-cap['rotation'], 4, 'Y') @ cap['cap-pos'])
 
     return cap
 

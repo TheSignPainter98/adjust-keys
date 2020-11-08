@@ -5,6 +5,7 @@ from .input_types import type_check_kle_layout
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
 from math import cos, radians, sin
+from mathutils import Matrix, Vector
 from types import SimpleNamespace
 from re import match
 
@@ -90,8 +91,7 @@ def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bo
                 parser_state.y = key['shift-y'] if 'shift-y' in key else 0.0
 
             # Apply current position data
-            key['col'] = parser_state.rx + parser_state.x * cos(parser_state.r) + parser_state.y * sin(parser_state.r)
-            key['row'] = parser_state.ry - parser_state.x * sin(parser_state.r) + parser_state.y * cos(parser_state.r)
+            key['kle-pos'] = Vector((parser_state.rx, parser_state.ry)) + Matrix.Rotation(-parser_state.r, 2) @ Vector((parser_state.x, parser_state.y))
 
             # Add to layout
             if 'key' in key and (not 'd' in key or not key['d']):

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
+from mathutils import Vector
 from os.path import basename
 from re import search
 from xml.dom.minidom import Document, parse
@@ -16,8 +17,7 @@ def glyph_inf(gpath: str) -> dict:
     svg_height: float = float(rawHeight)
     return {
         'glyph': gname,
-        'glyph-src-width': float(svg_width),
-        'glyph-src-height': float(svg_height),
+        'glyph-dim': Vector((float(svg_width), float(svg_height))),
         'src': gpath
     }
 

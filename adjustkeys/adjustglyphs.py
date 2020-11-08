@@ -18,7 +18,7 @@ from functools import reduce
 from os import remove
 from os.path import exists, join
 from math import degrees
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from types import LambdaType
@@ -54,9 +54,9 @@ def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collect
             remove_fill_from_svg(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
 
-    svgWidth: int = max(map(lambda p: p['pos-x'], placed_glyphs),
+    svgWidth: int = max(map(lambda p: p['glyph-pos'].x, placed_glyphs),
                         default=0) + 10.0 * pargs.glyph_unit_length
-    svgHeight: int = max(map(lambda p: p['pos-y'], placed_glyphs),
+    svgHeight: int = max(map(lambda p: p['glyph-pos'].y, placed_glyphs),
                          default=0) + 10.0 * pargs.glyph_unit_length
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -234,7 +234,7 @@ def get_style(key:dict) -> str:
 def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
     # Prepare header content
     transformations:[str] = [
-            'translate(%f %f)' % (glyph['pos-x'], glyph['pos-y'])
+            'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y)
         ]
     if 'rotation' in glyph:
         transformations.append('rotate(%f)' % -degrees(glyph['rotation']))

@@ -5,20 +5,22 @@ from math import cos, inf, sin
 from mathutils import Matrix, Vector
 
 
-def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, margin:float, scale:float) -> dict:
+def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, scale:float) -> dict:
     ret: dict = dict(data)
-    # Compute offset from top-left as if ret.rotation = 0
-    magic_constant:float = 0.101212 * scale # Lord only knows why this approximation works on the test data. If you're reading this, know that whilst I dislike some other parts of the code, all my feeling pales in comparison to that which I hold towards this one constant. TODO: remove the damn thing.
-    col_off: float = glyph_ulen * (ret['p-off-x'] + magic_constant) / cap_ulen - 0.5 * ret['glyph-src-width']
-    row_off: float = glyph_ulen * (ret['p-off-y'] + magic_constant) / cap_ulen - 0.5 * ret['glyph-src-height']
+
+    # Compute offset from top-left as if ret.rotation == 0
+    offset:Vector = Matrix.Scale(glyph_ulen / cap_ulen, 2) @ Vector((ret['p-off-x'], ret['p-off-y'])) - 0.5 * ret['glyph-dim']
+
     # Apply offset with rotation
-    ret['pos-x'] = glyph_ulen * ret['col'] + col_off * cos(ret['rotation']) + row_off * sin(ret['rotation'])
-    ret['pos-y'] = glyph_ulen * ret['row'] - col_off * sin(ret['rotation']) + row_off * cos(ret['rotation'])
+    ret['glyph-pos'] = glyph_ulen * ret['kle-pos'] + Matrix.Rotation(-ret['rotation'], 2) @ offset
     return ret
 
 
-def resolve_cap_position(cap: dict, ulen: float) -> dict:
-    cap['pos-x'] = ulen * cap['col']
-    cap['pos-y'] = ulen * cap['row'] * -1
-    cap['pos-z'] = 0.0
+def resolve_cap_position(cap: dict, ulen: float, margin_offset: float) -> dict:
+    # Compute cap position in R^2
+    raw_cap_pos:Vector = ulen * cap['kle-pos'] + Matrix.Rotation(-cap['rotation'], 2) @ Vector((margin_offset, margin_offset))
+
+    # Convert to vector in R^3
+    cap['cap-pos'] = Vector((raw_cap_pos.x, 0.0, raw_cap_pos.y))
+
     return cap
