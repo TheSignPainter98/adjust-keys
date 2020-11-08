@@ -50,7 +50,7 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of [Blender][blender] (v2.8x or v2.9x work) and a little familiarity with the [yaml][yaml-intro] syntax (although this can be picked up as it’s designed to be relatively human-friendly).
+You’ll need a working installation of [Blender][blender] (v2.82+ or v2.90+ work) and a little familiarity with the [yaml][yaml-intro] syntax (although this can be picked up as it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python, both are explained here.
 
 **Important**: currently, you need to be able to view the console output for certain features of `adjustkeys`, which can be done as follows depending on your operating system.
