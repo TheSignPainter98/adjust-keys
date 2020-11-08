@@ -93,12 +93,14 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             coll.objects.unlink(imp_obj)
         collection.objects.link(imp_obj)
 
-        printi('Updating scaling')
+        printi('Updating cap-model scaling')
         obj:Object = data.objects[importedModelName]
+        obj.data.transform(obj.matrix_world)
+        obj.matrix_world = Matrix.Scale(profile_data['scale'], 4)
+
+        printi('Applying outstanding cap-model transforms')
+        obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
-        obj.matrix_world @= Matrix.Rotation(pi/2.0, 4, 'X')
-        obj.matrix_world @= Matrix.Scale(profile_data['scale'] * pargs.scaling, 4)
-        obj.matrix_world @= Matrix.Translation(-Vector(obj.bound_box[0]))
 
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': margin_offset }
 

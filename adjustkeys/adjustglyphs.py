@@ -88,7 +88,8 @@ def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collect
     # Apprpriately scale the objects
     printi('Scaling glyphs and moving origins')
     for svgObjectName in svgObjectNames:
-        data.objects[svgObjectName].scale *= scale * profile_data['scale'] * pargs.scaling
+        svgObject = data.objects[svgObjectName]
+        svgObject.data.transform(Matrix.Scale(scale * profile_data['scale'], 4))
 
     # Clean away temporary files.
     if exists(adjusted_svg_file_name):
