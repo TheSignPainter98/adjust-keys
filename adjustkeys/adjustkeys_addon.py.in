@@ -18,7 +18,7 @@ bl_info = {
         'name': 'adjustkeys',
         'author': "Ed Jones",
         'version': VERSION,
-        'blender': (2, 83, 0),
+        'blender': (2, 82, 0),
         'location': 'Properties > Scene Properties > Adjustkeys',
         'description': 'Automatic keycap and glyph alignment tool',
         'warning': 'Adjustkeys requires some python dependencies. It’s also new so please play nice :P',
