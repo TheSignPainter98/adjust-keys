@@ -41,7 +41,8 @@ def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collect
     glyph_data: [dict] = collect_data(layout, profile_data, margin_offset, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
-    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), glyph_data))
+    offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
+    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
 
     for i in range(len(placed_glyphs)):
         with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
@@ -99,6 +100,24 @@ def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collect
     printi('Successfully imported svg objects')
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
+
+def resolve_glyph_offset(cap:dict, alignment:str, glyph_ulen:float) -> dict:
+    # Functions and mapping for placement
+    alignment_xy_map:dict = {
+        'top': 'left',
+        'middle': 'centre',
+        'bottom': 'right'
+    }
+    offset_funcs:dict = {
+        'left': lambda _: 0.5 * glyph_ulen,
+        'centre': lambda w: w / 2.0,
+        'right': lambda w: w - 0.5 * glyph_ulen
+    }
+
+    # Appropriately apply mapping funcs
+    alignment_parts:[str] = alignment.split('-')
+    cap['glyph-offset'] = Vector((offset_funcs[alignment_parts[1]](cap['glyph-dim'].x), offset_funcs[alignment_xy_map[alignment_parts[0]]](cap['glyph-dim'].y)))
+    return cap
 
 
 def remove_guide_from_cap(cap: Element, glyph_part_ignore_regex) -> Element:

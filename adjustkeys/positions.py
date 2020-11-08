@@ -9,7 +9,7 @@ def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, scale:
     ret: dict = dict(data)
 
     # Compute offset from top-left as if ret.rotation == 0
-    offset:Vector = Matrix.Scale(glyph_ulen / cap_ulen, 2) @ Vector((ret['p-off-x'], ret['p-off-y'])) - 0.5 * ret['glyph-dim']
+    offset:Vector = Matrix.Scale(glyph_ulen / cap_ulen, 2) @ Vector((ret['p-off-x'], ret['p-off-y'])) - ret['glyph-offset']
 
     # Apply offset with rotation
     ret['glyph-pos'] = glyph_ulen * ret['kle-pos'] + Matrix.Rotation(-ret['rotation'], 2) @ offset
