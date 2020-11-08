@@ -15,6 +15,8 @@ glyph_deactivation_colour:str = '#000000'
 def get_layout(layout_file:str, profile_data:dict, use_deactivation_colour:bool) -> [dict]:
     return parse_layout(read_yaml(layout_file), profile_data, use_deactivation_colour)
 
+def dumb_parse_layout(layout:[[dict]]) -> [dict]:
+    return parse_layout(layout, None, True)
 
 def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bool) -> [dict]:
     if not type_check_kle_layout(layout):

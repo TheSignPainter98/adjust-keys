@@ -10,7 +10,7 @@ from .collections import make_collection
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .input_types import type_check_colour_map, type_check_glyph_map, type_check_profile_data
-from .layout import get_layout, parse_layout
+from .layout import get_layout, dumb_parse_layout
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
 from .shrink_wrap import shrink_wrap_glyphs_to_keys
@@ -55,7 +55,7 @@ def adjustkeys(*args: [[str]]) -> dict:
             list(sorted(set(
                 map(
                     lambda k: k['key'],
-                    get_layout(pargs.layout_file, not pargs.no_apply_colour_map)))))))
+                    dumb_parse_layout(read_yaml(pargs.layout_file))))))))
         return {}
     if pargs.list_glyphs:
         knownGlyphs:[[str,str]] = list(map(lambda g: [glyph_name(g), g], glyph_files(pargs.glyph_dir)))
@@ -75,19 +75,14 @@ def adjustkeys(*args: [[str]]) -> dict:
     if not blender_available():
         die('bpy is not available, please run `adjustkeys` from within Blender (instructions should be in the supplied README.md file)')
 
-    profile_data:dict
+    layout:[dict] = []
+    profile_data:dict = {}
+    colour_map:[dict] = []
     if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
         profile_data = read_yaml(join(pargs.cap_dir, 'profile_data.yml'))
         if not type_check_profile_data(profile_data):
             die('Profile data failed type-checking, see console for more information')
-
-    layout:[dict] = []
-    if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
         layout:[dict] = get_layout(pargs.layout_file, profile_data, not pargs.no_apply_colour_map)
-    colour_map:[dict] = []
-
-    colour_map:[dict]
-    if not pargs.no_adjust_glyphs and not pargs.no_adjust_caps:
         colour_map = read_yaml(pargs.colour_map_file) if not pargs.no_apply_colour_map else None
         if not type_check_colour_map(colour_map):
             die('Colour map failed type-checking, see console for more information')
