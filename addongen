@@ -52,7 +52,7 @@ def prop(a:dict) -> str:
         if atype == str:
             default = default + ".upper().replace('-', '_')"
         else:
-            defailt = str(default)
+            default = 'str(%s)' % default
         return f'EnumProperty(items={choices}, name={label}, default={default}, description={description})'
     elif atype == bool:
         return f"BoolProperty(name={label}, description={description}, default={default})"
