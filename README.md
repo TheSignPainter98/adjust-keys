@@ -305,6 +305,7 @@ Please see the [contribution note,][contrib-note] abide by the [code of conduct]
 	2. Measure the margin between the space occupied by the keycap and the model itself (see [1u keycap size example diagram][keycap-info]) and enter the value into `profiles/y/keycap_data.yml`
 	3. (The annoying one) measure the location of the centre of the face of the keycap model and the uppermost and leftmost extremes of the keycap model and enter the values into `profiles/y/centres.csv`
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code written before!
+
 Above all, please abide by the licenses of the relevant works!
 For example, the license for Gotham, a common type family in KAT and KAM sets, would prohibit it’s inclusion in this repo.
 In particular, some licenses state that the format of the contained glyphs may not be changed.
