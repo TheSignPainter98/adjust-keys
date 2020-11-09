@@ -294,7 +294,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'Set the quality parameter of the subdivision surface modifier applied to all glyph-parts',
     'metavar': 'quality',
-    'default': 2,
+    'default': 3,
     'label': 'Subsurf mod quality',
     'type': int,
     'min': 0,
