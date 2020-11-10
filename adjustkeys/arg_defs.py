@@ -7,11 +7,11 @@ from os.path import join
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'adaptive_subsurf',
-    'short': '-Fa',
-    'long': '--adaptive-subsurf',
-    'action': 'store_true',
-    'help': 'Apply adaptively apply subdivision surface modifiers to the glyphs-parts by using size to determine how many levels to use. Each glyph part has a number of subdivisions applied in the range [0...m], where m is (by context) either the max viewport or render subdivision level values',
-    'default': False,
+    'short': '-Fn',
+    'long': '--no-adaptive-subsurf',
+    'action': 'store_false',
+    'help': 'Adaptively apply subdivision surface modifiers to the glyphs-parts by using size to determine the number of levels. Each glyph part has a number of subdivisions applied in the range [0...m], where m is (by context) either the max viewport or render subdivision level values',
+    'default': True,
     'type': bool,
     'label': 'Adaptively apply subsurf modifiers',
 }, {
@@ -182,40 +182,40 @@ args: [dict] = [{
     'type': bool,
     'op': True
 }, {
-    'dest': 'no_adjust_caps',
+    'dest': 'adjust_caps',
     'short': '-Nc',
     'long': '--no-adjust-caps',
-    'action': 'store_true',
-    'help': "Don't perform cap adjustment",
-    'default': False,
-    'label': "Don't produce aligned keycaps",
+    'action': 'store_false',
+    'help': 'Import keycap models and correctly adjust their positions',
+    'default': True,
+    'label': 'Import keycap meshes',
     'type': bool
 }, {
-    'dest': 'no_adjust_glyphs',
+    'dest': 'adjust_glyphs',
     'short': '-Ng',
     'long': '--no-adjust-glyphs',
-    'action': 'store_true',
-    'help': "Don't perform glyph adjustment",
-    'default': False,
-    'label': "Don't produce aligned glyphs",
+    'action': 'store_false',
+    'help': 'Import glyphs and correctly adjust their positions',
+    'default': True,
+    'label': 'Import glyph curves',
     'type': bool
 }, {
-    'dest': 'no_apply_colour_map',
+    'dest': 'apply_colour_map',
     'short': '-NC',
     'long': '--no-apply-colour_map',
-    'action': 'store',
-    'help': "Don't apply colour materials to the keycaps (colouring in KLE layout file will still override this)",
-    'default': False,
-    'label': "Don't apply the colour map",
+    'action': 'store_false',
+    'help': 'Apply the colour map file’s rules to the keycaps and glyphs (colouring in KLE layout file still overrides this)',
+    'default': True,
+    'label': 'Apply colour map',
     'type': bool
 }, {
-    'dest': 'no_shrink_wrap',
+    'dest': 'shrink_wrap',
     'short': '-Ns',
     'long': '--no-shrink-wrap',
-    'action': 'store_true',
-    'help': "Don't shrink wrap the adjusted glyphs and to the adjusted caps",
-    'default': False,
-    'label': "Don't shrink-wrap glyphs onto keys",
+    'action': 'store_false',
+    'help': "Subdivide and shrink wrap glyph models onto the keycaps",
+    'default': True,
+    'label': 'Shrink wrap glyphs to keys',
     'type': bool
 }, {
     'dest': 'opt_file',
