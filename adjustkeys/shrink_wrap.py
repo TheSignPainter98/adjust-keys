@@ -29,7 +29,6 @@ def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
         else:
             min_log_max_dim = 0.0
             max_log_max_dim = 1.0
-    print(min_log_max_dim, max_log_max_dim)
 
     # Shrink-wrap glyphs onto the keycaps
     for glyph in glyphs:

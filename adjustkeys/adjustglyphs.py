@@ -238,7 +238,9 @@ def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
         ]
     if 'rotation' in glyph:
         transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
-    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations), style ]
+    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations) ]
+    if style:
+        header_content.append(style)
 
     # Prepare svg content
     svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))

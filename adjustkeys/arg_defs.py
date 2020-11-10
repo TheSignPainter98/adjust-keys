@@ -7,11 +7,11 @@ from os.path import join
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
     'dest': 'adaptive_subsurf',
-    'short': '-Fa',
-    'long': '--adaptive-subsurf',
-    'action': 'store_true',
+    'short': '-Fn',
+    'long': '--no-adaptive-subsurf',
+    'action': 'store_false',
     'help': 'Apply adaptively apply subdivision surface modifiers to the glyphs-parts by using size to determine how many levels to use. Each glyph part has a number of subdivisions applied in the range [0...m], where m is (by context) either the max viewport or render subdivision level values',
-    'default': False,
+    'default': True,
     'type': bool,
     'label': 'Adaptively apply subsurf modifiers',
 }, {
@@ -182,40 +182,40 @@ args: [dict] = [{
     'type': bool,
     'op': True
 }, {
-    'dest': 'no_adjust_caps',
+    'dest': 'adjust_caps',
     'short': '-Nc',
     'long': '--no-adjust-caps',
-    'action': 'store_true',
+    'action': 'store_false',
     'help': "Don't perform cap adjustment",
-    'default': False,
-    'label': "Don't produce aligned keycaps",
+    'default': True,
+    'label': 'Import keycap meshes',
     'type': bool
 }, {
-    'dest': 'no_adjust_glyphs',
+    'dest': 'adjust_glyphs',
     'short': '-Ng',
     'long': '--no-adjust-glyphs',
-    'action': 'store_true',
+    'action': 'store_false',
     'help': "Don't perform glyph adjustment",
-    'default': False,
-    'label': "Don't produce aligned glyphs",
+    'default': True,
+    'label': 'Import glyph curves',
     'type': bool
 }, {
-    'dest': 'no_apply_colour_map',
+    'dest': 'apply_colour_map',
     'short': '-NC',
     'long': '--no-apply-colour_map',
-    'action': 'store',
+    'action': 'store_false',
     'help': "Don't apply colour materials to the keycaps (colouring in KLE layout file will still override this)",
-    'default': False,
-    'label': "Don't apply the colour map",
+    'default': True,
+    'label': 'Apply colour map',
     'type': bool
 }, {
-    'dest': 'no_shrink_wrap',
+    'dest': 'shrink_wrap',
     'short': '-Ns',
     'long': '--no-shrink-wrap',
-    'action': 'store_true',
+    'action': 'store_false',
     'help': "Don't shrink wrap the adjusted glyphs and to the adjusted caps",
-    'default': False,
-    'label': "Don't shrink-wrap glyphs onto keys",
+    'default': True,
+    'label': 'Shrink wrap glyphs to keys',
     'type': bool
 }, {
     'dest': 'opt_file',
