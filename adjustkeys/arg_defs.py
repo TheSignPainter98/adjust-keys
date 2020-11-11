@@ -332,8 +332,6 @@ args: [dict] = [{
     'help': 'Print current version and exit',
     'default': False,
     'type': bool,
-    'label': 'Show version',
-    'op': True
 }, {
     'dest': 'show_help',
     'short': '-h',
