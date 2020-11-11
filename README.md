@@ -329,14 +329,16 @@ This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
 Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
 
-All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
+All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions which use their own licenses:**
 
-- KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord.
+- KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
-- Cherry keycap models present were derived from step files kindly provided by hineybush and are available via [GitHub][cherry-keycap-model-github].
+- Cherry keycap models present were derived from step files kindly provided by hineybush and are available via [GitHub][cherry-keycap-model-github]
 - The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
-- The keycap representation used in `glyphs/red-hat-display` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
-- The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE.][kle]
+- The typeface used in svgs the `glyphs/open-cherry/` folder is [Open Cherry][open-cherry] by dakotafelder available under the license specified on [GitHub][open-cherry-font] and missing glyphs are substituted with [Quicksand][quicksand] ([OFL][ofl])
+- The arrow symbols used in svgs in the `glyphs/open-cherry/` folder are ‘GMK Icons’ found on the [Keycap Designers’][keycap-designers-discord] Discord
+- The keycap representation used in `glyphs/red-hat-display` and `glyphs/open-cherry` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
+- The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
 
 Please ensure that credit is given where it is due.
 
@@ -356,8 +358,10 @@ Please ensure that credit is given where it is due.
 [kle-ansi-104]: https://github.com/ijprest/keyboard-layout-editor/blob/master/layouts.json
 [makefile]: https://github.com/TheSignPainter98/adjust-keys/blob/master/Makefile
 [ofl]: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
+[open-cherry-font]: ihttps://github.com/dakotafelder/open-cherry
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
+[quicksand]: https://fonts.google.com/specimen/Quicksand?query=quicksa
 [red-hat-display]: https://fonts.google.com/specimen/Red+Hat+Display
 [regex-help]: https://docs.python.org/3/howto/regex.html
 [regex-playground]: https://regexr.com
