@@ -1,6 +1,6 @@
 '!-1': 1-exclamationmark
 '"-''': singlequote-doublequote
-'#-3': 3-hash
+'#-3': 3-octothorpe
 '$-4': 4-dollar
 '%-5': 5-percent
 '&-7': 7-ampersand
