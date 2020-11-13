@@ -4,6 +4,7 @@ from .blender_available import blender_available
 from .lazy_import import LazyImport
 from .util import dict_union
 from math import log
+from mathutils import Matrix
 if blender_available():
     from bpy import types
     data = LazyImport('bpy', 'data')
@@ -35,6 +36,10 @@ def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
         # Translate to favourable position (assuming no 3u tall keycaps)
         obj:Obj = glyph['obj']
         obj.location.z += 3.0 * cap_unit_length * scaling
+
+        printi('Setting parent of glyph "%s" to "%s"' % (obj.name, keycap_model_name))
+        obj.parent = data.objects[keycap_model_name]
+        obj.matrix_parent_inverse = obj.parent.matrix_world.inverted()
 
         # Apply subdivision surface to glyph
         printi('A%spplying subdivision surface to "%s"' %('daptively a' if subsurf_params['adaptive-subsurf'] else '', obj.name))
