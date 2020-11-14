@@ -6,11 +6,11 @@ from .adjustglyphs import adjust_glyphs, glyph_files
 from .args import parse_args, Namespace
 from .blender_available import blender_available
 from .colour_resolver import colourise_layout
-from .collections import make_collection
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .input_types import type_check_colour_map, type_check_glyph_map, type_check_profile_data
 from .layout import get_layout, parse_layout
+from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
 from .shrink_wrap import shrink_wrap_glyphs_to_keys
@@ -23,6 +23,7 @@ from sys import argv, exit
 from yaml import dump
 if blender_available():
     from bpy.types import Collection
+    context = LazyImport('bpy', 'context')
 
 
 def main(*args:[[str]]) -> dict:
@@ -94,9 +95,9 @@ def adjustkeys(*args: [[str]]) -> dict:
         if not type_check_glyph_map(glyph_map):
             die('Glyph map failed type-checking see the console for more information')
 
-    # Make the collection
-    collection:Collection = make_collection('adjustkeys_caps_and_glyphs')
-    collection_data:dict = { 'containing_collection': collection }
+    # Make collection
+    collection:Collection = context.collection
+    collection_data:dict = { 'containing-collection': collection }
 
     # Adjust model positions
     model_data:dict = {}

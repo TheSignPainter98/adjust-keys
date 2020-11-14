@@ -78,15 +78,13 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph
     svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
     collectionName:str = get_only(list_diff(collectionsPostImport, collectionsPreImport), 'No collections added when importing glyphs', 'Multiple collections added whilst importing glyphs, got %d: %s')
 
-    printi('Adding svg into the right collection')
-    glyph_collection = make_collection('glyphs', parent_collection=collection)
-    #  collection.children.link(glyph_collection)
+    printi("Adding svg into the correct collection")
     for svgObjectName in svgObjectNames:
-        glyph_collection.objects.link(data.objects[svgObjectName])
+        collection.objects.link(data.objects[svgObjectName])
     data.collections.remove(data.collections[collectionName])
 
     # Apprpriately scale the objects
-    printi('Scaling glyphs and moving origins')
+    printi('Scaling glyphs')
     for svgObjectName in svgObjectNames:
         data.objects[svgObjectName].scale *= scale * profile_data['scale'] * pargs.scaling
 
