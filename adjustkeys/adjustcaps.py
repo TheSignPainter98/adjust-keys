@@ -120,7 +120,6 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
             cap_data['cap-obj-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap_data['cap-source'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap_data['cap-source'])
             cap_data['cap-obj'] = context.scene.objects[cap_data['cap-obj-name']]
             firsts[cap_data['cap-source']] = cap_data['cap-obj']
-            collection.objects.link(cap_data['cap-obj'])
         else:
             # Duplicate existing object
             printi('Duplicating existing "%s"...' % cap_data['cap-source'])
