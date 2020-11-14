@@ -330,13 +330,14 @@ This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
 Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
 
-All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions:**
+All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions.**
+Please note that the licenses listed below were correct to the best of my knowledge at the time of writing; check the sources for the most up-to-date versions of their respective licenses.
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord.
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
 - The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
 - The keycap representation used in `glyphs/red-hat-display` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
-- The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE.][kle]
+- All contents of the `examples/` folder are licensed under CC0 1.0 Universal (CC0 1.0) and hence are dedicated to the public domain
 
 Please ensure that credit is given where it is due.
 
