@@ -34,11 +34,9 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
 
-    margin_offset:float = get_margin_offset(caps, profile_data['unit-length'])
-
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit-length'], margin_offset)
+        handle_cap(cap, profile_data['unit-length'])
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -102,7 +100,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
 
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': margin_offset }
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
@@ -147,12 +145,14 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
         printw('Missing the following keycap models:\n\t' +
                '\n\t'.join(sorted(missing_models)))
 
-    return layout_with_caps
+    layout_with_caps_with_margins = list(map(lambda c: get_margin_offset(c, profile_data['unit-length']), layout_with_caps))
+
+    return layout_with_caps_with_margins
 
 
-def handle_cap(cap: dict, unit_length: float, margin_offset:float):
+def handle_cap(cap: dict, unit_length: float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    cap = resolve_cap_position(cap, unit_length, margin_offset)
+    cap = resolve_cap_position(cap, unit_length)
     cap = apply_cap_pose(cap)
 
 
@@ -184,14 +184,13 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-source': c,
         }, capFiles))
 
-def get_margin_offset(caps:[dict], unit_length:float) -> float:
-    printi('Computing cap margin offset...')
-    sorted_caps:[dict] = sorted(caps, key=lambda c: c['width'] if c['width'] != 1 else -1)
-    margin:float = 0.0
+def get_margin_offset(cap:dict, unit_length:float) -> dict:
+    printi('Computing cap margin offset of keycap "%s"' % cap['key'])
 
-    if len(sorted_caps) >= 1:
-        probe_cap:dict = sorted_caps[0]
-        printi('Using key "%s" of width %.2f to compute margin offset' % (probe_cap['key'], probe_cap['width']))
-        margin = (unit_length * probe_cap['width'] - probe_cap['cap-obj'].dimensions.x) / 2.0
+    cap_dims:Vector = Vector((cap['cap-obj'].dimensions.x, cap['cap-obj'].dimensions.z))
+    unit_dims:Vector = Vector((max(cap['width'], cap['secondary-width'] if 'secondary-width' in cap else -1.0), max(cap['height'], cap['secondary-height'] if 'secondary-height' in cap else -1.0)))
 
-    return margin
+    print('~~', cap_dims, unit_length * unit_dims)
+
+    cap['margin-offset'] = (unit_length * unit_dims - cap_dims) / 2.0
+    return cap

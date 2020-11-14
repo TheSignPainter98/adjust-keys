@@ -16,9 +16,9 @@ def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, scale:
     return ret
 
 
-def resolve_cap_position(cap: dict, ulen: float, margin_offset: float) -> dict:
+def resolve_cap_position(cap: dict, ulen: float) -> dict:
     # Compute cap position in R^2
-    raw_cap_pos:Vector = ulen * cap['kle-pos'] + Matrix.Rotation(-cap['rotation'], 2) @ Vector((margin_offset, margin_offset))
+    raw_cap_pos:Vector = ulen * cap['kle-pos'] + Matrix.Rotation(-cap['rotation'], 2) @ cap['margin-offset']
 
     # Convert to vector in R^3
     cap['cap-pos'] = Vector((raw_cap_pos.x, 0.0, raw_cap_pos.y))
