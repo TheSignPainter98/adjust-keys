@@ -190,7 +190,5 @@ def get_margin_offset(cap:dict, unit_length:float) -> dict:
     cap_dims:Vector = Vector((cap['cap-obj'].dimensions.x, cap['cap-obj'].dimensions.z))
     unit_dims:Vector = Vector((max(cap['width'], cap['secondary-width'] if 'secondary-width' in cap else -1.0), max(cap['height'], cap['secondary-height'] if 'secondary-height' in cap else -1.0)))
 
-    print('~~', cap_dims, unit_length * unit_dims)
-
     cap['margin-offset'] = (unit_length * unit_dims - cap_dims) / 2.0
     return cap
