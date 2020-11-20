@@ -152,6 +152,20 @@ args: [dict] = [{
     'type': str,
     'str-type': 'file'
 }, {
+    'dest': 'legended_caps',
+    'short': '-H',
+    'long': '--legended-caps',
+    'action': 'store_true',
+    'help': 'Assume legends are part of the keycap models (currently incompatible with colour maps)',
+    'default': False,
+    'label': 'Legends in keycap models',
+    'type': bool,
+    'implies': [
+        '¬apply_colour_map',
+        '¬shrink_wrap',
+        '¬adjust_glyphs',
+    ]
+}, {
     'dest': 'list_cap_models',
     'short': '-Sc',
     'long': '--show-cap-models',

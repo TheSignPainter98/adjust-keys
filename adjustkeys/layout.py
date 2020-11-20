@@ -103,7 +103,7 @@ def parse_layout(layout: [[dict]], use_deactivation_colour:bool) -> [dict]:
         if len(line) > 1 and 'shift-y' not in line[-1]:
             parser_state.y += 1
 
-    return list(map(add_cap_name, parsed_layout))
+    return parsed_layout
 
 def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser_state:SimpleNamespace) -> [int, dict]:
     ret: dict
@@ -196,23 +196,3 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
 
 def parse_name(txt: str) -> str:
     return '-'.join(txt.split('\n'))
-
-
-def add_cap_name(key:dict) -> dict:
-    key['cap-name'] = gen_cap_name(key)
-    return key
-
-def gen_cap_name(key:dict) -> str:
-    if 'key-type' in key:
-        return key['key-type']
-    else:
-        name:str = '%s-%su' %(key['profile-part'], str(float(key['width'])).replace('.', '_')) # I'm really hoping that python will behave reasonably w.r.t. floating point precision
-        if key['stepped']:
-            name += '-%su' % str(float(key['secondary-height'])).replace('.', '_')
-            name += '-%su' % str(float(key['secondary-width'])).replace('.', '_')
-            name += '-stepped'
-        if key['homing']:
-            name += '-homing'
-        return name
-
-

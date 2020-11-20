@@ -33,7 +33,8 @@ if blender_available():
 def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection)
+    layout_with_cap_names:[dict] = list(map(lambda c: add_cap_name(c, pargs.legended_caps), layout))
+    caps: [dict] = get_data(layout_with_cap_names, pargs.cap_dir, colour_map, collection)
 
     printi('Adjusting keycaps...')
     for cap in caps:
@@ -163,3 +164,23 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-name': basename(c)[:-4],
             'cap-source': c,
         }, capFiles))
+
+def add_cap_name(key:dict, legended_caps:bool) -> dict:
+    key['cap-name'] = gen_cap_name(key, legended_caps)
+    return key
+
+def gen_cap_name(key:dict, legended_caps:bool) -> str:
+    ret:str
+    if 'key-type' in key:
+        return key['key-type']
+    else:
+        name:str = '%s-%su' %(key['profile-part'], str(float(key['width'])).replace('.', '_')) # I'm really hoping that python will behave reasonably w.r.t. floating point precision
+        if key['stepped']:
+            name += '-%su' % str(float(key['secondary-height'])).replace('.', '_')
+            name += '-%su' % str(float(key['secondary-width'])).replace('.', '_')
+            name += '-stepped'
+        if key['homing']:
+            name += '-homing'
+        if legended_caps:
+            return '%s-%s' %(name, key['key'] if key['key'] else 'BLANK')
+        return name

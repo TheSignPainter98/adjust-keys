@@ -71,6 +71,11 @@ def parse_args(iargs: tuple) -> Namespace:
         ap.print_usage()
         die(checkResult)
 
+    for arg in arg_dict.values():
+        if arg['type'] == bool and 'implies' in arg and rargs[arg['dest']]:
+            for implied in arg['implies']:
+                rargs[implied[1:] if implied[0] == '¬' else implied] = implied[0] != '¬'
+
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_version:
         print(version)
@@ -78,6 +83,7 @@ def parse_args(iargs: tuple) -> Namespace:
     elif npargs.show_help:
         ap.print_help()
         raise AdjustKeysGracefulExit()
+
     return npargs
 
 
