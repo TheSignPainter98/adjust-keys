@@ -1,19 +1,13 @@
-- name: specials
-  cap-colour: 'ffff00'
-  glyph-style: 'fill:#ff8000'
-  keys:
-  - Esc
-  - Enter
-- name: alphas
-  cap-colour: '00ff00'
-  glyph-style: 'fill:#ff0000;'
+- name: green
+  cap-colour: '32a852'
+  glyph-style: 'fill:#ad1aad;'
   keys:
   - .-.+
   - '[^+/*-]'
   - ''
   - F[1-49][0-2]?
-- name: mods
-  cap-colour: 'ff0000'
-  glyph-style: '00ff00'
+- name: purple
+  cap-colour: 'ad1aad'
+  glyph-style: '32a852'
   keys:
   - .*
