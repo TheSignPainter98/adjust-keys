@@ -103,7 +103,7 @@ def adjustkeys(*args: [[str]]) -> dict:
 
     # Make collection
     collection:Collection = context.collection
-    collection_data:dict = { 'containing-collection': collection }
+    collection_data:dict = { 'temporary-collection': collection }
 
     # Adjust model positions
     model_data:dict = {}
