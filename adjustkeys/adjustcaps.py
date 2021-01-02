@@ -9,18 +9,18 @@ from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
-from .positions import move_object_origin_to_global_origin_with_offset, resolve_cap_position
+from .positions import resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
 from .yaml_io import read_yaml
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
-from functools import reduce
 from math import inf, pi
 from mathutils import Euler, Matrix, Vector
 from os import makedirs, remove
 from os.path import basename, exists, join
 from re import IGNORECASE, match
+from statistics import mean
 from sys import argv, exit
 Collection:type = None
 if blender_available():
@@ -33,11 +33,11 @@ if blender_available():
 def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
-    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection)
+    caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
 
     printi('Adjusting keycaps...')
     for cap in caps:
-        handle_cap(cap, profile_data['unit-length'], pargs.scaling)
+        handle_cap(cap, profile_data['unit-length'])
 
     # Sequentially import the models
     printi('Preparing materials')
@@ -67,7 +67,8 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     if len(importedCapObjects) != 0:
         printi('Joining keycap models into a single object')
         ctx: dict = {}
-        ctx['object'] = ctx['active_object'] = importedCapObjects[0]
+        joinTarget:Object = min(caps, key=lambda c: (c['cap-pos'].x, c['cap-pos'].y))['cap-obj']
+        ctx['object'] = ctx['active_object'] = joinTarget
         ctx['selected_objects'] = ctx[
             'selected_editable_objects'] = importedCapObjects
         ops.object.join(ctx)
@@ -79,7 +80,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         while intended_name in data.objects:
             i += 1
             intended_name = 'capmodel' + '-' + str(i)
-        importedCapObjects[0].name = importedCapObjects[0].data.name = intended_name
+        joinTarget.name = joinTarget.data.name = intended_name
         objectsPostRename: [str] = data.objects.keys()
         importedModelName = get_only(
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
@@ -91,15 +92,22 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             coll.objects.unlink(imp_obj)
         collection.objects.link(imp_obj)
 
-        printi('Moving cap model origin')
+        printi('Updating cap-model scaling')
         obj:Object = data.objects[importedModelName]
-        move_object_origin_to_global_origin_with_offset(obj, 0.0, 0.0)
-        obj.scale *= profile_data['scale'] * pargs.scaling
+        obj.data.transform(obj.matrix_world)
+        obj.matrix_world = Matrix.Scale(profile_data['scale'], 4)
 
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
+        printi('Applying outstanding cap-model transforms')
+        obj.data.transform(obj.matrix_world)
+        obj.matrix_world = Matrix.Identity(4)
+
+    # Compute average margin offset. Arrumes the input data isn't too horrible.
+    average_margin_offset:float = mean(list(map(lambda c: c['margin-offset'][1], caps)))
+
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': average_margin_offset }
 
 
-def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection) -> [dict]:
+def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
     printi('Finding and parsing cap models')
     # Get caps, check for duplicates
     caps: [dict] = get_caps(cap_dir)
@@ -115,7 +123,7 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
             # Import new object
             printi('Importing "%s" into blender...' % cap_data['cap-source'])
             objectsPreSingleImport:[str] = data.objects.keys()
-            ops.import_scene.obj(filepath=cap_data['cap-source'], axis_up='Z', axis_forward='Y')
+            ops.import_scene.obj(filepath=cap_data['cap-source'])
             objectsPostSingleImport:[str] = data.objects.keys()
             cap_data['cap-obj-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap_data['cap-source'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap_data['cap-source'])
             cap_data['cap-obj'] = context.scene.objects[cap_data['cap-obj-name']]
@@ -140,19 +148,34 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
         printw('Missing the following keycap models:\n\t' +
                '\n\t'.join(sorted(missing_models)))
 
-    return layout_with_caps
+    layout_with_caps_with_margins = list(map(lambda c: get_margin_offset(c, profile_data['unit-length']), layout_with_caps))
+
+    return layout_with_caps_with_margins
 
 
-def handle_cap(cap: dict, unit_length: float, output_scaling:float):
+def handle_cap(cap: dict, unit_length: float):
     printi('Adjusting cap %s' % cap['cap-name'])
-    move_object_origin_to_global_origin_with_offset(cap['cap-obj'], 0.0, 0.0) # cap_x_offset, cap_y_offset)
     cap = resolve_cap_position(cap, unit_length)
-    cap = apply_cap_pose(cap, output_scaling)
+    cap = apply_cap_pose(cap)
 
 
-def apply_cap_pose(cap: dict, output_scaling:float) -> dict:
-    cap['cap-obj'].location = Vector((cap['pos-x'], cap['pos-y'], cap['pos-z']))
-    cap['cap-obj'].rotation_euler = Euler((0.0, 0.0, cap['rotation']))
+def apply_cap_pose(cap: dict) -> dict:
+    obj:object = cap['cap-obj']
+
+    # Original offset
+    original_off:Vector = Vector(obj.bound_box[0])
+
+    # Reset pose
+    obj.matrix_world = Matrix.Identity(4)
+
+    # Set rotation
+    obj.matrix_world @= Matrix.Rotation(pi/2.0, 4, 'X')
+    obj.matrix_world @= Matrix.Rotation(cap['rotation'], 4, 'Y')
+
+    # Move to correct position from origin
+    obj.matrix_world @= Matrix.Translation(-original_off)
+    obj.matrix_world @= Matrix.Translation(Matrix.Rotation(-cap['rotation'], 4, 'Y') @ cap['cap-pos'])
+
     return cap
 
 
@@ -163,3 +186,12 @@ def get_caps(cap_dir: str) -> [dict]:
             'cap-name': basename(c)[:-4],
             'cap-source': c,
         }, capFiles))
+
+def get_margin_offset(cap:dict, unit_length:float) -> dict:
+    printi('Computing cap margin offset of keycap "%s"' % cap['key'])
+
+    cap_dims:Vector = Vector((cap['cap-obj'].dimensions.x, cap['cap-obj'].dimensions.z))
+    unit_dims:Vector = Vector((max(cap['width'], cap['secondary-width'] if 'secondary-width' in cap else -1.0), max(cap['height'], cap['secondary-height'] if 'secondary-height' in cap else -1.0)))
+
+    cap['margin-offset'] = (unit_length * unit_dims - cap_dims) / 2.0
+    return cap

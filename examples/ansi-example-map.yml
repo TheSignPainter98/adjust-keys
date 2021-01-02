@@ -1,6 +1,6 @@
 '!-1': 1-exclamationmark
 '"-''': singlequote-doublequote
-'#-3': 3-hash
+'#-3': 3-octothorpe
 '$-4': 4-dollar
 '%-5': 5-percent
 '&-7': 7-ampersand
@@ -40,6 +40,8 @@
 'E': e
 'End': end
 'Enter': enter
+'Iso Enter': iso-enter
+'Num Enter': num-enter
 'Esc': esc
 'F': f
 'F1': f1

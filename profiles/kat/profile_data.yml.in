@@ -1,6 +1,6 @@
-margin-offset: 0.525
 unit-length: 19.05
 scale: 0.001
+profile-row-map: null
 y-offsets:
   R5: Y_OFF_R5
   R4: Y_OFF_R4

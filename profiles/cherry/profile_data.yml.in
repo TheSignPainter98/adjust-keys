@@ -1,0 +1,19 @@
+unit-length: 1.905
+scale: 0.01
+profile-row-map:
+  R5: R1
+  R4: R1
+  R3: R2
+  R2: R3
+  R1: R4
+  SPACE: SPACE
+y-offsets:
+  R4: Y_OFF_R4
+  R3: Y_OFF_R3
+  R2: Y_OFF_R2
+  R1: Y_OFF_R1
+  SPACE: Y_OFF_SPACE
+special-offsets:
+  iso-enter: ISO_ENTER_MIDDLE_Y
+  num-enter: NUM_ENTER
+  num-plus: NUM_PLUS

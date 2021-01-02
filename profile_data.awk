@@ -15,8 +15,6 @@ NR == 1 {
 	cap_boundary = $2
 	cap_centre = $3
 	inside_cap_offset = cap_boundary - cap_centre
-	if (inside_cap_offset < 0)
-		inside_cap_offset *= -1
 
 	# Output
 	printf "m4_define(`%s', `%.7f')m4_dnl\n", label, inside_cap_offset
