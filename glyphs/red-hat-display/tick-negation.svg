@@ -1,7 +1,7 @@
 <svg width="292" height="292" viewBox="0 0 292 292" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="iso-backslash-pipe">
-<path id="\" d="M219.735 219.49H212.385L182.845 156H190.195L219.735 219.49Z" fill="black"/>
-<path id="|" d="M73.07 137.56V74H79.58V137.56H73.07Z" fill="black"/>
+<g id="tick-negation">
+<path id="`" d="M201.74 186.25L208.04 194.79H202.16L193.2 186.25H201.74Z" fill="black"/>
+<path id="&#194;&#172;" d="M76.22 93.18H108.42V116H101.84V99.27H76.22V93.18Z" fill="black"/>
 <g id="cap-guide">
 <g id="path309">
 <mask id="path-3-inside-1" fill="white">
