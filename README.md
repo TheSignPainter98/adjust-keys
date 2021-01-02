@@ -1,10 +1,16 @@
 # Adjustkeys
 
-![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/slanted-layout-60.png)
-![An example adjustglyphs layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/100-layout.png)
+![Earliest supported Blender version](https://img.shields.io/badge/Blender%20version-%E2%89%A52.82-blue)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/TheSignPainter98/adjust-keys)](https://github.com/TheSignPainter98/adjust-keys/releases/latest)
+[![GitHub stars](https://img.shields.io/github/stars/TheSignPainter98/adjust-keys)](https://github.com/TheSignPainter98/adjust-keys/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/TheSignPainter98/adjust-keys)](https://github.com/TheSignPainter98/adjust-keys/issues)
+[![GitHub license](https://img.shields.io/github/license/TheSignPainter98/adjust-keys)](https://github.com/TheSignPainter98/adjust-keys/blob/master/LICENSE)
 
 This is a [python][python] script which generates layouts of keycaps and glyphs for (automatic) import into [Blender!][blender]
 Gone will be the days of manually placing caps into the correct locations and spending hours fixing alignment problems of glyphs on individual keys—simply specify the layout you want using the JSON output of [KLE][kle] to have the computer guide the caps into the mathematically-correct locations.
+
+![An example adjustcaps layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/slanted-layout-60.png)
+![An example adjustglyphs layout in blender](https://raw.githubusercontent.com/TheSignPainter98/adjust-keys/master/img/100-layout.png)
 
 This script can be used to create a _single source of truth_ for glyph alignment on caps and—as an added bonus—colourway-config, so later changes and fixes can be more easily propagated.
 
