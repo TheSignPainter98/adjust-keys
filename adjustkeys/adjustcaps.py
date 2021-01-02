@@ -101,10 +101,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
 
-    # Compute average margin offset. Arrumes the input data isn't too horrible.
-    average_margin_offset:float = mean(list(map(lambda c: c['margin-offset'][1], caps)))
-
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': average_margin_offset }
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), '~caps-with-margin-offsets': caps }
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:

@@ -37,8 +37,8 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
-    glyph_data: [dict] = collect_data(layout, profile_data, margin_offset, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
+def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+    glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
@@ -143,7 +143,7 @@ def resolve_profile_x_offsets_with_alignment(alignment:str, unit_length:float, s
     alignment_func:LambdaType = alignment_funcs[alignment.split('-')[1]]
     return { w: unit_length * alignment_func(w) for w in frange(smallest, largest, step) }
 
-def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, margin_offset:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
+def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_glyph_pos:str, unit_length:float, x_offsets:dict, y_offsets:dict, special_y_offsets:dict) -> dict:
     resolved_offsets:dict = {}
 
     # Resolve aligned iso-enter glyph x-offsets
@@ -164,10 +164,10 @@ def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_gl
     else:
         iso_enter_y = unit_length + y_offsets['R2']
 
-    resolved_offsets['iso-enter'] = { 'x': iso_enter_x, 'y': iso_enter_y + margin_offset }
+    resolved_offsets['iso-enter'] = { 'x': iso_enter_x, 'y': iso_enter_y }
 
     # Resolve num-plus and num-enter
-    unit_offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo + margin_offset }
+    unit_offgen:LambdaType = lambda yo: { 'x': x_offsets[1], 'y': yo }
     alignment_direction:str = alignment.split('-')[0]
     if alignment_direction == 'top':
         resolved_offsets['num-plus'] = unit_offgen(y_offsets['R3'])
@@ -181,7 +181,7 @@ def resolve_special_profile_y_offsets_with_alignment(alignment:str, iso_enter_gl
 
     return resolved_offsets
 
-def collect_data(layout: [dict], profile: dict, margin_offset:float, glyph_dir: str,
+def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         glyph_map: dict, iso_enter_glyph_pos:str, alignment:str) -> [dict]:
     profile_x_offsets:dict = resolve_profile_x_offsets_with_alignment(alignment, profile['unit-length'])
     profile_x_offsets_rel: [dict] = list(
@@ -192,9 +192,9 @@ def collect_data(layout: [dict], profile: dict, margin_offset:float, glyph_dir: 
     profile_y_offsets_rel: [dict] = list(
         map(lambda m: {
             'profile-part': m[0],
-            'p-off-y': m[1] + margin_offset
+            'p-off-y': m[1]
         }, profile['y-offsets'].items()))
-    profile_special_offsets:dict = resolve_special_profile_y_offsets_with_alignment(alignment, iso_enter_glyph_pos, profile['unit-length'], margin_offset, profile_x_offsets, profile['y-offsets'], profile['special-offsets'])
+    profile_special_offsets:dict = resolve_special_profile_y_offsets_with_alignment(alignment, iso_enter_glyph_pos, profile['unit-length'], profile_x_offsets, profile['y-offsets'], profile['special-offsets'])
     profile_special_offsets_rel: [dict] = list(map(lambda so: { 'key-type': so[0], 'p-off-x': so[1]['x'], 'p-off-y': so[1]['y'] }, profile_special_offsets.items()))
 
     glyph_offsets = list(map(glyph_inf, glyph_files(glyph_dir)))
@@ -212,13 +212,13 @@ def collect_data(layout: [dict], profile: dict, margin_offset:float, glyph_dir: 
     if len(missing_glyphs) != 0:
         printw('The following glyphs could not be found:\n\t' + '\n\t'.join(list(sorted(missing_glyphs))))
 
-    key_offsets = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
-    glyph_offset_layout = inner_join(key_offsets, 'key', layout, 'key')
-    profile_x_offset_keys = inner_join(glyph_offset_layout, 'width',
+    key_offsets:[dict] = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
+    glyph_offset_layout:[dict] = inner_join(key_offsets, 'key', layout, 'key')
+    profile_x_offset_keys:[dict] = inner_join(glyph_offset_layout, 'width',
                                        profile_x_offsets_rel, 'width')
-    profile_x_y_offset_keys = inner_join(profile_x_offset_keys, 'profile-part',
+    profile_x_y_offset_keys:[dict] = inner_join(profile_x_offset_keys, 'profile-part',
                                          profile_y_offsets_rel, 'profile-part')
-    data = list(
+    all_keys_offset:[dict] = list(
         map(
             lambda k: k if 'key-type' not in k else dict_union(
                 k,
@@ -231,7 +231,10 @@ def collect_data(layout: [dict], profile: dict, margin_offset:float, glyph_dir: 
     if len(glyphs_lost_due_to_profile_data) != 0:
         printw('The following glyphs were lost when inner-joining with the offset information\n\t' + '\n\t'.join(list(sorted(glyphs_lost_due_to_profile_data))))
 
-    return data
+    # Apply cap-specific vertical marign offsets (as the profile data y-offset value does not include margins)
+    all_keys_with_vertical_margin_offsets_applied:[dict] = list(map(apply_vertical_margin_offset, all_keys_offset))
+
+    return all_keys_with_vertical_margin_offsets_applied
 
 def get_style(key:dict) -> str:
     if safe_get(key, 'glyph-style') is not None:
@@ -299,6 +302,11 @@ def parse_special_pos(special_offset:[str, dict], iso_enter_glyph_pos:str, defau
                 'p-off-x': special_offset[1]['x'] if 'x' in special_offset[1] else default_x_offset,
                 'p-off-y': special_offset[1]['y']
             }
+
+def apply_vertical_margin_offset(cap:dict) -> dict:
+    if 'margin-offset' in cap:
+        cap['p-off-y'] += cap['margin-offset'][1]
+    return cap
 
 def glyph_files(dname: str) -> [str]:
     if not exists(dname):
