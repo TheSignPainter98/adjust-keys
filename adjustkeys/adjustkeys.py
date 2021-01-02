@@ -113,8 +113,7 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust glyph positions
     glyph_data:dict = {}
     if pargs.adjust_glyphs:
-        margin_offset:float = model_data['margin-offset'] if 'margin-offset' in model_data else 0.0
-        glyph_data = adjust_glyphs(coloured_layout, profile_data, margin_offset, collection, glyph_map, pargs)
+        glyph_data = adjust_glyphs(model_data['~caps-with-margin-offsets'] if '~caps-with-margin-offsets' in model_data else coloured_layout, profile_data, collection, glyph_map, pargs)
 
     # Shrink-wrap the glyphs onto the model
     if pargs.shrink_wrap and pargs.adjust_caps and pargs.adjust_glyphs:
@@ -126,7 +125,10 @@ def adjustkeys(*args: [[str]]) -> dict:
             }
         shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit-length'], pargs.shrink_wrap_offset, subsurf_params, profile_data['scale'])
 
-    return dict_union(collection_data, model_data, glyph_data)
+    return remove_private_data(dict_union(collection_data, model_data, glyph_data))
+
+def remove_private_data(d:dict) -> dict:
+    return dict(filter(lambda p: not p[0].startswith('~'), d.items()))
 
 if __name__ == '__main__':
     rc:int = 0
