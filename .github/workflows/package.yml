@@ -16,6 +16,8 @@ jobs:
       - name: Get current tag
         uses: olegtarasov/get-tag@v2
         id: tag_name
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       - name: Ensure up-to-date apt packages and lists
         run: |
           sudo apt-get update
