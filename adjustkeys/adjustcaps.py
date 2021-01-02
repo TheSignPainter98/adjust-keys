@@ -20,6 +20,7 @@ from mathutils import Euler, Matrix, Vector
 from os import makedirs, remove
 from os.path import basename, exists, join
 from re import IGNORECASE, match
+from statistics import mean
 from sys import argv, exit
 Collection:type = None
 if blender_available():
@@ -100,7 +101,10 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
 
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()) }
+    # Compute average margin offset. Arrumes the input data isn't too horrible.
+    average_margin_offset:float = mean(list(map(lambda c: c['margin-offset'][1], caps)))
+
+    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), 'margin-offset': average_margin_offset }
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
@@ -124,7 +128,6 @@ def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collect
             cap_data['cap-obj-name'] = get_only(list_diff(objectsPostSingleImport, objectsPreSingleImport), 'No new id was added when importing from %s' % cap_data['cap-source'], 'Multiple ids changed when importing %s, got %%d new: %%s' % cap_data['cap-source'])
             cap_data['cap-obj'] = context.scene.objects[cap_data['cap-obj-name']]
             firsts[cap_data['cap-source']] = cap_data['cap-obj']
-            collection.objects.link(cap_data['cap-obj'])
         else:
             # Duplicate existing object
             printi('Duplicating existing "%s"...' % cap_data['cap-source'])

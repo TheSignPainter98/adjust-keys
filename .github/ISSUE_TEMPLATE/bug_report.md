@@ -20,12 +20,12 @@ assignees: ''
 
 <!-- ### Screenshots -->
 
-<!-- If applicable, add screenshots to help explain your problem. -->
+<!-- If applicable, add screenshots to help explain the problem. -->
 
 ### Environment
 
-- OS: [e.g. iOS]
-- Script: (e.g. adjustcaps/adjustglyphs)
+- OS: [e.g. Arch Linux]
+- Blender version: [e.g. 2.90]
 
 ### Additional context
 

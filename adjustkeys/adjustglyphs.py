@@ -79,15 +79,13 @@ def adjust_glyphs(layout:[dict], profile_data:dict, margin_offset:float, collect
     svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
     collectionName:str = get_only(list_diff(collectionsPostImport, collectionsPreImport), 'No collections added when importing glyphs', 'Multiple collections added whilst importing glyphs, got %d: %s')
 
-    printi('Adding svg into the right collection')
-    glyph_collection = make_collection('glyphs', parent_collection=collection)
-    #  collection.children.link(glyph_collection)
+    printi("Adding svg into the correct collection")
     for svgObjectName in svgObjectNames:
-        glyph_collection.objects.link(data.objects[svgObjectName])
+        collection.objects.link(data.objects[svgObjectName])
     data.collections.remove(data.collections[collectionName])
 
     # Apprpriately scale the objects
-    printi('Scaling glyphs and moving origins')
+    printi('Scaling glyphs')
     for svgObjectName in svgObjectNames:
         svgObject = data.objects[svgObjectName]
         svgObject.data.transform(Matrix.Scale(scale * profile_data['scale'], 4))
@@ -257,7 +255,9 @@ def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
         ]
     if 'rotation' in glyph:
         transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
-    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations), style ]
+    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations) ]
+    if style:
+        header_content.append(style)
 
     # Prepare svg content
     svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))

@@ -50,7 +50,7 @@ Therefore, `adjustkeys` exists—to help banish the duplication of tedious align
 
 ## Usage
 
-You’ll need a working installation of [Blender][blender] (v2.8x or v2.9x work) and a little familiarity with the [yaml][yaml-intro] syntax (although this can be picked up as it’s designed to be relatively human-friendly).
+You’ll need a working installation of [Blender][blender] (v2.82+ or v2.90+ work) and a little familiarity with the [yaml][yaml-intro] syntax (although this can be picked up as it’s designed to be relatively human-friendly).
 There’s two ways of interacting with `adjustkeys`, either through the Blender extension or through Python, both are explained here.
 
 **Important**: currently, you need to be able to view the console output for certain features of `adjustkeys`, which can be done as follows depending on your operating system.
@@ -305,6 +305,7 @@ Please see the [contribution note,][contrib-note] abide by the [code of conduct]
 	2. Measure the margin between the space occupied by the keycap and the model itself (see [1u keycap size example diagram][keycap-info]) and enter the value into `profiles/y/keycap_data.yml`
 	3. (The annoying one) measure the location of the centre of the face of the keycap model and the uppermost and leftmost extremes of the keycap model and enter the values into `profiles/y/centres.csv`
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code written before!
+
 Above all, please abide by the licenses of the relevant works!
 For example, the license for Gotham, a common type family in KAT and KAM sets, would prohibit it’s inclusion in this repo.
 In particular, some licenses state that the format of the contained glyphs may not be changed.
@@ -329,7 +330,8 @@ This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
 Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
 
-All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions which use their own licenses:**
+All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions.**
+Please note that the licenses listed below were correct to the best of my knowledge at the time of writing; check the sources for the most up-to-date versions of their respective licenses.
 
 - KAT keycap models present in the repo were derived from a model kindly provided by [zFrontier][zfrontier] which was found on the [Keycap Designers’][keycap-designers-discord] Discord
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
@@ -339,6 +341,7 @@ All files written by contributors to this project are covered under the [GNU Les
 - The arrow symbols used in svgs in the `glyphs/open-cherry/` folder are ‘GMK Icons’ found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The keycap representation used in `glyphs/red-hat-display` and `glyphs/open-cherry` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
+- All contents of the `examples/` folder are licensed under CC0 1.0 Universal (CC0 1.0) and hence are dedicated to the public domain
 
 Please ensure that credit is given where it is due.
 
