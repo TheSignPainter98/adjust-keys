@@ -2,7 +2,7 @@
 
 from .log import die, printi
 from os.path import exists
-from re import Match, search
+from re import search # Match
 from sys import stdin
 from yaml import dump, safe_load
 
@@ -32,7 +32,7 @@ def read_yaml(fname: str) -> dict:
 
 
 def sanitise_yaml_line(line:str) -> str:
-    m:Match = search(r'^\t+', line)
+    m:'Match' = search(r'^\t+', line)
     if m is not None:
         span:tuple = m.span()
         num_tabs:int = span[1] - span[0]
