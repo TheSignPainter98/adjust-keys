@@ -343,7 +343,7 @@ Please note that the licenses listed below were correct to the best of my knowle
   If there are any artifacts not present in the originals, please blame AutoCAD’s `obj` conversion
 - Cherry keycap models present were derived from step files kindly provided by hineybush and are available via [GitHub][cherry-keycap-model-github]
 - The typeface used in svgs the `glyphs/red-hat-display/` folder is [Red Hat Display][red-hat-display] which uses the [Open Font License][ofl]
-- The typeface used in svgs the `glyphs/open-cherry/` folder is [Open Cherry][open-cherry] by dakotafelder available under the license specified on [GitHub][open-cherry-font] and missing glyphs are substituted with [Quicksand][quicksand] ([OFL][ofl])
+- The typeface used in svgs the `glyphs/open-cherry/` folder is Open Cherry by dakotafelder available under the license specified on [GitHub][open-cherry-font] and missing glyphs are substituted with [Quicksand][quicksand] ([OFL][ofl])
 - The arrow symbols used in svgs in the `glyphs/open-cherry/` folder are ‘GMK Icons’ found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The keycap representation used in `glyphs/red-hat-display` and `glyphs/open-cherry` is derived from a 2D model by Alex Lin of [zFrontier][zfrontier], which was also found on the [Keycap Designers’][keycap-designers-discord] Discord
 - The layout `examples/layout.yml` is derived from the [ANSI 104][kle-ansi-104] layout example on [KLE][kle]
