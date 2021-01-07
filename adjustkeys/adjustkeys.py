@@ -9,7 +9,7 @@ from .colour_resolver import colourise_layout
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
 from .input_types import type_check_colour_map, type_check_glyph_map, type_check_profile_data
-from .layout import get_layout, dumb_parse_layout
+from .layout import get_layout, dumb_parse_layout, compute_layout_dims
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
@@ -17,6 +17,7 @@ from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .update_checker import check_update
 from .util import dict_union
 from .yaml_io import read_yaml
+from mathutils import Vector
 from os import makedirs
 from os.path import exists, join
 from sys import argv, exit
@@ -87,6 +88,7 @@ def adjustkeys(*args: [[str]]) -> dict:
     layout:[dict] = []
     if pargs.adjust_glyphs or pargs.adjust_caps:
         layout:[dict] = get_layout(pargs.layout_file, profile_data, pargs.apply_colour_map)
+    layout_dims:Vector = compute_layout_dims(layout)
 
     # Read colour-map file
     colour_map:[dict] = []
@@ -108,7 +110,7 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust model positions
     model_data:dict = {}
     if pargs.adjust_caps:
-        model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, pargs)
+        model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, layout_dims, pargs)
 
     # Adjust glyph positions
     glyph_data:dict = {}

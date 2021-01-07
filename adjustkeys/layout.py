@@ -224,4 +224,28 @@ def gen_cap_name(key:dict) -> str:
             name += '-bar'
         return name
 
+def compute_layout_dims(layout:[dict]) -> Vector:
+    def point_enumerator(v:Vector) -> Matrix:
+        return Matrix([
+            (0.0, 0.0,  v[0], v[0]),
+            (0.0, v[1], 0.0,  v[1])
+        ])
 
+    # Initial extreme values
+    xmax = 0.0
+    ymax = 0.0
+
+    for cap in layout:
+        rot:Matrix = Matrix.Rotation(cap['rotation'], 2)
+        primary_dims:Vector = Vector((cap['width'], cap['height']))
+        secondary_dims:Vector = Vector((cap['secondary-width'], cap['secondary-height']))
+        kle_pos_mat:Matrix = Matrix([[cap['kle-pos'][0]] * 4, [cap['kle-pos'][1]] * 4])
+
+        # This method doesn't take into account extremely weird keycap shapes (which use x2, y2 keys but it should work for everything which actually exists)
+        primary_points:Matrix = kle_pos_mat + rot @ point_enumerator(primary_dims)
+        secondary_points:Matrix = kle_pos_mat + rot @ point_enumerator(secondary_dims)
+
+        xmax = max(xmax, *primary_points[0], *secondary_points[0])
+        ymax = max(ymax, *primary_points[1], *secondary_points[1])
+
+    return Vector((xmax, ymax))
