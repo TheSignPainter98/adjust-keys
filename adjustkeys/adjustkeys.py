@@ -115,7 +115,8 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust glyph positions
     glyph_data:dict = {}
     if pargs.adjust_glyphs:
-        glyph_data = adjust_glyphs(model_data['~caps-with-margin-offsets'] if '~caps-with-margin-offsets' in model_data else coloured_layout, profile_data, collection, glyph_map, pargs)
+        glyph_layout:[dict] = model_data['~caps-with-margin-offsets'] if '~caps-with-margin-offsets' in model_data else coloured_layout
+        glyph_data = adjust_glyphs(glyph_layout, profile_data, layout_dims, collection, glyph_map, pargs)
 
     # Shrink-wrap the glyphs onto the model
     if pargs.shrink_wrap and pargs.adjust_caps and pargs.adjust_glyphs:

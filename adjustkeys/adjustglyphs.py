@@ -37,7 +37,7 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
@@ -53,15 +53,12 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph
         style:str = get_style(placed_glyphs[i])
         if style:
             remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length)
 
-    svgWidth: int = max(map(lambda p: p['glyph-pos'].x, placed_glyphs),
-                        default=0) + 10.0 * pargs.glyph_unit_length
-    svgHeight: int = max(map(lambda p: p['glyph-pos'].y, placed_glyphs),
-                         default=0) + 10.0 * pargs.glyph_unit_length
+    svgSideLength: int = max(layout_dims) * pargs.glyph_unit_length
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        % (svgWidth, svgHeight, svgWidth, svgHeight)
+        % (svgSideLength, svgSideLength, svgSideLength, svgSideLength)
     ] + list(
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
