@@ -248,22 +248,37 @@ def get_style(key:dict) -> str:
     else:
         return None
 
-def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
-    # Prepare header content
-    transformations:[str] = [
-            'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y)
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float) -> [str]:
+    # Prepare glyph header contnet
+    glyph_transformations:[str] = [
+            'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
+            'rotate(%f)' % -degrees(glyph['rotation']),
         ]
-    if 'rotation' in glyph:
-        transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
-    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations) ]
+    glyph_svg_header_content:[str] = [ 'transform="%s"' % ' '.join(glyph_transformations) ]
     if style:
-        header_content.append(style)
+        glyph_svg_header_content.append(style)
 
-    # Prepare svg content
-    svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
+    #  # Prepare svg content
+    glyph_svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
+    glyph_svg_data:[str] = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
+
+    cap_transformations:[str] = [
+        'translate(%f %f)' % (ulen * glyph['kle-pos'].x, ulen * glyph['kle-pos'].y),
+        'rotate(%f)' % -degrees(glyph['rotation'])
+    ]
+    cap_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_transformations) ]
+    cap_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+    if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
+        cap_svg_content = [
+                '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
+                '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
+            ]
+    else:
+        cap_svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+    cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_svg_header) ] + cap_svg_content + [ '</g>' ]
 
     # Combine and return
-    return [ '<g %s>' % ' '.join(header_content) ] + svg_content + [ '</g>' ]
+    return ['<g>'] + cap_svg_data + glyph_svg_data + ['</g>']
 
 def sanitise_ids(node:Element) -> Element:
     if node.attributes and 'id' in node.attributes.keys():
