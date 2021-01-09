@@ -41,6 +41,16 @@ def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
         obj.parent = data.objects[keycap_model_name]
         obj.matrix_parent_inverse = obj.parent.matrix_world.inverted()
 
+        # Apply solidify modifier
+        printi('Solidifying glyph-part "%s"' % obj.name)
+        solidifyModName:str = 'solidify_' + obj.name
+        solidifyMod: SolidifyModifier = obj.modifiers.new(
+            name=solidifyModName, type='SOLIDIFY')
+        solidifyMod.offset = -1.0
+        solidifyMod.thickness = cap_unit_length # Better option would be with thickness 2 * shrink_wrap_offset applied after the shrinkwrap, but doing so causes horrendous aliases on nonplanar surfaces (e.g. keycaps)
+        solidifyMod.nonmanifold_merge_threshold = 0
+        solidifyMod.nonmanifold_thickness_mode = 'FIXED'
+
         # Apply subdivision surface to glyph
         printi('A%spplying subdivision surface to "%s"' %('daptively a' if subsurf_params['adaptive-subsurf'] else '', obj.name))
         subsurfModName: str = 'subsurf_' + obj.name
@@ -50,8 +60,6 @@ def shrink_wrap_glyphs_to_keys(glyph_names: [str], keycap_model_name: str,
         if subsurf_params['adaptive-subsurf']:
             subsurfMod.levels = round((glyph['log-max-dim'] - min_log_max_dim) / (max_log_max_dim - min_log_max_dim) * subsurf_params['viewport-levels'])
             subsurfMod.render_levels = round((glyph['log-max-dim'] - min_log_max_dim) / (max_log_max_dim - min_log_max_dim) * subsurf_params['render-levels'])
-            #  subsurfMod.levels = subsurf_params['viewport-levels']
-            #  subsurfMod.render_levels = subsurf_params['render-levels']
         else:
             subsurfMod.levels = subsurf_params['viewport-levels']
             subsurfMod.render_levels = subsurf_params['render-levels']
