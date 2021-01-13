@@ -12,7 +12,7 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_position
 from .scale import get_scale
-from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
+from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, right_outer_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
@@ -45,14 +45,15 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
 
     for i in range(len(placed_glyphs)):
-        with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
-            placed_glyphs[i] = dict_union(
-                placed_glyphs[i],
-                {'svg': parseString(f.read()).documentElement})
-        remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
         style:str = get_style(placed_glyphs[i])
-        if style:
-            remove_fill_from_svg(placed_glyphs[i]['svg'])
+        if 'src' in placed_glyphs[i]:
+            with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
+                placed_glyphs[i] = dict_union(
+                    placed_glyphs[i],
+                    {'svg': parseString(f.read()).documentElement})
+            remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
+            if style:
+                remove_fill_from_svg(placed_glyphs[i]['svg'])
         placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method)
 
     svgSideLength: int = max(layout_dims) * pargs.glyph_unit_length # TODO: check this
@@ -128,6 +129,10 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
 
 
 def resolve_glyph_offset(cap:dict, alignment:str, glyph_ulen:float) -> dict:
+    if 'glyph-dim' not in cap:
+        cap['glyph-offset'] = Vector((0.0, 0.0))
+        return cap
+
     # Functions and mapping for placement
     alignment_xy_map:dict = {
         'top': 'left',
@@ -241,7 +246,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         printw('The following glyphs could not be found:\n\t' + '\n\t'.join(list(sorted(missing_glyphs))))
 
     key_offsets:[dict] = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
-    glyph_offset_layout:[dict] = inner_join(key_offsets, 'key', layout, 'key')
+    glyph_offset_layout:[dict] = right_outer_join(key_offsets, 'key', layout, 'key')
     profile_x_offset_keys:[dict] = inner_join(glyph_offset_layout, 'width',
                                        profile_x_offsets_rel, 'width')
     profile_x_y_offset_keys:[dict] = inner_join(profile_x_offset_keys, 'profile-part',
@@ -255,7 +260,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
                            profile_special_offsets_rel))[0]),
             profile_x_y_offset_keys))
 
-    glyphs_lost_due_to_profile_data:{str} = set(list_diff(list_diff(map(lambda g: g['glyph'], profile_x_y_offset_keys), glyph_names), missing_glyphs))
+    glyphs_lost_due_to_profile_data:{str} = set(list_diff(list_diff(map(lambda g: g['glyph'], filter(lambda g: 'glyph' in g, profile_x_y_offset_keys)), glyph_names), missing_glyphs))
     if len(glyphs_lost_due_to_profile_data) != 0:
         printw('The following glyphs were lost when inner-joining with the offset information\n\t' + '\n\t'.join(list(sorted(glyphs_lost_due_to_profile_data))))
 
@@ -290,8 +295,11 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
         glyph_svg_header_content.append(style)
 
     #  # Prepare svg content
-    glyph_svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
-    glyph_svg_data:[str] = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
+    glyph_svg_content:[str] = []
+    glyph_svg_data:[str] = []
+    if 'svg' in glyph:
+        glyph_svg_content = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
+        glyph_svg_data = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
 
     cap_svg_data:[str] = []
     if glyph_application_method == 'uv-map':
