@@ -68,7 +68,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
     if pargs.glyph_application_method == 'shrinkwrap':
         svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, collection, svg)
     else:
-        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name)
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, Vector((pargs.uv_res, pargs.uv_res)))
 
     printi('Successfully imported glyphs')
 
@@ -108,11 +108,18 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, collection
 
     return svgObjectNames
 
-def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str):
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, uv_dims:Vector):
     # Convert to png
     png:bytes
     with Colour('transparent') as transparent:
-        with Image(blob=svg.encode('utf-8'), format='svg', background=transparent) as image:
+        image_params:dict = {
+            'blob': svg.encode('utf-8'),
+            'format': 'svg',
+            'background': transparent,
+            'width': int(uv_dims.x),
+            'height': int(uv_dims.y),
+        }
+        with Image(**image_params) as image:
             png = image.make_blob(format='png')
 
     # Write png to file
