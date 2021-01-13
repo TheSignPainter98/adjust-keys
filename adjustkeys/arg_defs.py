@@ -209,15 +209,6 @@ args: [dict] = [{
     'label': 'Apply colour map',
     'type': bool
 }, {
-    'dest': 'shrink_wrap',
-    'short': '-Ns',
-    'long': '--no-shrink-wrap',
-    'action': 'store_false',
-    'help': "Subdivide and shrink wrap glyph models onto the keycaps",
-    'default': True,
-    'label': 'Shrink wrap glyphs to keys',
-    'type': bool
-}, {
     'dest': 'opt_file',
     'short': '-@',
     'long': '--args',

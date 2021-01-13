@@ -11,6 +11,7 @@ from .obj_io import read_obj, write_obj
 from .path import walk
 from .positions import resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
+from .uv_unwrap import uv_unwrap
 from .yaml_io import read_yaml
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
@@ -101,8 +102,9 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
 
-        printi('UV-unwrapping cap-model')
-        uv_unwrap(obj, profile_data['unit-length'] * profile_data['scale'] * layout_dims)
+        if pargs.glyph_application_method == 'uv-map':
+            printi('UV-unwrapping cap-model')
+            uv_unwrap(obj, profile_data['unit-length'] * profile_data['scale'] * layout_dims, pargs.partition_uv_by_face_direction)
 
     return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), '~caps-with-margin-offsets': caps }
 
@@ -195,27 +197,3 @@ def get_margin_offset(cap:dict, unit_length:float) -> dict:
 
     cap['margin-offset'] = (unit_length * unit_dims - cap_dims) / 2.0
     return cap
-
-def uv_unwrap(obj:object, objw:Vector):
-    #  # Ensure object mode
-    #  origMode = context.object.mode
-    #  if origMode != 'OBJECT':
-        #  ops.object.mode_set(mode='OBJECT')
-
-    # Project vertices into uv-space, assuming upper-left most point is at
-    scale: float = uv_scale(objw)
-    printi('Scaling uv image by %f' % scale)
-    for face in obj.data.polygons:
-        for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-            obj.data.uv_layers.active.data[loop_idx].uv = scale * obj.data.vertices[vert_idx].co.to_2d() + Vector((0.0, 1.0))
-
-    #  # Reinstate previous mode
-    #  if origMode != 'OBJECT':
-        #  ops.object.mode_set(mode=origMode)
-
-def z0_project(v: Vector) -> Vector:
-    return Vector(v[:2])
-
-# Assume that the top left-most point occupied space is at (0,0)
-def uv_scale(kbw:Vector) -> float:
-    return 1.0 / kbw[kbw[0] <= kbw[1]]

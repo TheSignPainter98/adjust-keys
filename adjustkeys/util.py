@@ -241,3 +241,6 @@ def frange(x, y, jump):
     while x <= y:
         yield float(x)
         x += jump
+
+def layout_is_wider_than_height(v:'Vector') -> bool:
+    return v[0] <= 0.5 * v[1]
