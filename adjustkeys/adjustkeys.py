@@ -116,10 +116,13 @@ def adjustkeys(*args: [[str]]) -> dict:
     glyph_data:dict = {}
     if pargs.adjust_glyphs:
         glyph_layout:[dict] = model_data['~caps-with-margin-offsets'] if '~caps-with-margin-offsets' in model_data else coloured_layout
-        glyph_data = adjust_glyphs(glyph_layout, profile_data, layout_dims, collection, glyph_map, pargs)
+        imgNode:ShaderNodeTexImage = model_data['~texture-image-node'] if '~texture-image-node' in model_data else None
+        uv_image_path:str = model_data['uv-image-path'] if 'uv-image-path' in model_data else None
+        uv_material_name:str = model_data['uv-material-name'] if 'uv-material-name' in model_data else None
+        glyph_data = adjust_glyphs(glyph_layout, profile_data, layout_dims, collection, glyph_map, imgNode, uv_image_path, uv_material_name, pargs)
 
     # Shrink-wrap the glyphs onto the model
-    if pargs.shrink_wrap and pargs.adjust_caps and pargs.adjust_glyphs:
+    if pargs.glyph_application_method == 'shrinkwrap' and pargs.adjust_caps and pargs.adjust_glyphs:
         subsurf_params:dict = {
                 'viewport-levels': pargs.subsurf_viewport_levels,
                 'render-levels': pargs.subsurf_render_levels,

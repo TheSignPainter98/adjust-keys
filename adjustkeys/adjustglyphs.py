@@ -16,20 +16,20 @@ from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_val
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
-from os.path import exists, join
+from os.path import basename, exists, join
 from math import degrees
 from mathutils import Matrix, Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from types import LambdaType
+from wand.color import Color as Colour
+from wand.image import Image
 from xml.dom.minidom import Element, parseString
 Collection:type = None
 if blender_available():
     from bpy import ops
-    from bpy.types import Collection
+    from bpy.types import Collection, ShaderNodeTexImage
     data = LazyImport('bpy', 'data')
-
-adjusted_svg_file_name:str = get_temp_file_name()
 
 ##
 # @brief Entry point function, should be treated as the first thing called
@@ -37,7 +37,7 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
@@ -53,15 +53,28 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
         style:str = get_style(placed_glyphs[i])
         if style:
             remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method)
 
-    svgSideLength: int = max(layout_dims) * pargs.glyph_unit_length
+    svgSideLength: int = max(layout_dims) * pargs.glyph_unit_length # TODO: check this
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
         % (svgSideLength, svgSideLength, svgSideLength, svgSideLength)
     ] + list(
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
+
+    svgObjectNames:[str] = None
+    if pargs.glyph_application_method == 'shrinkwrap':
+        svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, collection, svg)
+    else:
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name)
+
+    printi('Successfully imported glyphs')
+
+    return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
+
+def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, collection:Collection, svg:str):
+    adjusted_svg_file_name:str = get_temp_file_name()
 
     printi('Writing svg to file "%s"' % adjusted_svg_file_name)
     with open(adjusted_svg_file_name, 'w+') as f:
@@ -92,9 +105,27 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
         printi('Cleaning away the placed-glyph svg file')
         remove(adjusted_svg_file_name)
 
-    printi('Successfully imported svg objects')
+    return svgObjectNames
 
-    return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str):
+    # Convert to png
+    png:bytes
+    with Colour('transparent') as transparent:
+        with Image(blob=svg.encode('utf-8'), format='svg', background=transparent) as image:
+            png = image.make_blob(format='png')
+
+    # Write png to file
+    with open(uv_image_path, 'wb+') as ofile:
+        ofile.write(png)
+
+    # Add image to Blender's database if absent otherwise update
+    bpy_internal_uv_image_name:str = basename(uv_image_path)
+    if bpy_internal_uv_image_name not in data.images:
+        imgNode.image = data.images.load(uv_image_path, check_existing=False) # TODO: delay this
+    else:
+        imgNode.image = data.images[bpy_internal_uv_image_name]
+        imgNode.image.reload()
+
 
 def resolve_glyph_offset(cap:dict, alignment:str, glyph_ulen:float) -> dict:
     # Functions and mapping for placement
@@ -248,7 +279,7 @@ def get_style(key:dict) -> str:
     else:
         return None
 
-def get_glyph_vector_data(glyph:dict, style:str, ulen:float) -> [str]:
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float) -> [str]:
     # Prepare glyph header contnet
     glyph_transformations:[str] = [
             'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
@@ -262,20 +293,23 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float) -> [str]:
     glyph_svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
     glyph_svg_data:[str] = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
 
-    cap_transformations:[str] = [
-        'translate(%f %f)' % (ulen * glyph['kle-pos'].x, ulen * glyph['kle-pos'].y),
-        'rotate(%f)' % -degrees(glyph['rotation'])
-    ]
-    cap_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_transformations) ]
-    cap_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
-    if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
-        cap_svg_content = [
-                '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
-                '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
-            ]
-    else:
-        cap_svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
-    cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_svg_header) ] + cap_svg_content + [ '</g>' ]
+    cap_svg_data:[str] = []
+    if glyph_application_method == 'uv-map':
+        cap_transformations:[str] = [
+            'translate(%f %f)' % (ulen * glyph['kle-pos'].x, ulen * glyph['kle-pos'].y),
+            'rotate(%f)' % -degrees(glyph['rotation'])
+        ]
+        cap_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_transformations) ]
+        cap_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+        if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
+            cap_svg_content = [
+                    '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
+                    '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
+                ]
+        else:
+            cap_svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+
+        cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_svg_header) ] + cap_svg_content + [ '</g>' ]
 
     # Combine and return
     return ['<g>'] + cap_svg_data + glyph_svg_data + ['</g>']

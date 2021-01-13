@@ -82,7 +82,7 @@ args: [dict] = [{
     'str-type': 'dir'
 }, {
     'dest': 'glyph_map_file',
-    'short': '-M',
+    'short': '-m',
     'long': '--glyph-map',
     'action': 'store',
     'help':
@@ -188,7 +188,7 @@ args: [dict] = [{
     'action': 'store_false',
     'help': 'Import keycap models and correctly adjust their positions',
     'default': True,
-    'label': 'Import keycap meshes',
+    'label': 'Import keycaps',
     'type': bool
 }, {
     'dest': 'adjust_glyphs',
@@ -197,7 +197,7 @@ args: [dict] = [{
     'action': 'store_false',
     'help': 'Import glyphs and correctly adjust their positions',
     'default': True,
-    'label': 'Import glyph curves',
+    'label': 'Import glyphs',
     'type': bool
 }, {
     'dest': 'apply_colour_map',
@@ -221,6 +221,15 @@ args: [dict] = [{
     'str-type': 'file',
     'label': 'YAML option file'
 }, {
+    'dest': 'partition_uv_by_face_direction',
+    'short': '-p',
+    'long': '--partition-uv-by-face-direction',
+    'action': 'store_true',
+    'help': 'Use separate areas of the uv-space for faces with upward and downward normals. Prevents prevents glyphs from appearing on the back of caps but effectively halves uv-resolution along one axis.',
+    'default': False,
+    'type': bool,
+    'label': 'Partition UV-map by face normals',
+}, {
     'dest': 'print_opts_yml',
     'short': '-#',
     'long': '--print-opts-yml',
@@ -230,6 +239,19 @@ args: [dict] = [{
     'type': bool,
     'label': 'List current options in YAML',
     'op': True
+}, {
+    'dest': 'glyph_application_method',
+    'short': '-M',
+    'long': '--glyph-application-method',
+    'action': 'store',
+    'help': 'Select the method of attaching the glyphs to the keys',
+    'default': 'uv-map',
+    'choices': [
+        'shrinkwrap',
+        'uv-map'
+    ],
+    'type': str,
+    'label': 'Glyph application method'
 }, {
     'dest': 'shrink_wrap_offset',
     'short': '-d',
@@ -291,6 +313,27 @@ args: [dict] = [{
     'type': float,
     'soft-min': 0.0,
     'soft-max': 100.0,
+}, {
+    'dest': 'use_existing_materials',
+    'short': '-e',
+    'long': '--use-existing-materials',
+    'action': 'store_true',
+    'help': "Don't create new materials for any existing ones found",
+    'default': False,
+    'type': bool,
+    'label': 'Use existing materials',
+}, {
+    'dest': 'uv_res',
+    'short': '-u',
+    'long': '--uv-res',
+    'metavar': 'res',
+    'action': 'store',
+    'help': 'Specify the length of the longest side of a uv image texture',
+    'default': 4096,
+    'label': 'UV map resolution',
+    'type': int,
+    'min': 1024,
+    'max': 8192,
 }, {
     'dest': 'verbosity',
     'short': '-v',
