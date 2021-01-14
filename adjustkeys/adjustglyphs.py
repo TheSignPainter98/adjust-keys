@@ -54,12 +54,17 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
             remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
             if style:
                 remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_dims)
 
-    svgSideLength: int = max(layout_dims) * pargs.glyph_unit_length # TODO: check this
+    svg_dims:Vector
+    if pargs.partition_uv_by_face_direction:
+        svg_dims = pargs.glyph_unit_length * Matrix.Diagonal((1, 2)) @ layout_dims
+    else:
+        svg_dims = pargs.glyph_unit_length * layout_dims
+
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        % (svgSideLength, svgSideLength, svgSideLength, svgSideLength)
+        % (svg_dims.x, svg_dims.y, svg_dims.x, svg_dims.y)
     ] + list(
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
@@ -291,7 +296,7 @@ def get_style(key:dict) -> str:
     else:
         return None
 
-def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float) -> [str]:
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_dims:Vector) -> [str]:
     # Prepare glyph header contnet
     glyph_transformations:[str] = [
             'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
@@ -310,24 +315,43 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
 
     cap_svg_data:[str] = []
     if glyph_application_method == 'uv-map':
-        cap_transformations:[str] = [
-            'translate(%f %f)' % (ulen * glyph['kle-pos'].x, ulen * glyph['kle-pos'].y),
+        cap_svg_content:[str] = generate_cap_svg_content(glyph, ulen)
+
+        # Compute colouring for the top
+        cap_top_pos:Vector = ulen * glyph['kle-pos']
+        cap_top_transformations:[str] = [
+            'translate(%f %f)' % (cap_top_pos.x, cap_top_pos.y),
             'rotate(%f)' % -degrees(glyph['rotation'])
         ]
-        cap_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_transformations) ]
-        cap_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
-        if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
-            cap_svg_content = [
-                    '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
-                    '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
-                ]
-        else:
-            cap_svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+        cap_top_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_top_transformations) ]
 
-        cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_svg_header) ] + cap_svg_content + [ '</g>' ]
+        # Compute colouring for the bottom if separate
+        if partition_uv_by_face_direction:
+            cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ layout_dims)
+            cap_bottom_transformations:[str] = [
+                'translate(%f %f)' % (cap_bottom_pos.x, cap_bottom_pos.y),
+                'rotate(%f)' % -degrees(glyph['rotation'])
+            ]
+            cap_bottom_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_bottom_transformations) ]
+            cap_bottom_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+
+        cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_top_svg_header) ] + cap_svg_content + [ '</g>' ]
+        if partition_uv_by_face_direction:
+            cap_svg_data += [ '<g %s>' % ' '.join(cap_bottom_svg_header) ] + cap_svg_content + [ '</g>' ]
 
     # Combine and return
     return ['<g>'] + cap_svg_data + glyph_svg_data + ['</g>']
+
+def generate_cap_svg_content(glyph:dict, ulen:float) -> [str]:
+    svg_content:[str]
+    if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
+        svg_content = [
+                '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
+                '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
+            ]
+    else:
+        svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+    return svg_content
 
 def sanitise_ids(node:Element) -> Element:
     if node.attributes and 'id' in node.attributes.keys():
