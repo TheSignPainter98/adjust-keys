@@ -73,7 +73,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
     if pargs.glyph_application_method == 'shrinkwrap':
         svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, collection, svg)
     else:
-        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, Vector((pargs.uv_res, pargs.uv_res)))
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.partition_uv_by_face_direction)
 
     printi('Successfully imported glyphs')
 
@@ -113,10 +113,12 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, collection
 
     return svgObjectNames
 
-def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, uv_dims:Vector):
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, partition_uv_by_face_direction:bool):
     # Convert to png
     png:bytes
     with Colour('transparent') as transparent:
+        m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
+        uv_dims:Vector = (uv_res / m) * layout_dims
         image_params:dict = {
             'blob': svg.encode('utf-8'),
             'format': 'svg',

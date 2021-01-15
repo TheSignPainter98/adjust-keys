@@ -328,7 +328,7 @@ args: [dict] = [{
     'long': '--uv-res',
     'metavar': 'res',
     'action': 'store',
-    'help': 'Specify the length of the longest side of a uv image texture',
+    'help': 'Specify the length of the shortest side of a uv image texture. Large res values require a lot of memory.',
     'default': 4096,
     'label': 'UV map resolution',
     'type': int,
