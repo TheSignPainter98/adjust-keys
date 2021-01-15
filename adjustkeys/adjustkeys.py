@@ -13,9 +13,8 @@ from .layout import get_layout, dumb_parse_layout, compute_layout_dims
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
 from .scale import get_scale
-from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .update_checker import check_update
-from .util import dict_union
+from .util import dict_union, safe_get
 from .yaml_io import read_yaml
 from mathutils import Vector
 from os import makedirs
@@ -91,13 +90,15 @@ def adjustkeys(*args: [[str]]) -> dict:
     layout_dims:Vector = compute_layout_dims(layout)
 
     # Read colour-map file
-    colour_map:[dict] = []
-    if pargs.adjust_glyphs or pargs.adjust_caps:
-        colour_map:[dict] = read_yaml(pargs.colour_map_file) if pargs.apply_colour_map else None
+    colour_map:[dict] = None
+    if pargs.apply_colour_map:
+        colour_map:[dict] = read_yaml(pargs.colour_map_file)
         if pargs.apply_colour_map and not type_check_colour_map(colour_map):
             die('Colour map failed type-checking, see console for more information')
 
     coloured_layout:[dict] = colourise_layout(layout, colour_map)
+
+    glyph_map:dict = {}
     if pargs.adjust_glyphs:
         glyph_map = read_yaml(pargs.glyph_map_file)
         if not type_check_glyph_map(glyph_map):
@@ -112,25 +113,19 @@ def adjustkeys(*args: [[str]]) -> dict:
     if pargs.adjust_caps:
         model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, layout_dims, pargs)
 
-    # Adjust glyph positions
     glyph_data:dict = {}
-    if pargs.adjust_glyphs:
-        glyph_layout:[dict] = model_data['~caps-with-margin-offsets'] if '~caps-with-margin-offsets' in model_data else coloured_layout
-        imgNode:ShaderNodeTexImage = model_data['~texture-image-node'] if '~texture-image-node' in model_data else None
-        uv_image_path:str = model_data['uv-image-path'] if 'uv-image-path' in model_data else None
-        uv_material_name:str = model_data['uv-material-name'] if 'uv-material-name' in model_data else None
-        glyph_data = adjust_glyphs(glyph_layout, profile_data, layout_dims, collection, glyph_map, imgNode, uv_image_path, uv_material_name, pargs)
+    if pargs.glyph_application_method != 'uv-map' or pargs.adjust_caps:
+        # Obtain data for glyph alignment
+        model_name:str = safe_get(model_data, 'keycap-model-name')
+        glyph_layout:[dict] = safe_get(model_data, '~caps-with-margin-offsets', default=coloured_layout)
+        imgNode:ShaderNodeTexImage = safe_get(model_data, '~texture-image-node')
+        uv_image_path:str = safe_get(model_data, 'uv-image-path')
+        uv_material_name:str = safe_get(model_data, 'uv-material-name')
 
-    # Shrink-wrap the glyphs onto the model
-    if pargs.glyph_application_method == 'shrinkwrap' and pargs.adjust_caps and pargs.adjust_glyphs:
-        subsurf_params:dict = {
-                'viewport-levels': pargs.subsurf_viewport_levels,
-                'render-levels': pargs.subsurf_render_levels,
-                'quality': pargs.subsurf_quality,
-                'adaptive-subsurf': pargs.adaptive_subsurf
-            }
-        shrink_wrap_glyphs_to_keys(glyph_data['glyph-names'], model_data['keycap-model-name'], profile_data['unit-length'], pargs.shrink_wrap_offset, subsurf_params, profile_data['scale'])
+        # Adjust glyph positions
+        glyph_data = adjust_glyphs(glyph_layout, profile_data, model_name, layout_dims, collection, glyph_map, imgNode, uv_image_path, uv_material_name, pargs)
 
+    # Return info
     return remove_private_data(dict_union(collection_data, model_data, glyph_data))
 
 def remove_private_data(d:dict) -> dict:

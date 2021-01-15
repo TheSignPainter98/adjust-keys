@@ -12,6 +12,7 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_position
 from .scale import get_scale
+from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, right_outer_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
@@ -37,9 +38,9 @@ if blender_available():
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
-    scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
+    scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
@@ -71,7 +72,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
 
     svgObjectNames:[str] = None
     if pargs.glyph_application_method == 'shrinkwrap':
-        svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, collection, svg)
+        svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
     else:
         import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.partition_uv_by_face_direction)
 
@@ -79,7 +80,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, layout_dims:Vector, collecti
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
 
-def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, collection:Collection, svg:str):
+def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapModelName:str, collection:Collection, svg:str, pargs:Namespace):
     adjusted_svg_file_name:str = get_temp_file_name()
 
     printi('Writing svg to file "%s"' % adjusted_svg_file_name)
@@ -110,6 +111,16 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, collection
     if exists(adjusted_svg_file_name):
         printi('Cleaning away the placed-glyph svg file')
         remove(adjusted_svg_file_name)
+
+    # Shrink-wrap if models were imported
+    if pargs.adjust_caps:
+        subsurf_params:dict = {
+                'viewport-levels': pargs.subsurf_viewport_levels,
+                'render-levels': pargs.subsurf_render_levels,
+                'quality': pargs.subsurf_quality,
+                'adaptive-subsurf': pargs.adaptive_subsurf
+            }
+        shrink_wrap_glyphs_to_keys(svgObjectNames, keycapModelName, profile_data['unit-length'], pargs.shrink_wrap_offset, subsurf_params, profile_data['scale'])
 
     return svgObjectNames
 
