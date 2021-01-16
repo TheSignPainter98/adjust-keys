@@ -1,7 +1,6 @@
 # Copyright (C) Edward Jones
 
 from .path import adjustkeys_path
-from bpy.app import binary_path_python
 from ensurepip import bootstrap as bootstrap_pip
 from importlib import import_module, invalidate_caches
 from importlib.util import find_spec
@@ -10,7 +9,15 @@ from os.path import dirname, exists, join
 from subprocess import CalledProcessError, check_output, run
 from sys import path
 
-pip:[str] = [binary_path_python, '-m', 'pip']
+# Get the path to the python binary in use
+python_bin_path:str = None
+from bpy.app import version as bpy_version
+if bpy_version >= (2, 91, 0):
+    from sys import executable as python_bin_path
+else:
+    from bpy.app import binary_path_python as python_bin_path
+
+pip:[str] = [python_bin_path, '-m', 'pip']
 dependency_install_dir:str = join(dirname(__file__), 'site-packages')
 
 def ensure_pip():
