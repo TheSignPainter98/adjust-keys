@@ -56,22 +56,47 @@ def inner_join(las: [dict],
                cond=None) -> [dict]:
     if las == [] or lbs == []:
         return []
-    else:
 
-        def eq(a: object, b: object) -> bool:
-            return a == b
+    if cond is None:
+        cond = eq
 
-        if cond is None:
-            cond = eq
-        return list(
-            reduce(
-                concat,
-                list(
-                    map(
-                        lambda la: [
-                            dict_union(la, lb) for lb in lbs
-                            if cond(la[ka], lb[kb])
-                        ], las))))
+    return list(
+        reduce(
+            concat,
+            list(
+                map(
+                    lambda la: [
+                        dict_union(la, lb) for lb in lbs
+                        if cond(safe_get(la, ka), safe_get(lb, kb))
+                    ], las))))
+
+
+def left_outer_join(las:[dict], ka:object, lbs:[dict], kb:object, cond=None) -> [dict]:
+    if las == []:
+        return []
+    elif lbs == []:
+        return las
+
+    if cond is None:
+        cond = eq
+
+    return inner_join(las, ka, lbs, kb, cond=cond) + list(filter(lambda la: not any(map(lambda lb: cond(la[ka], lb[kb]), lbs)), las))
+
+
+def right_outer_join(las:[dict], ka:object, lbs:[dict], kb:object, cond=None) -> [dict]:
+    if lbs == []:
+        return []
+    elif las == []:
+        return lbs
+
+    if cond is None:
+        cond = eq
+
+    return inner_join(las, ka, lbs, kb, cond=cond) + list(filter(lambda lb: not any(map(lambda la: cond(la[ka], lb[kb]), las)), lbs))
+
+
+def eq(a: object, b: object) -> bool:
+    return a == b
 
 
 ##
@@ -153,13 +178,13 @@ def list_diff(a: list, b: list) -> list:
 # @param object
 #
 # @return
-def safe_get(a: [object], i: object) -> object:
+def safe_get(a: [object], i: object, default:object=None) -> object:
     if a is None:
-        return None
+        return default
     elif type(a) == list:
-        return a[i] if len(a) > i else None
+        return a[i] if len(a) > i else default
     elif type(a) == dict:
-        return a[i] if i in a else None
+        return a[i] if i in a else default
     else:
         die('Can\'t safely-get from unhandled type %s (more code is needed in %s)'
             % (type(a), __file__))

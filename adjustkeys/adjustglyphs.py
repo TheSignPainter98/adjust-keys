@@ -12,24 +12,25 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_position
 from .scale import get_scale
-from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, list_diff, rob_rem, safe_get
+from .shrink_wrap import shrink_wrap_glyphs_to_keys
+from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, right_outer_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
 from os import remove
-from os.path import exists, join
+from os.path import basename, exists, join
 from math import degrees
 from mathutils import Matrix, Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from types import LambdaType
+from wand.color import Color as Colour
+from wand.image import Image
 from xml.dom.minidom import Element, parseString
 Collection:type = None
 if blender_available():
     from bpy import ops
-    from bpy.types import Collection
+    from bpy.types import Collection, ShaderNodeTexImage
     data = LazyImport('bpy', 'data')
-
-adjusted_svg_file_name:str = get_temp_file_name()
 
 ##
 # @brief Entry point function, should be treated as the first thing called
@@ -37,34 +38,50 @@ adjusted_svg_file_name:str = get_temp_file_name()
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph_map:dict, pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
-    scale:float = get_scale(profile_data['unit-length'], pargs.glyph_unit_length, pargs.svg_units_per_mm)
+    scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
 
     for i in range(len(placed_glyphs)):
-        with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
-            placed_glyphs[i] = dict_union(
-                placed_glyphs[i],
-                {'svg': parseString(f.read()).documentElement})
-        remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
         style:str = get_style(placed_glyphs[i])
-        if style:
-            remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style)
+        if 'src' in placed_glyphs[i]:
+            with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
+                placed_glyphs[i] = dict_union(
+                    placed_glyphs[i],
+                    {'svg': parseString(f.read()).documentElement})
+            remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
+            if style:
+                remove_fill_from_svg(placed_glyphs[i]['svg'])
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_dims)
 
-    svgWidth: int = max(map(lambda p: p['glyph-pos'].x, placed_glyphs),
-                        default=0) + 10.0 * pargs.glyph_unit_length
-    svgHeight: int = max(map(lambda p: p['glyph-pos'].y, placed_glyphs),
-                         default=0) + 10.0 * pargs.glyph_unit_length
+    svg_dims:Vector
+    if pargs.partition_uv_by_face_direction:
+        svg_dims = pargs.glyph_unit_length * Matrix.Diagonal((1, 2)) @ layout_dims
+    else:
+        svg_dims = pargs.glyph_unit_length * layout_dims
+
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        % (svgWidth, svgHeight, svgWidth, svgHeight)
+        % (svg_dims.x, svg_dims.y, svg_dims.x, svg_dims.y)
     ] + list(
         map(lambda p: '\n'.join(p['vector'])
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
+
+    svgObjectNames:[str] = None
+    if pargs.glyph_application_method == 'shrinkwrap':
+        svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
+    else:
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.partition_uv_by_face_direction)
+
+    printi('Successfully imported glyphs')
+
+    return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
+
+def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapModelName:str, collection:Collection, svg:str, pargs:Namespace):
+    adjusted_svg_file_name:str = get_temp_file_name()
 
     printi('Writing svg to file "%s"' % adjusted_svg_file_name)
     with open(adjusted_svg_file_name, 'w+') as f:
@@ -95,11 +112,52 @@ def adjust_glyphs(layout:[dict], profile_data:dict, collection:Collection, glyph
         printi('Cleaning away the placed-glyph svg file')
         remove(adjusted_svg_file_name)
 
-    printi('Successfully imported svg objects')
+    # Shrink-wrap if models were imported
+    if pargs.adjust_caps:
+        subsurf_params:dict = {
+                'viewport-levels': pargs.subsurf_viewport_levels,
+                'render-levels': pargs.subsurf_render_levels,
+                'quality': pargs.subsurf_quality,
+                'adaptive-subsurf': pargs.adaptive_subsurf
+            }
+        shrink_wrap_glyphs_to_keys(svgObjectNames, keycapModelName, profile_data['unit-length'], pargs.shrink_wrap_offset, subsurf_params, profile_data['scale'])
 
-    return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
+    return svgObjectNames
+
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, partition_uv_by_face_direction:bool):
+    # Convert to png
+    png:bytes
+    with Colour('transparent') as transparent:
+        m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
+        uv_dims:Vector = (uv_res / m) * layout_dims
+        image_params:dict = {
+            'blob': svg.encode('utf-8'),
+            'format': 'svg',
+            'background': transparent,
+            'width': int(uv_dims.x),
+            'height': int(uv_dims.y),
+        }
+        with Image(**image_params) as image:
+            png = image.make_blob(format='png')
+
+    # Write png to file
+    with open(uv_image_path, 'wb+') as ofile:
+        ofile.write(png)
+
+    # Add image to Blender's database if absent otherwise update
+    bpy_internal_uv_image_name:str = basename(uv_image_path)
+    if bpy_internal_uv_image_name not in data.images:
+        imgNode.image = data.images.load(uv_image_path, check_existing=False) # TODO: delay this
+    else:
+        imgNode.image = data.images[bpy_internal_uv_image_name]
+        imgNode.image.reload()
+
 
 def resolve_glyph_offset(cap:dict, alignment:str, glyph_ulen:float) -> dict:
+    if 'glyph-dim' not in cap:
+        cap['glyph-offset'] = Vector((0.0, 0.0))
+        return cap
+
     # Functions and mapping for placement
     alignment_xy_map:dict = {
         'top': 'left',
@@ -213,7 +271,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
         printw('The following glyphs could not be found:\n\t' + '\n\t'.join(list(sorted(missing_glyphs))))
 
     key_offsets:[dict] = inner_join(glyph_map_rel, 'glyph', glyph_offsets, 'glyph')
-    glyph_offset_layout:[dict] = inner_join(key_offsets, 'key', layout, 'key')
+    glyph_offset_layout:[dict] = right_outer_join(key_offsets, 'key', layout, 'key')
     profile_x_offset_keys:[dict] = inner_join(glyph_offset_layout, 'width',
                                        profile_x_offsets_rel, 'width')
     profile_x_y_offset_keys:[dict] = inner_join(profile_x_offset_keys, 'profile-part',
@@ -227,7 +285,7 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
                            profile_special_offsets_rel))[0]),
             profile_x_y_offset_keys))
 
-    glyphs_lost_due_to_profile_data:{str} = set(list_diff(list_diff(map(lambda g: g['glyph'], profile_x_y_offset_keys), glyph_names), missing_glyphs))
+    glyphs_lost_due_to_profile_data:{str} = set(list_diff(list_diff(map(lambda g: g['glyph'], filter(lambda g: 'glyph' in g, profile_x_y_offset_keys)), glyph_names), missing_glyphs))
     if len(glyphs_lost_due_to_profile_data) != 0:
         printw('The following glyphs were lost when inner-joining with the offset information\n\t' + '\n\t'.join(list(sorted(glyphs_lost_due_to_profile_data))))
 
@@ -251,22 +309,62 @@ def get_style(key:dict) -> str:
     else:
         return None
 
-def get_glyph_vector_data(glyph:dict, style:str) -> [str]:
-    # Prepare header content
-    transformations:[str] = [
-            'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y)
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_dims:Vector) -> [str]:
+    # Prepare glyph header contnet
+    glyph_transformations:[str] = [
+            'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
+            'rotate(%f)' % -degrees(glyph['rotation']),
         ]
-    if 'rotation' in glyph:
-        transformations.append('rotate(%f)' % -degrees(glyph['rotation']))
-    header_content:[str] = [ 'transform="%s"' % ' '.join(transformations) ]
+    glyph_svg_header_content:[str] = [ 'transform="%s"' % ' '.join(glyph_transformations) ]
     if style:
-        header_content.append(style)
+        glyph_svg_header_content.append(style)
 
-    # Prepare svg content
-    svg_content:[str] = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
+    #  # Prepare svg content
+    glyph_svg_content:[str] = []
+    glyph_svg_data:[str] = []
+    if 'svg' in glyph:
+        glyph_svg_content = list(map(lambda c: c.toxml(), map(sanitise_ids, filter(lambda c: type(c) == Element, glyph['svg'].childNodes))))
+        glyph_svg_data = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
+
+    cap_svg_data:[str] = []
+    if glyph_application_method == 'uv-map':
+        cap_svg_content:[str] = generate_cap_svg_content(glyph, ulen)
+
+        # Compute colouring for the top
+        cap_top_pos:Vector = ulen * glyph['kle-pos']
+        cap_top_transformations:[str] = [
+            'translate(%f %f)' % (cap_top_pos.x, cap_top_pos.y),
+            'rotate(%f)' % -degrees(glyph['rotation'])
+        ]
+        cap_top_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_top_transformations) ]
+
+        # Compute colouring for the bottom if separate
+        if partition_uv_by_face_direction:
+            cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ layout_dims)
+            cap_bottom_transformations:[str] = [
+                'translate(%f %f)' % (cap_bottom_pos.x, cap_bottom_pos.y),
+                'rotate(%f)' % -degrees(glyph['rotation'])
+            ]
+            cap_bottom_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_bottom_transformations) ]
+            cap_bottom_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+
+        cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_top_svg_header) ] + cap_svg_content + [ '</g>' ]
+        if partition_uv_by_face_direction:
+            cap_svg_data += [ '<g %s>' % ' '.join(cap_bottom_svg_header) ] + cap_svg_content + [ '</g>' ]
 
     # Combine and return
-    return [ '<g %s>' % ' '.join(header_content) ] + svg_content + [ '</g>' ]
+    return ['<g>'] + cap_svg_data + glyph_svg_data + ['</g>']
+
+def generate_cap_svg_content(glyph:dict, ulen:float) -> [str]:
+    svg_content:[str]
+    if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
+        svg_content = [
+                '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
+                '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
+            ]
+    else:
+        svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+    return svg_content
 
 def sanitise_ids(node:Element) -> Element:
     if node.attributes and 'id' in node.attributes.keys():

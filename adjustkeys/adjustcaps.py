@@ -11,6 +11,7 @@ from .obj_io import read_obj, write_obj
 from .path import walk
 from .positions import resolve_cap_position
 from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_field_values, get_only, list_diff, inner_join, rem
+from .uv_unwrap import uv_unwrap
 from .yaml_io import read_yaml
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
@@ -25,12 +26,13 @@ from sys import argv, exit
 Collection:type = None
 if blender_available():
     from bpy import ops
+    from bpy.path import abspath
     from bpy.types import Collection
     data = LazyImport('bpy', 'data')
     context = LazyImport('bpy', 'context')
 
 
-def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, pargs:Namespace) -> dict:
+def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, layout_dims:Vector, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
@@ -39,32 +41,26 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     for cap in caps:
         handle_cap(cap, profile_data['unit-length'])
 
-    # Sequentially import the models
-    printi('Preparing materials')
-    colourMaterials:dict = {}
-    if colour_map is not None:
-        colourMaterials = { m['name'] : m for m in colour_map if 'cap-colour' in m }
-        for m in colourMaterials.values():
-            colourStr:str = str(m['cap-colour'])
-            colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-            m['material'] = data.materials.new(name=m['name'])
-            m['material'].diffuse_color = colour
-
-    # Apply materials
-    printi('Applying material colourings...')
-    for cap in caps:
-        if cap['cap-colour'] is not None:
-            if cap['cap-colour'] not in colourMaterials:
-                colourStr:str = cap['cap-colour']
-                colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-                colourMaterials[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
-                colourMaterials[colourStr]['material'].diffuse_color = colour
-            cap['cap-obj'].data.materials.append(colourMaterials[cap['cap-colour']]['material'])
-            cap['cap-obj'].active_material = colourMaterials[cap['cap-colour']]['material']
-
+    capmodel_name:str = generate_capmodel_name('capmodel')
+    uv_image_path:str = None
+    uv_material_name:str = None
+    colourMaterials:list = []
     importedModelName: str = None
     importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
+    imgNode:ShaderNodeTexImage = None
     if len(importedCapObjects) != 0:
+        # If shrink-wrapping, apply materials before the join
+        if pargs.glyph_application_method == 'shrinkwrap':
+            printi('Preparing individual materials')
+            colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
+        else:
+            uv_image_path = abspath('//' + capmodel_name + '_uv_image.png')
+
+            printi('Handling material')
+            (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, caps)
+            if len(colourMaterials) != 0:
+                uv_material_name = colourMaterials[0]
+
         printi('Joining keycap models into a single object')
         ctx: dict = {}
         joinTarget:Object = min(caps, key=lambda c: (c['cap-pos'].x, c['cap-pos'].y))['cap-obj']
@@ -75,12 +71,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         printi('Renaming keycap model')
         objectsPreRename: [str] = data.objects.keys()
-        intended_name:str = 'capmodel'
-        i:int = 1
-        while intended_name in data.objects:
-            i += 1
-            intended_name = 'capmodel' + '-' + str(i)
-        joinTarget.name = joinTarget.data.name = intended_name
+        joinTarget.name = joinTarget.data.name = capmodel_name
         objectsPostRename: [str] = data.objects.keys()
         importedModelName = get_only(
                 list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
@@ -101,7 +92,79 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         obj.data.transform(obj.matrix_world)
         obj.matrix_world = Matrix.Identity(4)
 
-    return { 'keycap-model-name': importedModelName, 'material-names': list(colourMaterials.keys()), '~caps-with-margin-offsets': caps }
+        if pargs.glyph_application_method == 'uv-map':
+            printi('UV-unwrapping cap-model')
+            uv_unwrap(obj, profile_data['unit-length'] * profile_data['scale'] * layout_dims, pargs.partition_uv_by_face_direction)
+
+    return { 'keycap-model-name': importedModelName, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
+
+def generate_capmodel_name(intended_name:str) -> str:
+    name:str = intended_name
+    i:int = 1
+    while name in data.objects:
+        i += 1
+        name = intended_name + '-' + str(i)
+    return name
+
+def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict], caps:[dict]) -> [str]:
+    colourMaterialsList:list = []
+    colourMaterialsDict:dict = {}
+    if colour_map is not None:
+        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-colour' in m }
+        for m in colourMaterialsDict.values():
+            colourStr:str = str(m['cap-colour'])
+            colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+            if m['name'] not in data.materials.keys() or not use_existing_materials:
+                m['material'] = data.materials.new(name=m['name'])
+                m['material'].diffuse_color = colour
+                colourMaterialsList.append(m['material'].name)
+            else:
+                m['material'] = data.materials[m['name']]
+                colourMaterialsList.append(m['name'])
+
+    # Apply materials
+    printi('Applying material colourings...')
+    for cap in caps:
+        if cap['cap-colour'] is not None:
+            if cap['cap-colour'] not in colourMaterialsDict:
+                colourStr:str = cap['cap-colour']
+                colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
+                colourMaterialsDict[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
+                colourMaterialsDict[colourStr]['material'].diffuse_color = colour
+            cap['cap-obj'].data.materials.append(colourMaterialsDict[cap['cap-colour']]['material'])
+            cap['cap-obj'].active_material = colourMaterialsDict[cap['cap-colour']]['material']
+
+    return colourMaterialsList
+
+
+def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, caps:[dict]) -> [str]:
+    uv_material_name:str = model_name + '_material'
+    if uv_material_name not in data.materials or not use_existing_materials:
+        mat = data.materials.new(name=uv_material_name)
+        mat.use_nodes = True
+        mat_nodes = mat.node_tree.nodes
+        mat_edges = mat.node_tree.links
+
+        # Get BSDF shader node
+        bsdfNode:ShaderNodeBsdfPrincipled = mat_nodes['Principled BSDF']
+
+        # Add coordinate and image nodes
+        coordsNode:ShaderNodeTexCoord = mat_nodes.new('ShaderNodeTexCoord')
+        imgNode:ShaderNodeTexImage = mat_nodes.new('ShaderNodeTexImage')
+
+        # Position the new nodes relative to the old ones
+        node_horizontal_margin_offset:Vector = Vector((300.0, 0.0))
+        imgNode.location = bsdfNode.location - node_horizontal_margin_offset
+        coordsNode.location = imgNode.location - node_horizontal_margin_offset
+
+        # Add appropriate edges
+        mat_edges.new(coordsNode.outputs['UV'], imgNode.inputs['Vector'])
+        mat_edges.new(imgNode.outputs['Color'], bsdfNode.inputs['Base Color'])
+
+    for cap in caps:
+        cap['cap-obj'].active_material = data.materials[uv_material_name]
+
+    return (imgNode, [ uv_material_name ])
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:
