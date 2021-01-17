@@ -81,4 +81,4 @@ def printw(*args, **kwargs):
     if fatal_warnings:
         die(*args, **kwargs)
     if verbosity >= 1:
-        warnings.append(([f'{argv[0]}: WARNING:'] + list(args), kwargs))
+        warnings.append((['WARNING:'] + list(args), kwargs))
