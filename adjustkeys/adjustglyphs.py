@@ -46,16 +46,16 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
 
     for i in range(len(placed_glyphs)):
-        style:str = get_style(placed_glyphs[i])
+        glyph_style:str = get_style(placed_glyphs[i], 'glyph-style')
         if 'src' in placed_glyphs[i]:
             with open(placed_glyphs[i]['src'], 'r', encoding='utf-8') as f:
                 placed_glyphs[i] = dict_union(
                     placed_glyphs[i],
                     {'svg': parseString(f.read()).documentElement})
             remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
-            if style:
+            if glyph_style:
                 remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_dims)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], glyph_style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_dims)
 
     svg_dims:Vector
     if pargs.partition_uv_by_face_direction:
@@ -294,10 +294,10 @@ def collect_data(layout: [dict], profile: dict, glyph_dir: str,
 
     return all_keys_with_vertical_margin_offsets_applied
 
-def get_style(key:dict) -> str:
-    if safe_get(key, 'glyph-style') is not None:
-        raw_style:str = key['glyph-style']
-        if match('^[0-9a-f]{6}$', key['glyph-style'], IGNORECASE) is not None:
+def get_style(key:dict, style_key:str) -> str:
+    raw_style:str = safe_get(key, style_key)
+    if raw_style is not None:
+        if match('^[0-9a-f]{6}$', raw_style, IGNORECASE) is not None:
             # Apply RGB colour
             style = 'style="fill:#%s;"' % raw_style
         else:
@@ -346,7 +346,6 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
                 'rotate(%f)' % -degrees(glyph['rotation'])
             ]
             cap_bottom_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_bottom_transformations) ]
-            cap_bottom_svg_content:[str] = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
 
         cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_top_svg_header) ] + cap_svg_content + [ '</g>' ]
         if partition_uv_by_face_direction:
@@ -357,13 +356,14 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
 
 def generate_cap_svg_content(glyph:dict, ulen:float) -> [str]:
     svg_content:[str]
+    cap_style:str = get_style(glyph, 'cap-colour')
     if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
         svg_content = [
-                '<rect width="%f" height="%f" fill="%s" />' % (1.5 * ulen, ulen, glyph['cap-colour']),
-                '<rect width="%f" height="%f" transform="translate(%f %f)" fill="%s" />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, glyph['cap-colour'])
+                '<rect width="%f" height="%f" %s />' % (1.5 * ulen, ulen, cap_style),
+                '<rect width="%f" height="%f" transform="translate(%f %f)" %s />' % (1.25 * ulen, ulen, 0.25 * ulen, ulen, cap_style)
             ]
     else:
-        svg_content = [ '<rect width="%f" height="%f" fill="%s" />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], glyph['cap-colour']) ]
+        svg_content = [ '<rect width="%f" height="%f" %s />' % (ulen * glyph['secondary-width'], ulen * glyph['secondary-height'], cap_style) ]
     return svg_content
 
 def sanitise_ids(node:Element) -> Element:
