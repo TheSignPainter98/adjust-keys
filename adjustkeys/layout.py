@@ -57,10 +57,10 @@ def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bo
             key: dict = line[parser_state.i]
 
             # Handle colour changes
-            parser_state.c = key['cap-colour-raw']
+            parser_state.c = key['cap-style-raw']
             if use_deactivation_colour and parser_state.c == cap_deactivation_colour:
                 parser_state.c = None
-                key['cap-colour-raw'] = None
+                key['cap-style-raw'] = None
             parser_state.t = key['glyph-colour-raw']
             if use_deactivation_colour and parser_state.t == glyph_deactivation_colour:
                 parser_state.t = None
@@ -149,9 +149,9 @@ def parse_key(key: 'either str dict', nextKey: 'maybe (either str dict)', parser
     if 'y' in ret:
         ret = key_subst(ret, 'y', 'shift-y')
     if 'c' in ret:
-        ret = key_subst(ret, 'c', 'cap-colour-raw')
+        ret = key_subst(ret, 'c', 'cap-style-raw')
     else:
-        ret['cap-colour-raw'] = parser_state.c
+        ret['cap-style-raw'] = parser_state.c
     if 't' in ret:
         ret = key_subst(ret, 't', 'glyph-colour-raw')
     else:

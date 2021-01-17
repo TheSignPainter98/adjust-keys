@@ -110,9 +110,9 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
     colourMaterialsList:list = []
     colourMaterialsDict:dict = {}
     if colour_map is not None:
-        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-colour' in m }
+        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-style' in m }
         for m in colourMaterialsDict.values():
-            colourStr:str = str(m['cap-colour'])
+            colourStr:str = str(m['cap-style'])
             colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
             if m['name'] not in data.materials.keys() or not use_existing_materials:
                 m['material'] = data.materials.new(name=m['name'])
@@ -125,14 +125,15 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
     # Apply materials
     printi('Applying material colourings...')
     for cap in caps:
-        if cap['cap-colour'] is not None:
-            if cap['cap-colour'] not in colourMaterialsDict:
-                colourStr:str = cap['cap-colour']
+        if cap['cap-style-rule'] is not None:
+            colourRule:str = cap['cap-style-rule']
+            colourStr:str = cap['cap-style']
+            if colourRule not in colourMaterialsDict:
                 colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-                colourMaterialsDict[colourStr] = { 'material': data.materials.new(name=cap['cap-colour']) }
-                colourMaterialsDict[colourStr]['material'].diffuse_color = colour
-            cap['cap-obj'].data.materials.append(colourMaterialsDict[cap['cap-colour']]['material'])
-            cap['cap-obj'].active_material = colourMaterialsDict[cap['cap-colour']]['material']
+                colourMaterialsDict[colourRule]['material'] = data.materials.new(name=colourRule)
+                colourMaterialsDict[colourRule]['material'].diffuse_color = colour
+            cap['cap-obj'].data.materials.append(colourMaterialsDict[colourRule]['material'])
+            cap['cap-obj'].active_material = colourMaterialsDict[colourRule]['material']
 
     return colourMaterialsList
 
@@ -140,6 +141,10 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
 def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, caps:[dict]) -> [str]:
     uv_material_name:str = model_name + '_material'
     if uv_material_name not in data.materials or not use_existing_materials:
+        # Overwrite material if not using existing ones!
+        if uv_material_name in data.materials:
+            printw('Existing material named "%s" is overwritten, you may require the "use existing materials" option' % uv_material_name)
+            data.materials.remove(data.materials[uv_material_name])
         mat = data.materials.new(name=uv_material_name)
         mat.use_nodes = True
         mat_nodes = mat.node_tree.nodes
@@ -160,6 +165,17 @@ def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, mod
         # Add appropriate edges
         mat_edges.new(coordsNode.outputs['UV'], imgNode.inputs['Vector'])
         mat_edges.new(imgNode.outputs['Color'], bsdfNode.inputs['Base Color'])
+    else:
+        bpy_internal_uv_image_name:str = basename(uv_image_path)
+        imgNode = get_only(
+                [ imn
+                    for imn in data.materials[uv_material_name].node_tree.nodes
+                    if imn.type == 'TEX_IMAGE'
+                        and imn.image is not None
+                        and imn.image.name == bpy_internal_uv_image_name ],
+                'No image node for "%s" found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name),
+                'Multiple image nodes for "%s" were found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name)
+            )
 
     for cap in caps:
         cap['cap-obj'].active_material = data.materials[uv_material_name]

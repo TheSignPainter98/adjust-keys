@@ -1,5 +1,5 @@
 - name: green
-  cap-colour: '32a852'
+  cap-style: '32a852'
   glyph-style: 'fill:#ad1aad;'
   keys:
   - .-.+
@@ -7,7 +7,7 @@
   - ''
   - F[1-49][0-2]?
 - name: purple
-  cap-colour: 'ad1aad'
+  cap-style: 'ad1aad'
   glyph-style: '32a852'
   keys:
   - .*
