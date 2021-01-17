@@ -141,6 +141,10 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
 def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, caps:[dict]) -> [str]:
     uv_material_name:str = model_name + '_material'
     if uv_material_name not in data.materials or not use_existing_materials:
+        # Overwrite material if not using existing ones!
+        if uv_material_name in data.materials:
+            printw('Existing material named "%s" is overwritten, you may require the "use existing materials" option' % uv_material_name)
+            data.materials.remove(data.materials[uv_material_name])
         mat = data.materials.new(name=uv_material_name)
         mat.use_nodes = True
         mat_nodes = mat.node_tree.nodes
@@ -161,6 +165,17 @@ def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, mod
         # Add appropriate edges
         mat_edges.new(coordsNode.outputs['UV'], imgNode.inputs['Vector'])
         mat_edges.new(imgNode.outputs['Color'], bsdfNode.inputs['Base Color'])
+    else:
+        bpy_internal_uv_image_name:str = basename(uv_image_path)
+        imgNode = get_only(
+                [ imn
+                    for imn in data.materials[uv_material_name].node_tree.nodes
+                    if imn.type == 'TEX_IMAGE'
+                        and imn.image is not None
+                        and imn.image.name == bpy_internal_uv_image_name ],
+                'No image node for "%s" found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name),
+                'Multiple image nodes for "%s" were found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name)
+            )
 
     for cap in caps:
         cap['cap-obj'].active_material = data.materials[uv_material_name]
