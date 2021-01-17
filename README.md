@@ -232,14 +232,14 @@ The first way is always active and is just a matter of adjusting RGB colours thr
 
 A colour map file is a list of objects, each of which possibly specifies a keycap colour and/or a glyph style, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
 The file is scanned from top to bottom, so if there are two places a keycap can be matched from, then only one nearest the top of the file will be used.
-The `cap-colour` field is always a 6-digit hex number, available from any reputable colour picker.
-The `glyph-style` field is a little more interesting—it can either be a 6-digit hex colour like `cap-colour`, _or,_ it can be a section of CSS code which is applied directly to the svg data.
+The `cap-style` and `glyph-style` fields can either be a 6-digit hex colour or a section of CSS code which is applied directly to the `svg` data.
+Note that svg-styling for caps is only available when uv-mapping is used to apply glyphs to keys as the shrink-wrapping is only capable of using single block colours.
 
 Here’s an example of the first ten lines of the [example colour-map file](https://github.com/TheSignPainter98/adjust-keys/blob/master/examples/colour-map.yml) in the repo:
 
 ```yaml
 - name: green
-  cap-colour: '32a852'
+  cap-style: '32a852'
   glyph-style: 'fill:#ad1aad;'
   keys:
   - .-.+
@@ -247,7 +247,7 @@ Here’s an example of the first ten lines of the [example colour-map file](http
   - ''
   - F[1-49][0-2]?
 - name: purple
-  cap-colour: 'ad1aad'
+  cap-style: 'ad1aad'
 ```
 
 Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.

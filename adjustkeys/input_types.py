@@ -105,8 +105,8 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
                 if t:
                     for key in rule['keys']:
                         (okay, _) = assert_type(okay, key, str, 'Colour-map rule keys must be strings, got %s' % str(key))
-            if 'cap-colour' in rule:
-                (okay, _) = assert_type(okay, rule['cap-colour'], str, 'Cap-colours should be strings, got %s' % rule['cap-colour'])
+            if 'cap-style' in rule:
+                (okay, _) = assert_type(okay, rule['cap-style'], str, 'Cap-styles should be strings, got %s' % (str(rule['cap-style'])))
             if 'glyph-style' in rule:
                 (okay, _) = assert_type(okay, rule['glyph-style'], str, 'Glyph-styles should be strings (of either a single hex colour or CSS fragment), got %s' % rule['glyph-style'])
 

@@ -5,7 +5,7 @@ from typing import Tuple
 
 def colourise_layout(layout:[dict], colour_map:[dict]) -> [dict]:
     for key in layout:
-        apply_sanitised_colouring(key, colour_map, 'cap-colour', 'cap-colour-raw', 'cap-colour')
+        apply_sanitised_colouring(key, colour_map, 'cap-style', 'cap-style-raw', 'cap-style')
         apply_sanitised_colouring(key, colour_map, 'glyph-style', 'glyph-colour-raw', 'glyph-style')
     return layout
 

@@ -110,9 +110,9 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
     colourMaterialsList:list = []
     colourMaterialsDict:dict = {}
     if colour_map is not None:
-        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-colour' in m }
+        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-style' in m }
         for m in colourMaterialsDict.values():
-            colourStr:str = str(m['cap-colour'])
+            colourStr:str = str(m['cap-style'])
             colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
             if m['name'] not in data.materials.keys() or not use_existing_materials:
                 m['material'] = data.materials.new(name=m['name'])
@@ -125,9 +125,9 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
     # Apply materials
     printi('Applying material colourings...')
     for cap in caps:
-        if cap['cap-colour-rule'] is not None:
-            colourRule:str = cap['cap-colour-rule']
-            colourStr:str = cap['cap-colour']
+        if cap['cap-style-rule'] is not None:
+            colourRule:str = cap['cap-style-rule']
+            colourStr:str = cap['cap-style']
             if colourRule not in colourMaterialsDict:
                 colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
                 colourMaterialsDict[colourRule]['material'] = data.materials.new(name=colourRule)

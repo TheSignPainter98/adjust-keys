@@ -356,7 +356,7 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
 
 def generate_cap_svg_content(glyph:dict, ulen:float) -> [str]:
     svg_content:[str]
-    cap_style:str = get_style(glyph, 'cap-colour')
+    cap_style:str = get_style(glyph, 'cap-style')
     if 'key-type' in glyph and glyph['key-type'] == 'iso-enter':
         svg_content = [
                 '<rect width="%f" height="%f" %s />' % (1.5 * ulen, ulen, cap_style),
