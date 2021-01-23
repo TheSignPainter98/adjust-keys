@@ -18,8 +18,8 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from math import inf, pi
 from mathutils import Euler, Matrix, Vector
-from os import makedirs, remove
-from os.path import basename, exists, join
+from os import access, makedirs, remove, strerror, W_OK
+from os.path import basename, exists, expanduser, join
 from re import IGNORECASE, match
 from statistics import mean
 from sys import argv, exit
@@ -54,7 +54,10 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             printi('Preparing individual materials')
             colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
         else:
-            uv_image_path = abspath('//' + capmodel_name + '_uv_image.png')
+            uv_image_base:str = capmodel_name + '_uv_image.png'
+            uv_image_path = abspath('//' + uv_image_base)
+            if not check_permissions(uv_image_path, W_OK):
+                uv_image_path = expanduser(join('~', 'Downloads', uv_image_base))
 
             printi('Handling material')
             (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, caps)
@@ -97,6 +100,13 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             uv_unwrap(obj, profile_data['unit-length'] * profile_data['scale'] * layout_dims, pargs.partition_uv_by_face_direction)
 
     return { 'keycap-model-name': importedModelName, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
+
+def check_permissions(fpath:str, perms:int) -> bool:
+    try:
+        return access(fpath, perms)
+    except IOError as ioe:
+        printe(strerror(ioe))
+        return False
 
 def generate_capmodel_name(intended_name:str) -> str:
     name:str = intended_name
