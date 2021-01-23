@@ -63,6 +63,7 @@ Brownie: brownie
 Bugzilla_ETL: bzETL
 BuildNotify: buildnotifylib
 BuildbotEightStatusShields: BuildbotStatusShields
+CairoSVG: cairosvg
 Cartridge: cartridge
 CassandraLauncher: cassandralauncher
 Cerberus: cerberus
@@ -736,6 +737,7 @@ unicode_slugify: slugify
 useless.pipes: useless
 virtualenv_clone: clonevirtualenv
 vnc2flv: flvscreen
+Wand: wand
 weblogo: weblogolib
 websocket_client: websocket
 webunit: demo
