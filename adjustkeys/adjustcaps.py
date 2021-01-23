@@ -6,7 +6,7 @@ from .args import parse_args
 from .blender_available import blender_available
 from .layout import get_layout, parse_layout
 from .lazy_import import LazyImport
-from .log import die, init_logging, printi, printw, print_warnings
+from .log import die, init_logging, printe, printi, printw, print_warnings
 from .obj_io import read_obj, write_obj
 from .path import walk
 from .positions import resolve_cap_position

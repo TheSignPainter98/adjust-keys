@@ -6,7 +6,7 @@ from adjustkeys.util import rem
 from adjustkeys.version import version
 from adjustkeys.yaml_io import read_yaml
 from deps import external_dependencies
-from sys import argv, stdin
+from sys import argv, stdin, stderr
 
 def main(progName:str) -> None:
     if progName.endswith('.py'):
@@ -141,7 +141,19 @@ def op_name(dest:str) -> str:
 def dependencies(insertion_file:str) -> [[str, str]]:
     ext_deps:[str] = external_dependencies(insertion_file)
     dep_origin_map:[str] = { v:k for k,v in read_yaml('pipreqs_module_map.yml').items() }
-    return [ (pkg, dep_origin_map[pkg]) for pkg in ext_deps if pkg in dep_origin_map ]
+    deps:[[str,str]] =  [ (pkg, dep_origin_map[pkg]) for pkg in ext_deps if pkg in dep_origin_map ]
+
+    pipreqs_deps:[str]
+    with open('requirements.txt', 'r') as f:
+        pipreqs_deps = list(map(lambda l: l.split('==')[0], f.readlines()))
+
+    python_native_deps:[str] = [ 'futures' ] # futures is included in the Python3 standard library, but not that of Python2 (it can be ignored)
+    missing_deps:[str] = [ pkg for _,pkg in deps if pkg not in pipreqs_deps and pkg not in python_native_deps ]
+    if missing_deps != []:
+        print('WARNING: Some dependencies are missing from the mapping file:\n\t%s' % '\n\t'.join(missing_deps), file=stderr)
+        exit(1)
+
+    return deps
 
 if __name__ == '__main__':
     if len(argv) < 2:
