@@ -5,10 +5,11 @@ from .adjustcaps import adjust_caps, get_caps
 from .adjustglyphs import adjust_glyphs, glyph_files
 from .args import parse_args, Namespace
 from .blender_available import blender_available
+from .colour_map_parser import parse_colour_map
 from .colour_resolver import colourise_layout
 from .exceptions import AdjustKeysException, AdjustKeysGracefulExit
 from .glyphinf import glyph_name
-from .input_types import type_check_colour_map, type_check_glyph_map, type_check_profile_data
+from .input_types import type_check_glyph_map, type_check_profile_data
 from .layout import get_layout, dumb_parse_layout, compute_layout_dims
 from .lazy_import import LazyImport
 from .log import die, init_logging, printi, printw, print_warnings
@@ -92,11 +93,9 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Read colour-map file
     colour_map:[dict] = None
     if pargs.apply_colour_map:
-        colour_map:[dict] = read_yaml(pargs.colour_map_file)
-        if pargs.apply_colour_map and not type_check_colour_map(colour_map):
-            die('Colour map failed type-checking, see console for more information')
+        colour_map:[dict] = parse_colour_map(pargs.colour_map_file)
 
-    coloured_layout:[dict] = colourise_layout(layout, colour_map)
+    coloured_layout:[dict] = colourise_layout(pargs.layout_file, layout, colour_map)
 
     glyph_map:dict = {}
     if pargs.adjust_glyphs:

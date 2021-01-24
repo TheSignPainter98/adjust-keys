@@ -99,18 +99,37 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
             (okay, t) = assert_dict_key(okay, rule, 'name', 'Colour-map rule missing "name" field')
             if t:
                 (okay, _) = assert_type(okay, rule['name'], str, 'Colour-map rule names should be strings, got "%s"' % str(rule['name']))
-            (okay, t) = assert_dict_key(okay, rule, 'keys', 'Colour-map rules require a list of keys they apply to')
+            (okay, t) = assert_dict_key(okay, rule, 'cond', 'Colour-map rules require a condition they should apply to')
             if t:
-                (okay, t) = assert_type(okay, rule['keys'], list, 'Colour-map rule keys must be a list')
-                if t:
-                    for key in rule['keys']:
-                        (okay, _) = assert_type(okay, key, str, 'Colour-map rule keys must be strings, got %s' % str(key))
+                okay = type_check_cond(okay, rule['cond'])
             if 'cap-style' in rule:
                 (okay, _) = assert_type(okay, rule['cap-style'], str, 'Cap-styles should be strings, got %s' % (str(rule['cap-style'])))
             if 'glyph-style' in rule:
                 (okay, _) = assert_type(okay, rule['glyph-style'], str, 'Glyph-styles should be strings (of either a single hex colour or CSS fragment), got %s' % rule['glyph-style'])
 
     return okay
+
+def type_check_cond(p:bool, rule:dict) -> bool:
+    conditions:dict = {
+        'key-name': lambda p: assert_cond(p, type(rule['key-name']) == str or (type(rule['key-name']) == list and all(map(lambda k: type(k) in [str, int], rule['key-name']))), 'key-name field should be either a single key or list of keys, got "%s"' %(', '.join(rule['key-name']) if isinstance(rule['key-name'], list) else rule['key-name'])),
+        'key-pos': lambda p: assert_type(p, rule['key-pos'], str, 'key-pos field takes an expression, got %s' % rule['key-pos']),
+        'layout-file-name': lambda p: assert_type(p, rule['layout-file-name'], str, 'Layout-file-name field should be a string, got %s' % rule['layout-file-name']),
+        'layout-file-path': lambda p: assert_type(p, rule['layout-file-path'], str, 'Layout-file-path field should be a string, got %s' % rule['layout-file-path']),
+        'all': lambda p: (type_check_cond(p, rule['all']), None),
+        'any': lambda p: (type_check_cond(p, rule['any']), None),
+        'not-all': lambda p: (type_check_cond(p, rule['not-all']), None),
+        'not-any': lambda p: (type_check_cond(p, rule['not-any']), None),
+    }
+    (p, _) = assert_cond(p, any(map(lambda k: k in rule, conditions.keys())), 'Rule needs at least one of: %s' % ', '.join(list(conditions.keys())))
+
+    for field in rule.keys():
+        if field not in conditions:
+            printe('Unrecognised colour map rule field %s, is this a typo?' % field)
+            p = False
+        else:
+            (p, _) = conditions[field](p)
+
+    return p
 
 def assert_type(p:bool, o:object, t:type, s:str) -> [[bool, bool]]:
     return assert_cond(p, type(o) == t, s)
