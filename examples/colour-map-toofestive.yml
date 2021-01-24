@@ -1,19 +1,22 @@
 - name: specials
   cap-style: 'ffff00'
   glyph-style: 'fill:#ff8000'
-  keys:
-  - Esc
-  - Enter
+  cond:
+    key-name:
+    - Esc
+    - Enter
 - name: alphas
   cap-style: '00ff00'
   glyph-style: 'fill:#ff0000;'
-  keys:
-  - .-.+
-  - '[^+/*-]'
-  - ''
-  - F[1-49][0-2]?
+  cond:
+    key-name:
+      - .-.+
+      - '[^+/*-]'
+      - ''
+      - F[1-49][0-2]?
 - name: mods
   cap-style: 'ff0000'
   glyph-style: '00ff00'
-  keys:
-  - .*
+  cond:
+    key-name:
+      - .*

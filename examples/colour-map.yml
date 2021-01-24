@@ -1,13 +1,22 @@
 - name: green
   cap-style: '32a852'
   glyph-style: 'fill:#ad1aad;'
-  keys:
-  - .-.+
-  - '[^+/*-]'
-  - ''
-  - F[1-49][0-2]?
+  cond:
+    not-all:
+      key-name:
+      - ↑
+      - →
+      - ↓
+      - ←
+      key-pos: y > 5.5
+    key-name:
+    - .-.+
+    - '[^+/*-]'
+    - ''
+    - F[1-49][0-2]?
 - name: purple
   cap-style: 'ad1aad'
   glyph-style: '32a852'
-  keys:
-  - .*
+  cond:
+    key-name:
+    - .*
