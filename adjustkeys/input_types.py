@@ -111,23 +111,24 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
 
 def type_check_cond(p:bool, rule:dict) -> bool:
     conditions:dict = {
-        'key-name': lambda p: assert_cond(p, type(rule['key-name']) == str or (type(rule['key-name']) == list and all(map(lambda k: type(k) in [str, int], rule['key-name']))), 'key-name field should be either a single key or list of keys, got "%s"' %(', '.join(rule['key-name']) if isinstance(rule['key-name'], list) else rule['key-name'])),
-        'key-pos': lambda p: assert_type(p, rule['key-pos'], str, 'key-pos field takes an expression, got %s' % rule['key-pos']),
-        'layout-file-name': lambda p: assert_type(p, rule['layout-file-name'], str, 'Layout-file-name field should be a string, got %s' % rule['layout-file-name']),
-        'layout-file-path': lambda p: assert_type(p, rule['layout-file-path'], str, 'Layout-file-path field should be a string, got %s' % rule['layout-file-path']),
-        'all': lambda p: (type_check_cond(p, rule['all']), None),
-        'any': lambda p: (type_check_cond(p, rule['any']), None),
-        'not-all': lambda p: (type_check_cond(p, rule['not-all']), None),
-        'not-any': lambda p: (type_check_cond(p, rule['not-any']), None),
+        'key-name': lambda p,k: assert_cond(p, type(rule[k]) == str or (type(rule[k]) == list and all(map(lambda k: type(k) in [str, int], rule[k]))), 'key-name field should be either a single key or list of keys, got "%s"' %(', '.join(rule[k]) if isinstance(rule[k], list) else rule[k])),
+        'key-pos': lambda p,k: assert_type(p, rule[k], str, 'key-pos field takes an expression, got %s' % rule[k]),
+        'layout-file-name': lambda p,k: assert_type(p, rule[k], str, 'Layout-file-name field should be a string, got %s' % rule[k]),
+        'layout-file-path': lambda p,k: assert_type(p, rule[k], str, 'Layout-file-path field should be a string, got %s' % rule[k]),
+        'all': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'any': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'not-all': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'not-any': lambda p,k: (type_check_cond(p, rule[k]), None),
     }
     (p, _) = assert_cond(p, any(map(lambda k: k in rule, conditions.keys())), 'Rule needs at least one of: %s' % ', '.join(list(conditions.keys())))
 
     for field in rule.keys():
-        if field not in conditions:
+        if not any(map(lambda c: field.startswith(c), conditions)):
             printe('Unrecognised colour map rule field %s, is this a typo?' % field)
             p = False
         else:
-            (p, _) = conditions[field](p)
+            condKey:str = list(filter(lambda c: field.startswith(c), conditions))[0]
+            (p, _) = conditions[condKey](p, field)
 
     return p
 

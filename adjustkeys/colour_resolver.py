@@ -5,7 +5,7 @@ from functools import partial
 from mathutils import Matrix, Vector
 from os import sep
 from os.path import basename, split, splitext
-from re import IGNORECASE, match, U
+from re import IGNORECASE, match, UNICODE
 from typing import Callable, List, Tuple, Union
 
 def colourise_layout(layout_file_path:str, layout:[dict], colour_map:[dict]) -> [dict]:
@@ -54,43 +54,44 @@ def resolve_matches(layout_context:dict, cap:dict, rule:dict) -> [bool]:
     conds:[bool] = []
 
     # Resolve conditions at this level
-    if 'key-name' in rule:
-        printi_name('Checking key name "%s" entirely matches any of' % cap['key'], end=' ')
-        key_name_regexes = rule['key-name'] if type(rule['key-name']) == list else [rule['key-name']]
-        printi('[ %s ]...' % ', '.join(list(map(lambda r: '"%s"' % r, key_name_regexes))), end=' ')
-        cond_result:bool = any(map(lambda r: match('^%s$' % r, cap['key'], IGNORECASE | U) is not None, key_name_regexes))
-        printi('%r' % cond_result)
+    for statementKey in rule:
+        if statementKey.startswith('key-name'):
+            printi_name('Checking key name "%s" entirely matches any of' % cap['key'], end=' ')
+            key_name_regexes = rule['key-name'] if type(rule['key-name']) == list else [rule['key-name']]
+            printi('[ %s ]...' % ', '.join(list(map(lambda r: '"%s"' % r, key_name_regexes))), end=' ')
+            cond_result:bool = any(map(lambda r: match('^%s$' % r, cap['key'], IGNORECASE | UNICODE) is not None, key_name_regexes))
+            printi('%r' % cond_result)
 
-        conds.append(cond_result)
-    if 'key-pos' in rule:
-        printi_name('Checking key position (%.4fu,%.4fu) satisfies condition "%s"...' % (cap['kle-pos'].x, cap['kle-pos'].y, rule['key-pos']), end=' ')
-        print(rule)
-        cond_result:bool = eval_maths_cond(cap, rule['parsed-key-pos'])
-        printi('%r' % cond_result)
+            conds.append(cond_result)
+        if statementKey.startswith('key-pos'):
+            printi_name('Checking key position (%.4fu,%.4fu) satisfies condition "%s"...' % (cap['kle-pos'].x, cap['kle-pos'].y, rule['key-pos']), end=' ')
+            print(rule)
+            cond_result:bool = eval_maths_cond(cap, rule['parsed-key-pos'])
+            printi('%r' % cond_result)
 
-        conds.append(cond_result)
-    if 'layout-file-name' in rule:
-        printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-name'], rule['layout-file-name']), end=' ')
-        cond_result:bool = match('^%s$' % rule['layout-file-name'], layout_context['layout-file-name'], IGNORECASE | U) is not None
-        printi('%r' % cond_result)
+            conds.append(cond_result)
+        if statementKey.startswith('layout-file-name'):
+            printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-name'], rule['layout-file-name']), end=' ')
+            cond_result:bool = match('^%s$' % rule['layout-file-name'], layout_context['layout-file-name'], IGNORECASE | UNICODE) is not None
+            printi('%r' % cond_result)
 
-        conds.append(cond_result)
-    if 'layout-file-path' in rule:
-        printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-path'], rule['layout-file-path']), end=' ')
-        cond_result:bool = match('^%s$' % rule['layout-file-path'], layout_context['layout-file-path'], IGNORECASE | U) is not None
-        printi('%r' % cond_result)
+            conds.append(cond_result)
+        if statementKey.startswith('layout-file-path'):
+            printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-path'], rule['layout-file-path']), end=' ')
+            cond_result:bool = match('^%s$' % rule['layout-file-path'], layout_context['layout-file-path'], IGNORECASE | UNICODE) is not None
+            printi('%r' % cond_result)
 
-        conds.append(cond_result)
+            conds.append(cond_result)
 
-    # Resolve sub-conditions
-    if 'any' in rule:
-        conds.append(any(resolve_matches(layout_context, cap, rule['any'])))
-    if 'all' in rule:
-        conds.append(all(resolve_matches(layout_context, cap, rule['all'])))
-    if 'not-all' in rule:
-        conds.append(not all(resolve_matches(layout_context, cap, rule['not-all'])))
-    if 'not-any' in rule:
-        conds.append(not any(resolve_matches(layout_context, cap, rule['not-any'])))
+        # Resolve sub-conditions
+        if statementKey.startswith('any'):
+            conds.append(any(resolve_matches(layout_context, cap, rule[statementKey])))
+        if statementKey.startswith('all'):
+            conds.append(all(resolve_matches(layout_context, cap, rule[statementKey])))
+        if statementKey.startswith('not-all'):
+            conds.append(not all(resolve_matches(layout_context, cap, rule[statementKey])))
+        if statementKey.startswith('not-any'):
+            conds.append(not any(resolve_matches(layout_context, cap, rule[statementKey])))
 
     return conds
 

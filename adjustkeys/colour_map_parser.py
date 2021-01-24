@@ -56,9 +56,7 @@ def parse_colour_map(fname:str) -> [dict]:
     ]
     colour_map:[dict] = raw_map
     for mappingInf in mappings:
-        #  colour_map = map(partial(recursively_add, *mappingInf), colour_map)
         colour_map = recursively_add(*mappingInf, colour_map)
-        print(list(colour_map))
 
     return list(colour_map)
 
@@ -66,9 +64,6 @@ def sanitise_key_name(rule:dict) -> dict:
     if 'key-name' in rule and type(rule['key-name']) == str:
         rule['key-name'] = [rule['key-name']]
     return rule
-
-#  def parse_equations(rule:dict) -> dict:
-    #  return recursively_add(rule, 'key-pos', 'parsed-key-pos', parse_equation)
 
 def parse_equation(eq:str) -> dict:
     ParserElement.enablePackrat()
