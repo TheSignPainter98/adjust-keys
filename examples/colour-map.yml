@@ -2,6 +2,11 @@
   cap-style: '32a852'
   glyph-style: 'fill:#ad1aad;'
   cond:
+    key-name:
+    - .-.+
+    - '[^+/*-]'
+    - ''
+    - F[1-49][0-2]?
     not-all:
       key-name:
       - ↑
@@ -9,11 +14,6 @@
       - ↓
       - ←
       key-pos: y > 5.5
-    key-name:
-    - .-.+
-    - '[^+/*-]'
-    - ''
-    - F[1-49][0-2]?
 - name: purple
   cap-style: 'ad1aad'
   glyph-style: '32a852'
