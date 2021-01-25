@@ -16,7 +16,7 @@ from subprocess import CalledProcessError
 from sys import path, version_info
 
 # Allow site-packages to contain dll files (e.g. where the user needs to copy them in due to missing installers / packages)
-if version_info >= (3,8):
+if version_info >= (3,8) and system() == 'Windows':
     from os import add_dll_directory
     from os.path import join
     add_dll_directory(join(dirname(__file__), 'site-packages'))
