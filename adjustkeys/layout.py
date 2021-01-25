@@ -40,7 +40,7 @@ def parse_layout(layout: [[dict]], profile_data:dict, use_deactivation_colour:bo
             'r': 0.0,
             'rx': 0.0,
             'ry': 0.0,
-            'p': profile_row_map['R2'] if profile_row_map is not None else 'R2',
+            'p': profile_row_map['R1'] if profile_row_map is not None else 'R1',
         }
     parser_state:SimpleNamespace = SimpleNamespace(**parser_default_state_dict)
     for line in layout:
