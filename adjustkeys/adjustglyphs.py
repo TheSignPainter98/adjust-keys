@@ -15,7 +15,6 @@ from .scale import get_scale
 from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, right_outer_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
-from cairosvg import svg2png
 from functools import reduce
 from os import remove
 from os.path import basename, exists, join
@@ -24,6 +23,8 @@ from mathutils import Matrix, Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from types import LambdaType
+from wand.color import Color as Colour
+from wand.image import Image
 from xml.dom.minidom import Element, parseString
 Collection:type = None
 if blender_available():
@@ -125,37 +126,35 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapMode
 
 def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, partition_uv_by_face_direction:bool):
     # Convert to png
+    #  from cairosvg import svg2png
+    #  m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
+    #  uv_dims:Vector = (uv_res / m) * layout_dims
+    #  svg2png_params:dict = {
+        #  'parent_width': int(uv_dims.x),
+        #  'parent_height': int(uv_dims.y),
+        #  'scale': m,
+        #  #  'unsafe': True,
+        #  'output_width': int(uv_dims.x),
+        #  'output_height': int(uv_dims.y) * (2 if partition_uv_by_face_direction else 1), # Who knows why this is required for the cairo method, but it seems to do the job
+        #  'write_to': uv_image_path,
+    #  }
+    #  svg2png(svg, **svg2png_params)
+
+    png:bytes
     m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
     uv_dims:Vector = (uv_res / m) * layout_dims
-    svg2png_params:dict = {
-        'parent_width': int(uv_dims.x),
-        'parent_height': int(uv_dims.y),
-        'scale': m,
-        #  'unsafe': True,
-        'output_width': int(uv_dims.x),
-        'output_height': int(uv_dims.y) * (2 if partition_uv_by_face_direction else 1), # Who knows why this is required for the cairo method, but it seems to do the job
-        'write_to': uv_image_path,
-    }
-    svg2png(svg, **svg2png_params)
-
-    #  # Unused wand (ImageMagick API) code, functions correctly but one day decided to stop because even a 1x1 pixel image apparently exceeded maximum width/height limits. The following imports are required.
-    #  from wand.color import Color as Colour
-    #  from wand.image import Image
-    #  png:bytes
-    #  with Colour('transparent') as transparent:
-        #  m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
-        #  uv_dims:Vector = (uv_res / m) * layout_dims
-        #  image_params:dict = {
-            #  'blob': svg.encode('utf-8'),
-            #  'format': 'svg',
-            #  'background': transparent,
-            #  'width': int(uv_dims.x),
-            #  'height': int(uv_dims.y),
-        #  }
-        #  with Image(**image_params) as image:
-            #  png = image.make_blob(format='png')
-    #  with open(uv_image_path, 'wb+') as ofile:
-        #  ofile.write(png)
+    with Colour('transparent') as transparent:
+        image_params:dict = {
+            'blob': svg.encode('utf-8'),
+            'format': 'svg',
+            'background': transparent,
+            'width': int(uv_dims.x),
+            'height': int(uv_dims.y),
+        }
+        with Image(**image_params) as image:
+            png = image.make_blob(format='png')
+    with open(uv_image_path, 'wb+') as ofile:
+        ofile.write(png)
 
     # Add image to Blender's database if absent otherwise update
     bpy_internal_uv_image_name:str = basename(uv_image_path)

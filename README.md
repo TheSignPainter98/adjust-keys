@@ -91,11 +91,12 @@ If you’re new around text-editors, I’d recommend [VSCodium][codium], a minim
 You’ll need a working installation of Blender.
 
 1. Go to the [releases page][releases] and download `adjust-keys-blender-addon.zip`
-2. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded and activate the plugin (tick the tick-box)
+2. Install [ImageMagick][imagemagick] by following [this quick guide][imagemagick-install-guide]
+3. Install the addon by going to _Edit > Preferences > Add-ons > Install,_ and install the zip you just downloaded and activate the plugin (tick the tick-box)
 	- (Optional) If it doesn’t already appear, you may need to search the preferences window for `Adjustkeys`.
-3. Go to _Properties > Scene Properties > Adjustkeys_ to see the menu
-4. Press _place caps and glyphs_
-5. Wait a moment, et voilà!
+4. Go to _Properties > Scene Properties > Adjustkeys_ to see the menu
+5. Press _place caps and glyphs_
+6. Wait a moment, et voilà!
 
 See the [custom setup section](#custom-setup) for how to change the stock settings into your own keycap set.
 
@@ -103,10 +104,11 @@ See the [custom setup section](#custom-setup) for how to change the stock settin
 
 If you want to use `adjustkeys` through another python script for the purpose of automating something a script:
 
-1. Go to the [releases page][releases], download `adjust-keys.zip` and unzip it so that the `adjustkeys-bin` binary somewhere you won’t accidentally delete it
+1. Install [ImageMagick][imagemagick] by following [this quick guide][imagemagick-install-guide]
+2. Go to the [releases page][releases], download `adjust-keys.zip` and unzip it so that the `adjustkeys-bin` binary somewhere you won’t accidentally delete it
 	- If you want to automate the process (e.g. through `git submodule`), running `make -C /path/to/adjust-keys/ devel` will make a binary and necessary data files
-2. Copy the path where `adjustkeys` now is (I have mine in `/home/kcza/Documents/keys/adjustkeys-bin`)
-3. In your existing Python script add the following lines, appropriately substituting the path from the previous step:
+3. Copy the path where `adjustkeys` now is (I have mine in `/home/kcza/Documents/keys/adjustkeys-bin`)
+4. In your existing Python script add the following lines, appropriately substituting the path from the previous step:
 
 ```python
 from sys import path
@@ -539,6 +541,8 @@ Please ensure that credit is given where it is due.
 [open-cherry-font]: ihttps://github.com/dakotafelder/open-cherry
 [pip]: https://pip.pypa.io/en/stable/
 [python]: https://www.python.org
+[imagemagick]: https://en.wikipedia.org/wiki/ImageMagick
+[imagemagick-install-guide]: https://docs.wand-py.org/en/latest/guide/install.html
 [quicksand]: https://fonts.google.com/specimen/Quicksand?query=quicksa
 [red-hat-display]: https://fonts.google.com/specimen/Red+Hat+Display
 [regex-help]: https://docs.python.org/3/howto/regex.html

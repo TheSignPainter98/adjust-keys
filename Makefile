@@ -88,7 +88,7 @@ requirements.txt: $(ADJUST_KEYS_SRCS)
 ChangeLog.md: change-log.sh change-log-format.awk
 	./$< > $@
 
-adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS)
+adjustkeys/adjustkeys_addon.py: adjustkeys/adjustkeys_addon.py.in adjustkeys/args.py addongen $(ADJUST_KEYS_SRCS) requirements.txt
 	./addongen adjustkeys/adjustkeys.py < $< > $@
 
 profiles/%/profile_data.yml: profiles/%/profile_data.csv profiles/%/profile_data.yml.in profile_data.awk

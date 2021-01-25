@@ -11,8 +11,16 @@ from importlib import reload
 from inspect import getmembers
 from math import ceil, log10
 from os.path import dirname
+from platform import system
 from subprocess import CalledProcessError
-from sys import path
+from sys import path, version_info
+
+# Allow site-packages to contain dll files (e.g. where the user needs to copy them in due to missing installers / packages)
+if version_info >= (3,8):
+    from os import add_dll_directory
+    from os.path import join
+    add_dll_directory(join(dirname(__file__), 'site-packages'))
+
 
 bl_info = {
         'name': 'adjustkeys',
@@ -40,12 +48,18 @@ configurable_arg_dests = list(map(lambda a: a['dest'], configurable_args))
 
 Dependency = namedtuple('Dependency', ['module', 'package', 'name'])
 
+imagemagick_url = 'https://docs.wand-py.org/en/latest/guide/install.html'
+
 dependencies = [ DEPENDENCY_LIST ]
 dependencyWarningLines = [
-        "If you’re seeing this, it means that adjustkeys is missing some dependencies. Before installing these, you should note the following.",
+        "Adjustkeys is missing some dependencies. You need to do TWO things:",
+        "1. Install the ImageMagick library (manual, sorry)",
+        "2. Install python dependencies (automatic :D).",
+        "ImageMagick is most easily installed by following the guide at %s" % imagemagick_url,
+        "Before installing the python dependencies please note the following.",
         "Firstly, an internet connection will be used to download the necessary packages.",
         "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case as external code will be executed, so please don’t do this if you don’t need to.",
-        "The following python packages (and their respective dependencies) are required:"
+        "The following python packages (and their respective dependencies) are will be downloaded:"
     ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
         "To install these, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Open the system console to see what’s happening behind the scenes."
     ]
@@ -181,7 +195,7 @@ class KCZA_Preferences(AddonPreferences):
                 layout.label(text=line)
             layout.operator(KCZA_OT_InstallDependencies.bl_idname, icon='CONSOLE')
         else:
-            messageText = [ 'Dependency status: OK' ]
+            messageText = [ 'Python dependency status: OK' ]
             for line in dumb_wrap_text(messageText, self.message_width):
                 layout.label(text=line)
 
