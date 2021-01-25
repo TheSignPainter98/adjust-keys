@@ -46,6 +46,7 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 * [Pitfalls](#pitfalls)
 	* [Missing keycap models due to incorrect key profile](#missing-keycap-models-due-to-incorrect-key-profile)
 	* [Deactivation colours](#deactivation-colours)
+	* [Width or height exceeds policy limit](#width-or-height-exceeds-policy-limit)
 	* [Unicode characters in regular expression classes](#unicode-characters-in-regular-expression-classes)
 * [Building from Source](#building-from-source)
 * [Contributing](#contributing)
@@ -441,6 +442,13 @@ The heuristic used by adjustkeys is as follows:
 - Otherwise, KLE colours are taken as an exact specification of the user’s desired colourway
 
 Therefore, if the user wishes to use a colour of `#cccccc` for caps, or `#000000` for glyphs in their design, it may be better to tell adjustkeys not to use the colour-map file through the appropriate option.
+
+### Width or height exceeds policy limit
+
+The library `adjustkeys` uses for svg to png conversion, ImageMagick, has configurable usage limits to prevent a user’s system from being overwhelmed.
+Unfortunately, for large uv images, this can sometimes be too low by default.
+To fix this, find your system’s ImageMagick `policy.xml` file and increase the maximum width, height and area to something massive such as 100EiB.
+You may need to uncomment the relevant lines (by removing the `<!--` and `-->` surrounding the line).
 
 ### Unicode characters in regular expression classes
 
