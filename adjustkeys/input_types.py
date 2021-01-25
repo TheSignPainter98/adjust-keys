@@ -142,21 +142,24 @@ def type_check_cond(p:bool, rule:Union[bool, dict]) -> bool:
     return p
 
 def type_check_implication(p:bool, rule:Union[dict]) -> bool:
-    (p, c) = assert_type(p, rule, dict, 'Implication rule should be a dictionary with an "lhs" and an "rhs" field, got "%s" instead' % str(rule))
+    (p, c) = assert_type(p, rule, dict, 'Implication rule should be a dictionary with an "if" and an "then" field, got "%s" instead' % str(rule))
     if not c:
         return False
 
-    if 'lhs' in rule:
-        p = type_check_cond(p, rule['lhs'])
+    if 'if' in rule:
+        p = type_check_cond(p, rule['if'])
     else:
-        printe('Implication rule requires "lhs" key')
+        printe('Implication rule requires "if" key')
         p = False
 
-    if 'rhs' in rule:
-        p = type_check_cond(p, rule['rhs'])
+    if 'then' in rule:
+        p = type_check_cond(p, rule['then'])
     else:
-        printe('Implication rule requires "rhs" key')
+        printe('Implication rule requires "then" key')
         p = False
+
+    if 'else' in rule:
+        p = type_check_cond(p, rule['else'])
 
     return p
 
