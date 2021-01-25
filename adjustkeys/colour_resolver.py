@@ -66,20 +66,20 @@ def resolve_matches(layout_context:dict, cap:dict, rule:Union[bool, dict]) -> [b
             printi('%r' % cond_result)
 
             conds.append(cond_result)
-        if statementKey.startswith('key-pos'):
+        elif statementKey.startswith('key-pos'):
             printi_name('Checking key position (%.4fu,%.4fu) satisfies condition "%s"...' % (cap['kle-pos'].x, cap['kle-pos'].y, rule['key-pos']), end=' ')
             print(rule)
             cond_result:bool = eval_maths_cond(cap, rule['parsed-key-pos'])
             printi('%r' % cond_result)
 
             conds.append(cond_result)
-        if statementKey.startswith('layout-file-name'):
+        elif statementKey.startswith('layout-file-name'):
             printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-name'], rule['layout-file-name']), end=' ')
             cond_result:bool = match('^%s$' % rule['layout-file-name'], layout_context['layout-file-name'], IGNORECASE | UNICODE) is not None
             printi('%r' % cond_result)
 
             conds.append(cond_result)
-        if statementKey.startswith('layout-file-path'):
+        elif statementKey.startswith('layout-file-path'):
             printi_name('Checking "%s" entirely matches "%s"...' % (layout_context['layout-file-path'], rule['layout-file-path']), end=' ')
             cond_result:bool = match('^%s$' % rule['layout-file-path'], layout_context['layout-file-path'], IGNORECASE | UNICODE) is not None
             printi('%r' % cond_result)
@@ -89,11 +89,11 @@ def resolve_matches(layout_context:dict, cap:dict, rule:Union[bool, dict]) -> [b
         # Resolve sub-conditions
         if statementKey.startswith('any'):
             conds.append(any(resolve_matches(layout_context, cap, rule[statementKey])))
-        if statementKey.startswith('all'):
+        elif statementKey.startswith('all'):
             conds.append(all(resolve_matches(layout_context, cap, rule[statementKey])))
-        if statementKey.startswith('not-all'):
+        elif statementKey.startswith('not-all'):
             conds.append(not all(resolve_matches(layout_context, cap, rule[statementKey])))
-        if statementKey.startswith('not-any'):
+        elif statementKey.startswith('not-any'):
             conds.append(not any(resolve_matches(layout_context, cap, rule[statementKey])))
 
     return conds
