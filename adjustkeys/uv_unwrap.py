@@ -13,7 +13,7 @@ def uv_unwrap(obj:Object, objw:Vector, partition_uv_by_face_direction:bool):
     # Project vertices into uv-space, assuming upper-left most point is at
     scale: float = uv_scale(partition_uv_by_face_direction, objw)
     diag:[float] = diagonal(scale)
-    printi('Scaling uv image by (%f, %f)' %(diag[0], diag[1]))
+    printi('Scaling uv image to fill space (%fx, %fy)' %(diag[0], diag[1]))
     for face in obj.data.polygons:
         front_face:bool = is_front_face(obj, face)
         for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
@@ -24,6 +24,8 @@ def uv_unwrap(obj:Object, objw:Vector, partition_uv_by_face_direction:bool):
     #  # Reinstate previous mode
     #  if origMode != 'OBJECT':
         #  ops.object.mode_set(mode=origMode)
+
+    printi('Done scaling uv image')
 
 
 # Assume that the top left-most point occupied space is at (0,0)

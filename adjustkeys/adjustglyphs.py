@@ -140,6 +140,7 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
     #  }
     #  svg2png(svg, **svg2png_params)
 
+    printi('Converting uv image svg to png for import...')
     png:bytes
     m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
     uv_dims:Vector = (uv_res / m) * layout_dims
@@ -157,9 +158,10 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
         ofile.write(png)
 
     # Add image to Blender's database if absent otherwise update
+    printi('Importing image into blender')
     bpy_internal_uv_image_name:str = basename(uv_image_path)
     if bpy_internal_uv_image_name not in data.images:
-        imgNode.image = data.images.load(uv_image_path, check_existing=False) # TODO: delay this
+        imgNode.image = data.images.load(uv_image_path, check_existing=False)
     else:
         imgNode.image = data.images[bpy_internal_uv_image_name]
         imgNode.image.reload()
