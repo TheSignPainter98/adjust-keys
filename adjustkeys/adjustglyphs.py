@@ -72,9 +72,11 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:
 
     svgObjectNames:[str] = None
     if pargs.glyph_application_method == 'shrinkwrap':
-        svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
+        if pargs.adjust_glyphs:
+            svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
     else:
-        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.partition_uv_by_face_direction)
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
+
 
     printi('Successfully imported glyphs')
 
@@ -124,11 +126,11 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapMode
 
     return svgObjectNames
 
-def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, partition_uv_by_face_direction:bool):
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, use_custom_image:bool, partition_uv_by_face_direction:bool):
     # Convert to png
     #  from cairosvg import svg2png
     #  m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
-    #  uv_dims:Vector = (uv_res / m) * layout_dims
+    #  uv_dims:Vector = (uv_res / m) * (Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims
     #  svg2png_params:dict = {
         #  'parent_width': int(uv_dims.x),
         #  'parent_height': int(uv_dims.y),
@@ -140,32 +142,41 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
     #  }
     #  svg2png(svg, **svg2png_params)
 
-    printi('Converting uv image svg to png for import...')
-    png:bytes
-    m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
-    uv_dims:Vector = (uv_res / m) * layout_dims
-    with Colour('transparent') as transparent:
-        image_params:dict = {
-            'blob': svg.encode('utf-8'),
-            'format': 'svg',
-            'background': transparent,
-            'width': int(uv_dims.x),
-            'height': int(uv_dims.y),
-        }
-        with Image(**image_params) as image:
-            png = image.make_blob(format='png')
-    with open(uv_image_path, 'wb+') as ofile:
-        ofile.write(png)
+    # Compute uv image dimensions
+    partition_transform:Matrix = Matrix.Diagonal((1,2)) if partition_uv_by_face_direction else Matrix.Identity(2)
+    partition_transformed_layout_dims:Vector = partition_transform @ layout_dims
+    m:float = min(partition_transformed_layout_dims)
+    uv_dims:Vector = (uv_res / m) * partition_transformed_layout_dims
 
-    # Add image to Blender's database if absent otherwise update
-    printi('Importing image into blender')
+    # Blender internal image name
     bpy_internal_uv_image_name:str = basename(uv_image_path)
-    if bpy_internal_uv_image_name not in data.images:
-        imgNode.image = data.images.load(uv_image_path, check_existing=False)
-    else:
-        imgNode.image = data.images[bpy_internal_uv_image_name]
-        imgNode.image.reload()
 
+    if use_custom_image:
+        printi('Converting uv image svg to png for import...')
+        png:bytes
+        with Colour('transparent') as transparent:
+            image_params:dict = {
+                'blob': svg.encode('utf-8'),
+                'format': 'svg',
+                'background': transparent,
+                'width': int(uv_dims.x),
+                'height': int(uv_dims.y),
+            }
+            with Image(**image_params) as image:
+                png = image.make_blob(format='png')
+        with open(uv_image_path, 'wb+') as ofile:
+            ofile.write(png)
+
+        # Add image to Blender's database if absent otherwise update
+        printi('Importing image into blender')
+        if bpy_internal_uv_image_name not in data.images:
+            imgNode.image = data.images.load(uv_image_path, check_existing=False)
+        else:
+            imgNode.image = data.images[bpy_internal_uv_image_name]
+            imgNode.image.reload()
+    else:
+        printi('Creating new blank uv image')
+        imgNode.image = data.images.new(bpy_internal_uv_image_name, width=int(uv_dims.x), height=int(uv_dims.y))
 
 def resolve_glyph_offset(cap:dict, alignment:str, glyph_ulen:float) -> dict:
     if 'glyph-dim' not in cap:
