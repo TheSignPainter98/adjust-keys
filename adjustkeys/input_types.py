@@ -103,6 +103,7 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
             (okay, t) = assert_dict_key(okay, rule, 'cond', 'Colour-map rules require a condition they should apply to')
             if t:
                 okay = type_check_cond(okay, rule['cond'])
+            (okay, _) = assert_cond(okay, 'cap-style' in rule or 'glyph-style' in rule, 'Colour map rules should contain at least one of "cap-style" or "glyph-style"')
             if 'cap-style' in rule:
                 (okay, _) = assert_type(okay, rule['cap-style'], str, 'Cap-styles should be strings, got %s' % (str(rule['cap-style'])))
             if 'glyph-style' in rule:

@@ -320,7 +320,7 @@ def get_style(key:dict, style_key:str) -> str:
             style = 'style="%s"' % raw_style.replace('\\', '\\\\').replace('"', '\\"')
         return style
     else:
-        printw('Style key "%s" not present in whichever rule was intended for key "%s"' % (style_key, key['key']))
+        printw('Style key "%s" was never applied to key "%s"' % (style_key, key['key']))
         return ''
 
 def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_dims:Vector) -> [str]:
