@@ -1,0 +1,11 @@
+- name: red-cap
+  cap-style: 'bb0000'
+  glyph-style: 'ffffff'
+  cond:
+    any:
+      key-pos: (X + Y) % 2 <= 0.75
+      key-name: ''
+- name: white-cap
+  cap-style: 'ffffff'
+  glyph-style: 'bb0000'
+  cond: true

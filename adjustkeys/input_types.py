@@ -3,6 +3,7 @@
 from .log import printe
 from .util import list_diff
 from re import IGNORECASE, match
+from typing import Union
 
 # The equivalent Haskell code to do all this would add a total of zero extra lines to the existing program. Thanks Python, get a type system.
 
@@ -99,18 +100,68 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
             (okay, t) = assert_dict_key(okay, rule, 'name', 'Colour-map rule missing "name" field')
             if t:
                 (okay, _) = assert_type(okay, rule['name'], str, 'Colour-map rule names should be strings, got "%s"' % str(rule['name']))
-            (okay, t) = assert_dict_key(okay, rule, 'keys', 'Colour-map rules require a list of keys they apply to')
+            (okay, t) = assert_dict_key(okay, rule, 'cond', 'Colour-map rules require a condition they should apply to')
             if t:
-                (okay, t) = assert_type(okay, rule['keys'], list, 'Colour-map rule keys must be a list')
-                if t:
-                    for key in rule['keys']:
-                        (okay, _) = assert_type(okay, key, str, 'Colour-map rule keys must be strings, got %s' % str(key))
+                okay = type_check_cond(okay, rule['cond'])
+            (okay, _) = assert_cond(okay, 'cap-style' in rule or 'glyph-style' in rule, 'Colour map rules should contain at least one of "cap-style" or "glyph-style"')
             if 'cap-style' in rule:
                 (okay, _) = assert_type(okay, rule['cap-style'], str, 'Cap-styles should be strings, got %s' % (str(rule['cap-style'])))
             if 'glyph-style' in rule:
                 (okay, _) = assert_type(okay, rule['glyph-style'], str, 'Glyph-styles should be strings (of either a single hex colour or CSS fragment), got %s' % rule['glyph-style'])
 
     return okay
+
+def type_check_cond(p:bool, rule:Union[bool, dict]) -> bool:
+    if type(rule) == bool:
+        return True
+    elif type(rule) != dict:
+        printe('Expected dictionary of boolean for rule, got %s: "%s"' % (str(type(rule)), str(rule)))
+        return False
+
+    conditions:dict = {
+        'key-name': lambda p,k: assert_cond(p, type(rule[k]) == str or (type(rule[k]) == list and all(map(lambda k: type(k) in [str, int], rule[k]))), 'key-name field should be either a single key or list of keys, got "%s"' %(', '.join(rule[k]) if isinstance(rule[k], list) else rule[k])),
+        'key-pos': lambda p,k: assert_type(p, rule[k], str, 'key-pos field takes an expression, got %s' % rule[k]),
+        'layout-file-name': lambda p,k: assert_type(p, rule[k], str, 'Layout-file-name field should be a string, got %s' % rule[k]),
+        'layout-file-path': lambda p,k: assert_type(p, rule[k], str, 'Layout-file-path field should be a string, got %s' % rule[k]),
+        'all': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'any': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'not-all': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'not-any': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'implication': lambda p,k: (type_check_implication(p, rule[k]), None)
+    }
+    (p, _) = assert_cond(p, any(map(lambda k: k in rule, conditions.keys())), 'Rule needs at least one of: %s' % ', '.join(list(conditions.keys())))
+
+    for field in rule.keys():
+        if not any(map(lambda c: field.startswith(c), conditions)):
+            printe('Unrecognised colour map rule field %s, is this a typo?' % field)
+            p = False
+        else:
+            condKey:str = list(filter(lambda c: field.startswith(c), conditions))[0]
+            (p, _) = conditions[condKey](p, field)
+
+    return p
+
+def type_check_implication(p:bool, rule:Union[dict]) -> bool:
+    (p, c) = assert_type(p, rule, dict, 'Implication rule should be a dictionary with an "if" and an "then" field, got "%s" instead' % str(rule))
+    if not c:
+        return False
+
+    if 'if' in rule:
+        p = type_check_cond(p, rule['if'])
+    else:
+        printe('Implication rule requires "if" key')
+        p = False
+
+    if 'then' in rule:
+        p = type_check_cond(p, rule['then'])
+    else:
+        printe('Implication rule requires "then" key')
+        p = False
+
+    if 'else' in rule:
+        p = type_check_cond(p, rule['else'])
+
+    return p
 
 def assert_type(p:bool, o:object, t:type, s:str) -> [[bool, bool]]:
     return assert_cond(p, type(o) == t, s)
