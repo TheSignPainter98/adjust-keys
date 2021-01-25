@@ -128,6 +128,7 @@ def recursively_add(old_key:str, new_key:str, f:Callable, data:object) -> object
         int: lambda i: i,
         list: lambda l: list(map(lambda e: recursively_add(old_key, new_key, f, e), data)),
         str: lambda s: s,
+        bool: lambda b: b,
         type(None): lambda n: n,
         type(lambda:None): lambda f: f,
     }

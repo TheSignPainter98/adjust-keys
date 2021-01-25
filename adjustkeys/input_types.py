@@ -3,6 +3,7 @@
 from .log import printe
 from .util import list_diff
 from re import IGNORECASE, match
+from typing import Union
 
 # The equivalent Haskell code to do all this would add a total of zero extra lines to the existing program. Thanks Python, get a type system.
 
@@ -109,7 +110,13 @@ def type_check_colour_map(cm:object) -> [[bool, bool]]:
 
     return okay
 
-def type_check_cond(p:bool, rule:dict) -> bool:
+def type_check_cond(p:bool, rule:Union[bool, dict]) -> bool:
+    if type(rule) == bool:
+        return True
+    elif type(rule) != dict:
+        printe('Expected dictionary of boolean for rule, got %s: "%s"' % (str(type(rule)), str(rule)))
+        return False
+
     conditions:dict = {
         'key-name': lambda p,k: assert_cond(p, type(rule[k]) == str or (type(rule[k]) == list and all(map(lambda k: type(k) in [str, int], rule[k]))), 'key-name field should be either a single key or list of keys, got "%s"' %(', '.join(rule[k]) if isinstance(rule[k], list) else rule[k])),
         'key-pos': lambda p,k: assert_type(p, rule[k], str, 'key-pos field takes an expression, got %s' % rule[k]),

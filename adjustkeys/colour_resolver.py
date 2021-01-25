@@ -49,7 +49,10 @@ def rule_match(layout_context:dict, key:dict, rule:dict) -> bool:
     #  key_name:str = key['key']
     #  return any(map(lambda r: match('^' + r + '$', key_name, IGNORECASE) is not None, rule['keys']))
 
-def resolve_matches(layout_context:dict, cap:dict, rule:dict) -> [bool]:
+def resolve_matches(layout_context:dict, cap:dict, rule:Union[bool, dict]) -> [bool]:
+    if type(rule) == bool:
+        return [rule]
+
     printi_name:Callable = partial(printi, '%s:' % layout_context['layout-file-name'])
     conds:[bool] = []
 
