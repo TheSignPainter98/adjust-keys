@@ -126,6 +126,7 @@ def type_check_cond(p:bool, rule:Union[bool, dict]) -> bool:
         'any': lambda p,k: (type_check_cond(p, rule[k]), None),
         'not-all': lambda p,k: (type_check_cond(p, rule[k]), None),
         'not-any': lambda p,k: (type_check_cond(p, rule[k]), None),
+        'implication': lambda p,k: (type_check_implication(p, rule[k]), None)
     }
     (p, _) = assert_cond(p, any(map(lambda k: k in rule, conditions.keys())), 'Rule needs at least one of: %s' % ', '.join(list(conditions.keys())))
 
@@ -136,6 +137,25 @@ def type_check_cond(p:bool, rule:Union[bool, dict]) -> bool:
         else:
             condKey:str = list(filter(lambda c: field.startswith(c), conditions))[0]
             (p, _) = conditions[condKey](p, field)
+
+    return p
+
+def type_check_implication(p:bool, rule:Union[dict]) -> bool:
+    (p, c) = assert_type(p, rule, dict, 'Implication rule should be a dictionary with an "lhs" and an "rhs" field, got "%s" instead' % str(rule))
+    if not c:
+        return False
+
+    if 'lhs' in rule:
+        p = type_check_cond(p, rule['lhs'])
+    else:
+        printe('Implication rule requires "lhs" key')
+        p = False
+
+    if 'rhs' in rule:
+        p = type_check_cond(p, rule['rhs'])
+    else:
+        printe('Implication rule requires "rhs" key')
+        p = False
 
     return p
 

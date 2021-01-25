@@ -87,7 +87,11 @@ def resolve_matches(layout_context:dict, cap:dict, rule:Union[bool, dict]) -> [b
             conds.append(cond_result)
 
         # Resolve sub-conditions
-        if statementKey.startswith('any'):
+        elif statementKey.startswith('implication'):
+            lhs:bool = all(resolve_matches(layout_context, cap, rule[statementKey]['lhs']))
+            rhs:bool = all(resolve_matches(layout_context, cap, rule[statementKey]['rhs']))
+            conds.append(not lhs or rhs)
+        elif statementKey.startswith('any'):
             conds.append(any(resolve_matches(layout_context, cap, rule[statementKey])))
         elif statementKey.startswith('all'):
             conds.append(all(resolve_matches(layout_context, cap, rule[statementKey])))
