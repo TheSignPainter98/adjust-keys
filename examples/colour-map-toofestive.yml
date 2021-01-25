@@ -17,6 +17,4 @@
 - name: mods
   cap-style: 'ff0000'
   glyph-style: '00ff00'
-  cond:
-    key-name:
-      - .*
+  cond: true

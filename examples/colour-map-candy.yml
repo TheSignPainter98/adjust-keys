@@ -8,6 +8,4 @@
 - name: white-cap
   cap-style: 'ffffff'
   glyph-style: 'bb0000'
-  cond:
-    key-name:
-    - .*
+  cond: true
