@@ -33,9 +33,20 @@ The [python][python] API of `adjustkeys` also allows a coder to be notified of t
 	* [Changing keycap profiles](#changing-keycap-profiles)
 	* [Using custom glyphs / fonts](#using-custom-glyphs--fonts)
 	* [Setting colours (via KLE or name-matching)](#setting-colours-via-kle-or-name-matching)
+		* [A single boolean value](#a-single-boolean-value)
+		* [The `key-pos` condition](#the-key-pos-condition)
+		* [The `key-name` condition](#the-key-name-condition)
+		* [The `layout-file-name` condition](#the-layout-file-name-condition)
+		* [The `layout-file-path` condition](#the-layout-file-path-condition)
+		* [The `all` condition](#the-all-condition)
+		* [The `any` condition](#the-any-condition)
+		* [The `not-all` condition](#the-not-all-condition)
+		* [The `not-any` condition](#the-not-any-condition)
+		* [The `implication` condition](#the-implication-condition)
 * [Pitfalls](#pitfalls)
 	* [Missing keycap models due to incorrect key profile](#missing-keycap-models-due-to-incorrect-key-profile)
 	* [Deactivation colours](#deactivation-colours)
+	* [Unicode characters in regular expression classes](#unicode-characters-in-regular-expression-classes)
 * [Building from Source](#building-from-source)
 * [Contributing](#contributing)
 * [Gripes](#gripes)
@@ -230,35 +241,181 @@ For the most logical results, ensure that the value provided to the ‘unit-leng
 There are two ways of colouring keycaps and glyphs: either from raw [KLE][kle] input or from a colour map file.
 The first way is always active and is just a matter of adjusting RGB colours through the website; the second way can be deactivated but is on by default.
 
-A colour map file is a list of objects, each of which possibly specifies a keycap colour and/or a glyph style, the name to give the corresponding material in Blender, and a list of keycaps to apply it to.
+A colour map file is a list of objects, each of which possibly specifies a keycap colour and/or a glyph style, the name to give the corresponding material in Blender, and a condition which must be true for it to be applied to each given key.
 The file is scanned from top to bottom, so if there are two places a keycap can be matched from, then only one nearest the top of the file will be used.
 The `cap-style` and `glyph-style` fields can either be a 6-digit hex colour or a section of CSS code which is applied directly to the `svg` data.
-Note that svg-styling for caps is only available when uv-mapping is used to apply glyphs to keys as the shrink-wrapping is only capable of using single block colours.
+Note that svg-styling for _caps_ is only available when uv-mapping is used to apply glyphs to keys as the shrink-wrapping is only capable of using single block colours.
 
-Here’s an example of the first ten lines of the [example colour-map file](https://github.com/TheSignPainter98/adjust-keys/blob/master/examples/colour-map.yml) in the repo:
+Here’s an example of the [example colour-map file](https://github.com/TheSignPainter98/adjust-keys/blob/master/examples/colour-map.yml) in the repo:
 
 ```yaml
 - name: green
   cap-style: '32a852'
   glyph-style: 'fill:#ad1aad;'
-  keys:
-  - .-.+
-  - '[^+/*-]'
-  - ''
-  - F[1-49][0-2]?
+  cond:
+    key-name:
+    - .-.+
+    - '[^+/*-]'
+    - ''
+    - F[1-49][0-2]?
+    not-all:
+      key-name:
+      - ↑
+      - →
+      - ↓
+      - ←
+      key-pos: y > 5.5
 - name: purple
   cap-style: 'ad1aad'
+  glyph-style: '32a852'
+  cond: true
 ```
 
-Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `colour` and `keys` field) from the `keys` list stored inside each.
+Note firstly the indentation and how it discerns the list of objects (each containing a `name`, `cap-style`, `glyph-style` and `cond` field) from the contents of the condition (`cond`) stored inside of each.
 
 Secondly, note the quote marks—these are used to force the yaml parser to consider what’s inside them as a string of letters as otherwise, the hex code `001100` would be considered a number and have the preceding zeros stripped away (leaving `1100`, which isn’t good).
 
-Finally, observe how you can also use [Python regular expressions][regex-help] to specify keycap names in more general terms.
-If you aren’t too comfortable using regular expressions, `adjustkeys` takes a list of keys, so you can more simply copy the names of the keycaps you wish to colour into the appropriate `keys` list, whilst being mindful of indentation and putting the `-` character at the start of each key-name as above.
-These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of ‘any character,’ so `.*` is just a concise way of telling `adjustkeys` to match _anything._
-It’s not essential to know regular expressions, but a few basics can make things a little more streamlined.
+The condition key (`cond`) is true if _all_ of its contained conditions are true, where a condition is any of the following.
+Some mental gymnastics is required.
+
+#### A single boolean value
+
+This is either `true` or `false`.
+It is useful to have the last rule of a colour-map file with condition `true` as a catch-all so that no keys lack styling information.
+
+#### The `key-pos` condition
+
+It is possible to make the colour of the key depend on its position in a given layout.
+For this, a mathematical condition may be specified.
+Note that as per the [KLE][kle] standard, the value of `x` increases to the right, and the value of `y` _downwards._
+
+Conditions are constructed as follows, closely following Python+C syntax.
+
+- Numbers and the variables `x` and `y` are valid expressions
+- The negation of an expression is also an expression
+- A pair of expressions can be compared by any of the following binary operations.
+	- `^^` power
+    - `*`, multiplication
+    - `/`, division, e.g. `3 / 2 = 1.5`
+    - `//`, integer division, e.g. `3 // 2 = 1`
+    - `%`, modulo, remainder of integer division, e.g. `3 % 2 = 1`
+    - `+`, addition
+    - `-`, subtraction
+- A pair of expressions may be compared to form a condition
+    - `<` less-than
+    - `<=`, less-than-or-equal
+    - `>`, greater-than
+    - `>=`, greater-than-or-equal
+    - `=`, equal
+    - `==`, equal
+    - `!=`, not equal
+- A pair of conditions may be used in logical operations; this is also a condition:
+	- `!` logical negation (`true` iff its input is `false`)
+	- `&` logical conjunction (`true` iff both inputs are `true`)
+	- `|` logical disjunction (`true` iff either input is `true`)
+	- `^` exclusive or (`true` iff either but not both inputs is `true`)
+	- `=>` logical implication (`true` iff either the left is false, or both are true)
+	- `<=>` logical equivalence (`true` iff both inputs have the same value)
+
+If a conditional operator is omitted, a value of `true` is returned _if and only if_ the numerical value resolved is not equal to zero.
+
+Note that as only binary operations are considered (exactly two inputs), multiple comparisons can have unexpected results, such as the following.
+
+```python
+0.3 < 0.1 < 0.2
+= (0.3 < 0.1) < 0.2
+= False < 0.2
+= 0 < 0.2
+= True
+```
+
+Use the `&` operator instead: `a < b < c` should be expanded to `a < b & b < c`.
+
+#### The `key-name` condition
+
+It is possible for the legend text of a key to be used to constrain colour-application.
+The contents of the `key-name` field is either a string, or a list of strings, each of which represents a regular expression.
+If the keycap legend matches any of the regular expressions specified, then the condition is `true`.
+Any new-line characters present in the keycap legend are replaced by dashes, for example `!\n1` becomes `!-1`.
+
+It’s not essential to know regular expressions, but a few basics such as those outlined below can make things a little more streamlined.
 The cheatsheet and playground on [regexr][regex-playground] may be helpful.
+
+Consider the example regular expression `.*`.
+This comprises of `.`, which means match any _one_ character, and `*` which means repeat _zero or more_ of the regular expression to its left.
+Hence `.*` just means that _anything,_ including the empty string, is matched.
+
+Similarly, the regex `[0-9]` specifies a character class which means match any _one_ of the characters specified inside it.
+Here a range from `0` to `9` is specified, hence this will match any single digit.
+In the example colour-map, this concept is used in conjunction with the `?` operator which matches either _zero or one__ of the regular expression to its left.
+This was used in the expression `F[1-49][0-2]?`, which when applied to a 100% keyboard will match keys F1 to F4 and F9 to F12.
+
+<!--
+   -
+   - Finally, observe how you can also use [Python regular expressions][regex-help] to specify keycap names in more general terms.
+   - If you aren’t too comfortable using regular expressions, `adjustkeys` takes a list of keys, so you can more simply copy the names of the keycaps you wish to colour into the appropriate `keys` list, whilst being mindful of indentation and putting the `-` character at the start of each key-name as above.
+   - These are little filters for patterns in text, for example on the final line of the above, the `.*` is as follows: `.` means match any _single_ character (e.g. a-z), and `*` means match zero or more of the expression to the left, hence here means zero or more of ‘any character,’ so `.*` is just a concise way of telling `adjustkeys` to match _anything._
+   - It’s not essential to know regular expressions, but a few basics can make things a little more streamlined.
+   - The cheatsheet and playground on [regexr][regex-playground] may be helpful.
+   -->
+
+#### The `layout-file-name` condition
+
+It is possible to apply the same rule differently depending on the last part of the path to the layout file to which it is applied.
+This is done using regular expressions in the same way as the [`key-name`](#the-key-name-condition) condition.
+If this is required, some diligent naming if input files may be useful.
+For example, orthogonal layouts might have the word `ortho` as a part of their name, which would be matched by `.*ortho.*`.
+
+For example if a layout file `/home/kcza/Documents/some-layout.yml` is used, regular expression will be applied to just the `some-layout` part.
+
+#### The `layout-file-path` condition
+
+This is the same as the `layout-file-name` condition except that the entire path (i.e. including parent directories) is considered.
+For platform-independence, all directory separators are replaced with forward-slashes so no DOS-style backslashes in paths can break things.
+
+#### The `all` condition
+
+Takes a set of conditions as specified in this readme.
+Returns `true` iff _every single one_ of its sub-conditions are `true`.
+
+#### The `any` condition
+
+Takes a set of conditions as specified in this readme.
+Returns `true` iff _at least one_ of its sub-conditions are `true`.
+
+#### The `not-all` condition
+
+Takes a set of conditions as specified in this readme.
+Negation of the `all` condition, returns `true` iff _at least one_ of its sub-conditions is `false`.
+
+#### The `not-any` condition
+
+Takes a set of conditions as specified in this readme.
+Negation of the `any` condition, returns `true` iff _none_ of its sub-conditions is `true`.
+
+#### The `implication` condition
+
+This takes either two or three sub-conditions: an `if` clause, a `then` clause and an optional `else` clause.
+
+- If everything in the `if` clause is `true`, then the implication returns `true` iff all conditions in the `then` clause are `true`
+- Otherwise (something in the `if` clause is `false`) and so the implication returns `true` iff either there is no `else` clause or all conditions in the `else` clause are `true`.
+
+This is useful for making conditions which are only checked in response to certain conditions.
+For example, the following will colour everything left of a line at 45° red in a layout with ‘ortho’ in the name, but otherwise will colour red anything left of a vertical line.
+
+```yaml
+- name: red
+  cap-colour: 'ff0000'
+  glyph-style: 'ff0000'
+  cond:
+    implication:
+      if:
+        layout-file-name: .*ortho.*
+      then:
+        key-pos: x + y <= 8
+      else:
+        key-pos: y <= 5
+```
 
 ## Pitfalls
 
@@ -282,6 +439,14 @@ The heuristic used by adjustkeys is as follows:
 - Otherwise, KLE colours are taken as an exact specification of the user’s desired colourway
 
 Therefore, if the user wishes to use a colour of `#cccccc` for caps, or `#000000` for glyphs in their design, it may be better to tell adjustkeys not to use the colour-map file through the appropriate option.
+
+### Unicode characters in regular expression classes
+
+Some strange results may be seen when using some of the fancier unicode characters (such as `←` and `→`) in character classes (`[...]`).
+This is because they have a longer internal representation than the common Latin characters and the regular expression matcher only checks one Latin character-length at a when checking character classes.
+Avoid this by moving these characters into their own regular expressions if possible or rewriting things to avoid this situation.
+
+For example, in the [example colour map file](https://github.com/TheSignPainter98/adjust-keys/blob/master/examples/colour-map.yml), a list of arrows is given instead of the single regular expression `[^↑→↓←]`.
 
 ## Building from Source
 
@@ -308,7 +473,10 @@ Please see the [contribution note,][contrib-note] abide by the [code of conduct]
 - To add glyphs for a font _x,_ please place the related `svg`s in `glyphs/x/`, relative to the project root (the `x` should be lower-case)
 - To add keycap models and metadata for a profile _y,_
 	1. Place the related `obj` files in `profiles/y/` relative to the project root (the `y` should be lower-case and spaces should be replaced by dashes)
-	2. Measure the margin between the space occupied by the keycap and the model itself (see [1u keycap size example diagram][keycap-info]) and enter the value into `profiles/y/keycap_data.yml`
+	<!-- 2. Measure the margin between the space occupied by the keycap and the model itself (see [1u keycap size example diagram][keycap-info]) and enter the value into `profiles/y/keycap_data.yml.in` -->
+	2. If the profile is non-uniform and the row closest to the average user’s wrists is not `R1`, enter a mapping in the `profile-row-map` field of the `profiles/y/keycap_data.yml.in`, where the left are standardised names as below and the right are the names used by the new cap models. Otherwise, leave the field `null`
+		- Users of `adjustkeys` should assume that profile `R1` is that of the row closest to the average user’s wrists
+		- The profile number of any other row is either the same or one greater than the previous row as distance away from the user increases.
 	3. (The annoying one) measure the location of the centre of the face of the keycap model and the uppermost and leftmost extremes of the keycap model and enter the values into `profiles/y/centres.csv`
 - When adding code, please use include type-annotations—they make it much easier to interface with the Python code written before!
 
@@ -333,6 +501,7 @@ Although Python isn’t the only language to suffer these ailments, it’s the o
 ## Author and Acknowledgements
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
+Acknowledgement for using `adjustkeys` is welcome but not mandatory :P
 
 Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
 
