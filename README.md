@@ -281,6 +281,9 @@ Secondly, note the quote marks—these are used to force the yaml parser to cons
 The condition key (`cond`) is true if _all_ of its contained conditions are true, where a condition is any of the following.
 Some mental gymnastics is required.
 
+Note that as `yaml` dictionaries are used, condition names must be unique.
+To avoid problems `adjustkeys` only checks that the first part matches, hence the conditions `all: ...`, `all2: ...` and `all-asdf: ...` are all treated identically.
+
 #### A single boolean value
 
 This is either `true` or `false`.
