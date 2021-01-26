@@ -516,7 +516,7 @@ Although Python isn’t the only language to suffer these ailments, it’s the o
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 Acknowledgement for using `adjustkeys` is welcome but not mandatory :P
 
-Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension.
+Thanks to Swishy for user-testing in the early stages and for suggesting that `adjustkeys` would benefit from being a Blender extension and that it needed uv-mapping.
 
 All files written by contributors to this project are covered under the [GNU Lesser General Public License v3.0][lgpl3], **with the following exceptions.**
 Please note that the licenses listed below were correct to the best of my knowledge at the time of writing; check the sources for the most up-to-date versions of their respective licenses.
