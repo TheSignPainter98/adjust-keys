@@ -139,15 +139,36 @@ def op_name(dest:str) -> str:
     return 'akminiop' + dest.title().replace('_', '')
 
 def dependencies(insertion_file:str) -> [[str, str]]:
+    python_native_deps:[str] = [ # there must be a better way of doing this...
+        'argparse',
+        'bpy',
+        'collections',
+        'copy',
+        'decimal',
+        'functools',
+        'futures', # futures is included in the Python3 standard library, but not that of Python2 (it can be ignored)
+        'importlib',
+        'math',
+        'mathutils',
+        'multiprocessing',
+        'os',
+        're',
+        'statistics',
+        'sys',
+        'tempfile',
+        'types',
+        'typing',
+        'xml',
+    ]
+
     ext_deps:[str] = external_dependencies(insertion_file)
     dep_origin_map:[str] = { v:k for k,v in read_yaml('pipreqs_module_map.yml').items() }
-    deps:[[str,str]] =  [ (pkg, dep_origin_map[pkg]) for pkg in ext_deps if pkg in dep_origin_map ]
+    deps:[[str,str]] =  [ (pkg, dep_origin_map[pkg]) if pkg in dep_origin_map else (pkg, pkg) for pkg in ext_deps if not pkg.startswith('adjustkeys') and pkg not in python_native_deps ]
 
     pipreqs_deps:[str]
     with open('requirements.txt', 'r') as f:
         pipreqs_deps = list(map(lambda l: l.split('==')[0], f.readlines()))
 
-    python_native_deps:[str] = [ 'futures' ] # futures is included in the Python3 standard library, but not that of Python2 (it can be ignored)
     missing_deps:[str] = [ pkg for _,pkg in deps if pkg not in pipreqs_deps and pkg not in python_native_deps ]
     if missing_deps != []:
         print('WARNING: Some dependencies are missing from the mapping file:\n\t%s' % '\n\t'.join(missing_deps), file=stderr)
