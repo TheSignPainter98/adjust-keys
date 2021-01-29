@@ -165,9 +165,9 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
                 'height': int(uv_dims.y),
             }
             with Image(**image_params) as image:
-                png = image.make_blob(format='png')
-        with open(uv_image_path, 'wb+') as ofile:
-            ofile.write(png)
+                with image.convert('png') as converted:
+                    printi('Writing uv png to file')
+                    converted.save(filename=uv_image_path)
 
         # Add image to Blender's database if absent otherwise update
         printi('Importing image into blender')
