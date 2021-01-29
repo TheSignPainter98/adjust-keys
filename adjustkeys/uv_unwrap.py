@@ -15,21 +15,32 @@ def uv_unwrap(obj:Object, objw:Vector, partition_uv_by_face_direction:bool):
         #  ops.object.mode_set(mode='OBJECT')
 
     # Project vertices into uv-space, assuming upper-left most point is at
-    scale: float = uv_scale(partition_uv_by_face_direction, objw)
+    scale: Matrix = uv_scale(partition_uv_by_face_direction, objw)
+    scale_x:float = scale[0][0]
+    scale_y:float = scale[1][1]
     diag:[float] = diagonal(scale)
-    printi('Scaling uv image to fill space (%fx, %fy)' %(diag[0], diag[1]))
+    data = obj.data.uv_layers.active.data
+    vertices = obj.data.vertices
+
+    printi('Projecting uv map...')
     for face in obj.data.polygons:
-        front_face:bool = is_front_face(obj, face)
+        off:Vector = Vector((0.0, 1.0))
+        front_face:bool
+        if partition_uv_by_face_direction:
+            front_face = is_front_face(vertices, face)
+            off.y = 0.5 if front_face else 1.0
         for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-            place_off:float = 1.0 if not partition_uv_by_face_direction or front_face else 0.5
-            off:Vector = Vector((0.0, place_off))
-            obj.data.uv_layers.active.data[loop_idx].uv = scale @ obj.data.vertices[vert_idx].co.to_2d() + off
+            #  data[loop_idx].uv = scale @ vertices[vert_idx].co.to_2d() + off
+            uv = data[loop_idx].uv
+            co = vertices[vert_idx].co
+            uv.x = scale_x * co.x + off.x
+            uv.y = scale_y * co.y + off.y
 
     #  # Reinstate previous mode
     #  if origMode != 'OBJECT':
         #  ops.object.mode_set(mode=origMode)
 
-    printi('Done scaling uv image')
+    printi('Done projecting uv map')
 
 
 # Assume that the top left-most point occupied space is at (0,0)
@@ -43,8 +54,8 @@ def uv_scale(partition_uv_by_face_direction:bool, kbw:Vector) -> Matrix:
 
     return uv_scale_mat
 
-def is_front_face(o:Object, f:MeshPolygon) -> bool:
-    return max(map(lambda vi: o.data.vertices[vi].normal @ Vector((0.0, 1.0, 0.0)), f.vertices)) >= 0.0
+def is_front_face(vertices:list, f:MeshPolygon) -> bool:
+    return max(map(lambda vi: vertices[vi].normal @ Vector((0.0, 1.0, 0.0)), f.vertices)) >= 0.0
 
 # Assumes square matrix
 def diagonal(m:Matrix) -> [float]:
