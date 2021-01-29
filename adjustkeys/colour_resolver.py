@@ -1,12 +1,14 @@
 # Copyright (C) Edward Jones
 
+from .lazy_import import LazyImport
 from .log import printi
 from functools import partial
-from mathutils import Matrix, Vector
 from os import sep
 from os.path import basename, split, splitext
 from re import IGNORECASE, match, UNICODE
 from typing import Callable, List, Tuple, Union
+Matrix:type = LazyImport('mathutils', 'Matrix')
+Vector:type = LazyImport('mathutils', 'Vector')
 
 def colourise_layout(layout_file_path:str, layout:[dict], colour_map:[dict]) -> [dict]:
     layout_context:dict = {

@@ -1,8 +1,12 @@
 # Copyright (C) Edward Jones
 
 from .log import printi
-from bpy.types import MeshPolygon, Object
-from mathutils import Matrix, Vector
+from .lazy_import import LazyImport
+
+Matrix:type = LazyImport('mathutils', 'Matrix')
+MeshPolygon:type = LazyImport('bpy', 'types', 'MexhPolygon')
+Object:type = LazyImport('bpy', 'types', 'Object')
+Vector:type = LazyImport('mathutils', 'Vector')
 
 def uv_unwrap(obj:Object, objw:Vector, partition_uv_by_face_direction:bool):
     #  # Ensure object mode

@@ -19,7 +19,6 @@ from functools import reduce
 from os import remove
 from os.path import basename, exists, join
 from math import degrees
-from mathutils import Matrix, Vector
 from re import IGNORECASE, match
 from sys import argv, exit
 from types import LambdaType
@@ -29,8 +28,11 @@ from xml.dom.minidom import Element, parseString
 Collection:type = None
 if blender_available():
     from bpy import ops
-    from bpy.types import Collection, ShaderNodeTexImage
+    from bpy.types import Collection
     data = LazyImport('bpy', 'data')
+Matrix:type = LazyImport('mathutils', 'Matrix')
+Vector:type = LazyImport('mathutils', 'Vector')
+ShaderNodeTexImage:type = LazyImport('bpy', 'types', 'ShaderNodeTexImage')
 
 ##
 # @brief Entry point function, should be treated as the first thing called

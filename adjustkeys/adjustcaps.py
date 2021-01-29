@@ -17,13 +17,16 @@ from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from math import inf, pi
-from mathutils import Euler, Matrix, Vector
 from os import access, makedirs, remove, strerror, W_OK
 from os.path import basename, exists, expanduser, join
 from re import IGNORECASE, match
 from statistics import mean
 from sys import argv, exit
+
 Collection:type = None
+Euler:type = LazyImport('mathutils', 'Euler')
+Matrix:type = LazyImport('mathutils', 'Matrix')
+Vector:type = LazyImport('mathutils', 'Vector')
 if blender_available():
     from bpy import ops
     from bpy.path import abspath

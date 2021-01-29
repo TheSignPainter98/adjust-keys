@@ -1,8 +1,11 @@
 # Copyright (C) Edward Jones
 
+from .lazy_import import LazyImport
 from .log import printw
 from math import cos, inf, sin
-from mathutils import Matrix, Vector
+
+Matrix:type = LazyImport('mathutils', 'Matrix')
+Vector:type = LazyImport('mathutils', 'Vector')
 
 
 def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, scale:float) -> dict:

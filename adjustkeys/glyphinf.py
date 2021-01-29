@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # Copyright (C) Edward Jones
 
-from mathutils import Vector
+from .lazy_import import LazyImport
 from os.path import basename
 from re import search
 from xml.dom.minidom import Document, parse
+Vector:type = LazyImport('mathutils', 'Vector')
 
 numRegex:str = r'([0-9]*\.[0-9]+|[0-9]+)'
 

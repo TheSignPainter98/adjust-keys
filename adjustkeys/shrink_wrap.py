@@ -4,10 +4,10 @@ from .blender_available import blender_available
 from .lazy_import import LazyImport
 from .util import dict_union
 from math import log
-from mathutils import Matrix
 if blender_available():
     from bpy import types
     data = LazyImport('bpy', 'data')
+Matrix:type = LazyImport('mathutils', 'Matrix')
 
 from .log import printi, printw
 

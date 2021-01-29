@@ -17,7 +17,6 @@ from .scale import get_scale
 from .update_checker import check_update
 from .util import dict_union, safe_get
 from .yaml_io import read_yaml
-from mathutils import Vector
 from os import makedirs
 from os.path import exists, join
 from sys import argv, exit
@@ -25,6 +24,7 @@ from yaml import dump
 if blender_available():
     from bpy.types import Collection
     context = LazyImport('bpy', 'context')
+Vector:type = LazyImport('mathutils', 'Vector')
 
 
 def main(*args:[[str]]) -> dict:

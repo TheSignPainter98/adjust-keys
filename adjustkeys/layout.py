@@ -2,12 +2,15 @@
 
 from .log import die, printi, printw
 from .input_types import type_check_kle_layout
+from .lazy_import import LazyImport
 from .util import dict_union, key_subst, rem, safe_get
 from .yaml_io import read_yaml
 from math import cos, radians, sin
-from mathutils import Matrix, Vector
 from types import SimpleNamespace
 from re import match
+
+Matrix:type = LazyImport('mathutils', 'Matrix')
+Vector:type = LazyImport('mathutils', 'Vector')
 
 cap_deactivation_colour:str = '#cccccc'
 glyph_deactivation_colour:str = '#000000'
