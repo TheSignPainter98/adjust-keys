@@ -54,12 +54,12 @@ dependencies = [ DEPENDENCY_LIST ]
 dependencyWarningLines = [
         "Adjustkeys is missing some dependencies. You need to do TWO things:",
         "1. Install the ImageMagick library (manual, sorry)",
-        "2. Install python dependencies (automatic :D).",
+        "2. Install python dependencies (just one button press :D).",
         "ImageMagick is most easily installed by following the guide at %s" % imagemagick_url,
         "Before installing the python dependencies please note the following.",
         "Firstly, an internet connection will be used to download the necessary packages.",
         "Secondly, depending on the your setup, you may need to run Blender with elevated privileges. This is not advisable in the general case as external code will be executed, so please don’t do this if you don’t need to.",
-        "The following python packages (and their respective dependencies) are will be downloaded:"
+        "The following python packages (and their respective dependencies) will be downloaded:"
     ] + list(map(lambda d: '∙ %s' % d.package, sorted(dependencies, key=lambda d: d.package.lower()))) + [
         "To install these, press the button below and this message should disappear. DO NOT QUIT BLENDER WHILE DEPENDENCIES ARE INSTALLING as the side-effects of this action are undefined. Open the system console to see what’s happening behind the scenes."
     ]
@@ -138,7 +138,7 @@ class KCZA_PT_AdjustKeysPanel(Panel):
 dependencies_installed = False
 class KCZA_OT_InstallDependencies(Operator):
     bl_idname = 'kcza.install_dependencies'
-    bl_label = 'Install dependencies'
+    bl_label = 'Install python dependencies'
     bl_description = "Download and install the python packages required for adjustkeys, requires internet connection and maybe elevated permissions to install things depending on your setup"
     bl_options = {'REGISTER', 'INTERNAL'}
 
@@ -160,7 +160,7 @@ class KCZA_OT_InstallDependencies(Operator):
         dependencies_installed = True
         for cls in classes:
             register_class(cls)
-        self.report({'INFO'}, 'Finished installing Adjustkeys dependencies')
+        self.report({'INFO'}, 'Finished installing Adjustkeys python dependencies')
         print('=' * 80)
         return {'FINISHED'}
 
@@ -221,7 +221,7 @@ def register():
         global dependencies_installed
         dependencies_installed = True
     except ModuleNotFoundError as mnferr:
-        print('Adjustkeys addon detected missing dependencies detected, showing install button and warning panel.', str(mnferr))
+        print('Adjustkeys addon detected missing python dependencies, showing install button and warning panel.', str(mnferr))
         # Don't register everything else
         return
 
