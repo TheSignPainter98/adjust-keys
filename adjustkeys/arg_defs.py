@@ -341,7 +341,7 @@ args: [dict] = [{
     'action': 'store',
     'help': 'Control how much logging output is given, 0 for minimal, 2 for everything',
     'metavar': 'int',
-    'default': 1,
+    'default': 2,
     'label': 'Console-output verbosity',
     'type': int,
     'choices': [0, 1, 2]
