@@ -18,10 +18,6 @@ jobs:
         id: tag_name
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      - name: Ensure up-to-date apt packages and lists
-        run: |
-          sudo apt-get update
-          sudo apt-get upgrade
       - name: Install dependencies
         run: sudo apt-get install -y help2man python3-setuptools groff
       - name: Install Python wheel package
