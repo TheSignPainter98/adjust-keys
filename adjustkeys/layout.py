@@ -239,7 +239,7 @@ def compute_layout_dims(layout:[dict]) -> Vector:
     ymax = 0.0
 
     for cap in layout:
-        rot:Matrix = Matrix.Rotation(cap['rotation'], 2)
+        rot:Matrix = Matrix.Rotation(-cap['rotation'], 2)
         primary_dims:Vector = Vector((cap['width'], cap['height']))
         secondary_dims:Vector = Vector((cap['secondary-width'], cap['secondary-height']))
         kle_pos_mat:Matrix = Matrix([[cap['kle-pos'][0]] * 4, [cap['kle-pos'][1]] * 4])
