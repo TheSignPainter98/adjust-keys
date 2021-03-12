@@ -114,7 +114,7 @@ If you want to use `adjustkeys` through another python script for the purpose of
 ```python
 from sys import path
 path.append('/path/to/adjustkeys-bin')
-from adjustkeys import main as adjustkeys
+from adjustkeys.adjustkeys import main as adjustkeys
 ```
 
 4. Now, you can call `adjustkeys` as necessary from your script.
@@ -126,18 +126,18 @@ A complete python example is below.
 
 ```python
 from sys import path
-path.append('./adjustkeys-bin')
-from adjustkeys import main as adjustkeys
+path.append('/path/to/adjustkeys-bin')
+from adjustkeys.adjustkeys import main as adjustkeys
 
 adjustkeys_args:dict = {
-		'glyph_dir': './my-super-cool-glyphs/',
+		'glyph_dir': 'my-super-cool-glyphs/',
 		'layout_row_profiles_file': 'examples/layout_row_profiles-60.yml',
-		'layout_file': './my-exotic-layout.json'
+		'layout_file': './my-interesting-layout.json'
 	}
 inf:dict = adjustkeys(adjustkeys_args)
 ```
 
-Assuming that the `my-super-cool-glyphs` folder is full of (super cool) glyphs, that the `adjustkeys.zip` has been extracted into the same folder as the script above (hence `examples/` is next to it) and that `my-exotic-layout.json` exists and contains a valid [KLE][kle] layout.
+Assuming that the `my-super-cool-glyphs` folder is full of (super cool) glyphs, that the `adjustkeys.zip` has been extracted into the same folder as the script above (hence `examples/` is next to it) and that `my-interesting-layout.json` exists and contains a valid [KLE][kle] layout.
 
 ### Uninstalling
 
