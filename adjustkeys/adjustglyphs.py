@@ -40,7 +40,7 @@ ShaderNodeTexImage:type = LazyImport('bpy', 'types', 'ShaderNodeTexImage')
 # @param args:[str] Command line arguments
 #
 # @return Zero if and only if the program is to exit successfully
-def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
+def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_point:Vector, layout_max_point:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
     scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
@@ -57,13 +57,13 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:
             remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
             if glyph_style:
                 remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], glyph_style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_dims)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], glyph_style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_min_point, layout_max_point)
 
     svg_dims:Vector
     if pargs.partition_uv_by_face_direction:
-        svg_dims = pargs.glyph_unit_length * Matrix.Diagonal((1, 2)) @ layout_dims
+        svg_dims = pargs.glyph_unit_length * Matrix.Diagonal((1, 2)) @ (layout_max_point - layout_min_point)
     else:
-        svg_dims = pargs.glyph_unit_length * layout_dims
+        svg_dims = pargs.glyph_unit_length * (layout_max_point - layout_min_point)
 
     svg: str = '\n'.join([
         '<svg width="%d" height="%d" viewbox="0 0 %d %d" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -77,7 +77,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_dims:
         if pargs.adjust_glyphs:
             svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
     else:
-        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_dims, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
+        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_min_point, layout_max_point, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
 
 
     printi('Successfully imported glyphs')
@@ -128,7 +128,7 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapMode
 
     return svgObjectNames
 
-def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_dims:Vector, uv_res:float, use_custom_image:bool, partition_uv_by_face_direction:bool):
+def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_min_point:Vector, layout_max_point:Vector, uv_res:float, use_custom_image:bool, partition_uv_by_face_direction:bool):
     # Convert to png
     #  from cairosvg import svg2png
     #  m:float = min((Matrix.Diagonal((1, 2)) @ layout_dims) if partition_uv_by_face_direction else layout_dims)
@@ -146,7 +146,7 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
 
     # Compute uv image dimensions
     partition_transform:Matrix = Matrix.Diagonal((1,2)) if partition_uv_by_face_direction else Matrix.Identity(2)
-    partition_transformed_layout_dims:Vector = partition_transform @ layout_dims
+    partition_transformed_layout_dims:Vector = partition_transform @ (layout_max_point - layout_min_point)
     m:float = min(partition_transformed_layout_dims)
     uv_dims:Vector = (uv_res / m) * partition_transformed_layout_dims
 
@@ -337,7 +337,7 @@ def get_style(key:dict, style_key:str) -> str:
         printw('Style key "%s" was never applied to key "%s"' % (style_key, key['key']))
         return ''
 
-def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_dims:Vector) -> [str]:
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_min_point:Vector, layout_max_point:Vector) -> [str]:
     # Prepare glyph header contnet
     glyph_transformations:[str] = [
             'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
@@ -359,7 +359,7 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
         cap_svg_content:[str] = generate_cap_svg_content(glyph, ulen)
 
         # Compute colouring for the top
-        cap_top_pos:Vector = ulen * glyph['kle-pos']
+        cap_top_pos:Vector = ulen * (glyph['kle-pos'] - layout_min_point)
         cap_top_transformations:[str] = [
             'translate(%f %f)' % (cap_top_pos.x, cap_top_pos.y),
             'rotate(%f)' % -degrees(glyph['rotation'])
@@ -368,7 +368,7 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
 
         # Compute colouring for the bottom if separate
         if partition_uv_by_face_direction:
-            cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ layout_dims)
+            cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ (layout_max_point - layout_min_point) - layout_min_point)
             cap_bottom_transformations:[str] = [
                 'translate(%f %f)' % (cap_bottom_pos.x, cap_bottom_pos.y),
                 'rotate(%f)' % -degrees(glyph['rotation'])
