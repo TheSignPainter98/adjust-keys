@@ -235,20 +235,24 @@ def compute_layout_dims(layout:[dict]) -> Vector:
         ])
 
     # Initial extreme values
-    xmax = 0.0
-    ymax = 0.0
+    xmin = 0.0
+    ymin = 0.0
+    xmax = 1.0
+    ymax = 1.0
 
     for cap in layout:
-        rot:Matrix = Matrix.Rotation(cap['rotation'], 2)
+        rot:Matrix = Matrix.Rotation(-cap['rotation'], 2)
         primary_dims:Vector = Vector((cap['width'], cap['height']))
         secondary_dims:Vector = Vector((cap['secondary-width'], cap['secondary-height']))
         kle_pos_mat:Matrix = Matrix([[cap['kle-pos'][0]] * 4, [cap['kle-pos'][1]] * 4])
 
-        # This method doesn't take into account extremely weird keycap shapes (which use x2, y2 keys but it should work for everything which actually exists)
+        # This method doesn't take into account extremely weird keycap shapes (which use x2, y2 keys but it should work for everything which actually exists) and which doesn't have an iso-enter in the very bottom right
         primary_points:Matrix = kle_pos_mat + rot @ point_enumerator(primary_dims)
         secondary_points:Matrix = kle_pos_mat + rot @ point_enumerator(secondary_dims)
 
+        xmin = min(xmin, *primary_points[0], *secondary_points[0])
+        ymin = min(ymin, *primary_points[1], *secondary_points[1])
         xmax = max(xmax, *primary_points[0], *secondary_points[0])
         ymax = max(ymax, *primary_points[1], *secondary_points[1])
 
-    return Vector((xmax, ymax))
+    return (Vector((xmin, ymin)), Vector((xmax, ymax)))

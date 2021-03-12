@@ -88,7 +88,9 @@ def adjustkeys(*args: [[str]]) -> dict:
     layout:[dict] = []
     if pargs.adjust_glyphs or pargs.adjust_caps:
         layout:[dict] = get_layout(pargs.layout_file, profile_data, pargs.apply_colour_map)
-    layout_dims:Vector = compute_layout_dims(layout)
+    layout_extreme_points:Tuple[Vector, Vector] = compute_layout_dims(layout)
+    layout_min_point:Vector = layout_extreme_points[0]
+    layout_max_point:Vector = layout_extreme_points[1]
 
     # Read colour-map file
     colour_map:[dict] = None
@@ -110,7 +112,7 @@ def adjustkeys(*args: [[str]]) -> dict:
     # Adjust model positions
     model_data:dict = {}
     if pargs.adjust_caps:
-        model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, layout_dims, pargs)
+        model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, layout_min_point, layout_max_point, pargs)
 
     glyph_data:dict = {}
     if pargs.glyph_application_method != 'uv-map' or pargs.adjust_caps:
@@ -122,7 +124,7 @@ def adjustkeys(*args: [[str]]) -> dict:
         uv_material_name:str = safe_get(model_data, 'uv-material-name')
 
         # Adjust glyph positions
-        glyph_data = adjust_glyphs(glyph_layout, profile_data, model_name, layout_dims, collection, glyph_map, imgNode, uv_image_path, uv_material_name, pargs)
+        glyph_data = adjust_glyphs(glyph_layout, profile_data, model_name, layout_min_point, layout_max_point, collection, glyph_map, imgNode, uv_image_path, uv_material_name, pargs)
 
     # Return info
     return remove_private_data(dict_union(collection_data, model_data, glyph_data))

@@ -35,7 +35,7 @@ if blender_available():
     context = LazyImport('bpy', 'context')
 
 
-def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, layout_dims:Vector, pargs:Namespace) -> dict:
+def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection:Collection, layout_min_point:Vector, layout_max_point:Vector, pargs:Namespace) -> dict:
     # Resolve output unique output name
     printi('Getting required keycap data...')
     caps: [dict] = get_data(layout, pargs.cap_dir, colour_map, collection, profile_data)
@@ -100,7 +100,8 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
 
         if pargs.glyph_application_method == 'uv-map':
             printi('UV-unwrapping cap-model')
-            uv_unwrap(obj, profile_data['unit-length'] * profile_data['scale'] * layout_dims, pargs.partition_uv_by_face_direction)
+            layout_scale:float = profile_data['unit-length'] * profile_data['scale']
+            uv_unwrap(obj, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
 
     return { 'keycap-model-name': importedModelName, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
 
