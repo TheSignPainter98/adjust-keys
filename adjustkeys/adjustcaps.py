@@ -186,7 +186,9 @@ def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, mod
                     for n in data.materials[uv_material_name].node_tree.nodes
                     if n.type == 'TEX_IMAGE'
                         and n.image is not None
-                        and n.image.name == bpy_internal_uv_image_name ],
+                        and n.image.name is not None
+                        and n.image.name.endswith(bpy_internal_uv_image_name)
+                ],
                 'No image node for "%s" found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name),
                 'Multiple image nodes for "%s" were found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name)
             )

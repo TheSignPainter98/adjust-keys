@@ -171,11 +171,7 @@ def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_im
 
         # Add image to Blender's database if absent otherwise update
         printi('Importing image into blender')
-        if bpy_internal_uv_image_name not in data.images:
-            imgNode.image = data.images.load(uv_image_path, check_existing=False)
-        else:
-            imgNode.image = data.images[bpy_internal_uv_image_name]
-            imgNode.image.reload()
+        imgNode.image = data.images.load(uv_image_path, check_existing=False)
     else:
         printi('Creating new blank uv image')
         imgNode.image = data.images.new(bpy_internal_uv_image_name, width=int(uv_dims.x), height=int(uv_dims.y))
