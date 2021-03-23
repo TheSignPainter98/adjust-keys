@@ -45,7 +45,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_p
     scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
-    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
+    placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, layout_min_point, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
 
     for i in range(len(placed_glyphs)):
         glyph_style:str = get_style(placed_glyphs[i], 'glyph-style')
