@@ -8,14 +8,14 @@ Matrix:type = LazyImport('mathutils', 'Matrix')
 Vector:type = LazyImport('mathutils', 'Vector')
 
 
-def resolve_glyph_position(data: dict, glyph_ulen: float, cap_ulen:float, scale:float) -> dict:
+def resolve_glyph_position(data: dict, layout_min_point:Vector, glyph_ulen: float, cap_ulen:float, scale:float) -> dict:
     ret: dict = dict(data)
 
     # Compute offset from top-left as if ret.rotation == 0
     offset:Vector = Matrix.Scale(glyph_ulen / cap_ulen, 2) @ Vector((ret['p-off-x'], ret['p-off-y'])) - ret['glyph-offset']
 
     # Apply offset with rotation
-    ret['glyph-pos'] = glyph_ulen * ret['kle-pos'] + Matrix.Rotation(-ret['rotation'], 2) @ offset
+    ret['glyph-pos'] = glyph_ulen * (ret['kle-pos'] - layout_min_point) + Matrix.Rotation(-ret['rotation'], 2) @ offset
     return ret
 
 
