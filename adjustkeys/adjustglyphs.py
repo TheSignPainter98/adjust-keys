@@ -42,7 +42,6 @@ ShaderNodeTexImage:type = LazyImport('bpy', 'types', 'ShaderNodeTexImage')
 # @return Zero if and only if the program is to exit successfully
 def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_point:Vector, layout_max_point:Vector, collection:Collection, glyph_map:dict, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, pargs:Namespace) -> [str]:
     glyph_data: [dict] = collect_data(layout, profile_data, pargs.glyph_dir, glyph_map, pargs.iso_enter_glyph_pos, pargs.alignment)
-    scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     offset_resolved_glyphs: [dict] = map(lambda glyph: resolve_glyph_offset(glyph, pargs.alignment if glyph['key'] != 'iso-enter' else pargs.iso_enter_glyph_pos, pargs.glyph_unit_length), glyph_data)
     placed_glyphs: [dict] = list(map(lambda glyph: resolve_glyph_position(glyph, layout_min_point, pargs.glyph_unit_length, profile_data['unit-length'], profile_data['scale']), offset_resolved_glyphs))
@@ -75,7 +74,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_p
     svgObjectNames:[str] = None
     if pargs.glyph_application_method == 'shrinkwrap':
         if pargs.adjust_glyphs:
-            svgObjectNames = import_and_align_glyphs_as_curves(scale, profile_data, model_name, collection, svg, pargs)
+            svgObjectNames = import_and_align_glyphs_as_curves(profile_data, layout_min_point, model_name, collection, svg, pargs)
     else:
         import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_min_point, layout_max_point, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
 
@@ -84,8 +83,9 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_p
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
 
-def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapModelName:str, collection:Collection, svg:str, pargs:Namespace):
+def import_and_align_glyphs_as_curves(profile_data:dict, layout_min_point:Vector, keycapModelName:str, collection:Collection, svg:str, pargs:Namespace):
     adjusted_svg_file_name:str = get_temp_file_name()
+    scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
 
     printi('Writing svg to file "%s"' % adjusted_svg_file_name)
     with open(adjusted_svg_file_name, 'w+') as f:
@@ -106,10 +106,19 @@ def import_and_align_glyphs_as_curves(scale:float, profile_data:dict, keycapMode
     data.collections.remove(data.collections[collectionName])
 
     # Apprpriately scale the objects
-    printi('Scaling glyphs')
+    printi('Scaling and translating glyphs')
     for svgObjectName in svgObjectNames:
         svgObject = data.objects[svgObjectName]
-        svgObject.data.transform(Matrix.Scale(scale * profile_data['scale'], 4))
+        scale_mat:Matrix = Matrix.Scale(scale * profile_data['scale'], 4)
+        translation_mat:Matrix
+        if layout_min_point.magnitude == 0:
+            translation_mat = Matrix.Identity(4)
+        else:
+            translation_vec:Vector = Matrix.Diagonal((1, -1, 1)) @ layout_min_point.to_3d()
+            translation_mat = Matrix.Translation(translation_vec)
+
+        svgObject.data.transform(translation_mat @ scale_mat)
+
 
     # Clean away temporary files.
     if exists(adjusted_svg_file_name):
