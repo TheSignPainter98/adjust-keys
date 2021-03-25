@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from math import inf, pi
 from os import access, makedirs, remove, strerror, W_OK
-from os.path import basename, exists, expanduser, join
+from os.path import abspath as os_abspath, basename, exists, expanduser, join
 from re import IGNORECASE, match
 from statistics import mean
 from sys import argv, exit
@@ -58,9 +58,9 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
             colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
         else:
             uv_image_base:str = capmodel_name + '_uv_image.png'
-            uv_image_path = abspath('//' + uv_image_base)
+            uv_image_path = os_abspath(abspath('//' + uv_image_base))
             if not check_permissions(uv_image_path, W_OK):
-                uv_image_path = expanduser(join('~', 'Downloads', uv_image_base))
+                uv_image_path = os_abspath(expanduser(join('~', 'Downloads', uv_image_base)))
 
             printi('Handling material')
             (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, caps)
