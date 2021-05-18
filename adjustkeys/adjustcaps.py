@@ -14,6 +14,8 @@ from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_fie
 from .uv_unwrap import uv_unwrap
 from .yaml_io import read_yaml
 from argparse import Namespace
+from bmesh import new as new_mesh
+from bmesh.types import BMesh
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from math import inf, pi
@@ -68,42 +70,35 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
                 uv_material_name = colourMaterials[0]
 
         printi('Joining keycap models into a single object')
-        ctx: dict = {}
-        joinTarget:Object = min(caps, key=lambda c: (c['cap-pos'].x, c['cap-pos'].y))['cap-obj']
-        ctx['object'] = ctx['active_object'] = joinTarget
-        ctx['selected_objects'] = ctx[
-            'selected_editable_objects'] = importedCapObjects
-        ops.object.join(ctx)
+        capmodel_mesh_tmp:BMesh = new_mesh()
+        for importedCapObject in importedCapObjects:
+            # Transform the object and its normals
+            importedCapObject.data.transform(importedCapObject.matrix_world)
 
-        printi('Renaming keycap model')
-        objectsPreRename: [str] = data.objects.keys()
-        joinTarget.name = joinTarget.data.name = capmodel_name
-        objectsPostRename: [str] = data.objects.keys()
-        importedModelName = get_only(
-                list_diff(objectsPostRename, objectsPreRename), 'No new id was created by blender when renaming the keycap model', 'Multiple new ids were created when renaming the keycap model (%d new): %s')
-        printi('Keycap model renamed to "%s"' % importedModelName)
+            # Append the single cap to the model for the entire layout
+            capmodel_mesh_tmp.from_mesh(importedCapObject.data)
 
-        printi('Ensuring imported cap model object only linked in the new collection')
-        imp_obj:object = data.objects[importedModelName]
-        for coll in imp_obj.users_collection:
-            coll.objects.unlink(imp_obj)
-        collection.objects.link(imp_obj)
+            # Remove the now-unused single-cap object
+            data.objects.remove(importedCapObject)
+        capmodel_mesh:BMesh = data.meshes.new(capmodel_name)
+        capmodel_mesh_tmp.to_mesh(capmodel_mesh)
+        capmodel_mesh.use_auto_smooth = True
+        capmodel_object:Object = data.objects.new(capmodel_name, capmodel_mesh)
+        collection.objects.link(capmodel_object)
+        capmodel_mesh_tmp.free()
 
         printi('Updating cap-model scaling')
-        obj:Object = data.objects[importedModelName]
-        obj.data.transform(obj.matrix_world)
-        obj.matrix_world = Matrix.Scale(profile_data['scale'], 4)
-
-        printi('Applying outstanding cap-model transforms')
-        obj.data.transform(obj.matrix_world)
-        obj.matrix_world = Matrix.Identity(4)
+        capmodel_object.data.transform(capmodel_object.matrix_world)
+        capmodel_object.matrix_world = Matrix.Scale(profile_data['scale'], 4)
+        capmodel_object.data.transform(capmodel_object.matrix_world)
+        capmodel_object.matrix_world = Matrix.Identity(4)
 
         if pargs.glyph_application_method == 'uv-map':
             printi('UV-unwrapping cap-model')
             layout_scale:float = profile_data['unit-length'] * profile_data['scale']
-            uv_unwrap(obj, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
+            uv_unwrap(capmodel_object, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
 
-    return { 'keycap-model-name': importedModelName, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
+    return { 'keycap-model-name': capmodel_name, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
 
 def check_permissions(fpath:str, perms:int) -> bool:
     try:
