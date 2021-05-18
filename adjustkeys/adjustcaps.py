@@ -50,25 +50,9 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
     uv_image_path:str = None
     uv_material_name:str = None
     colourMaterials:list = []
-    importedModelName: str = None
     importedCapObjects:[Object] = list(map(lambda cap: cap['cap-obj'], caps))
     imgNode:ShaderNodeTexImage = None
     if len(importedCapObjects) != 0:
-        # If shrink-wrapping, apply materials before the join
-        if pargs.glyph_application_method == 'shrinkwrap':
-            printi('Preparing individual materials')
-            colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
-        else:
-            uv_image_base:str = capmodel_name + '_uv_image.png'
-            uv_image_path = os_abspath(abspath('//' + uv_image_base))
-            if not check_permissions(uv_image_path, W_OK):
-                uv_image_path = os_abspath(expanduser(join('~', 'Downloads', uv_image_base)))
-
-            printi('Handling material')
-            (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, caps)
-            if len(colourMaterials) != 0:
-                uv_material_name = colourMaterials[0]
-
         printi('Joining keycap models into a single object')
         capmodel_mesh_tmp:BMesh = new_mesh()
         for importedCapObject in importedCapObjects:
@@ -86,6 +70,21 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         capmodel_object:Object = data.objects.new(capmodel_name, capmodel_mesh)
         collection.objects.link(capmodel_object)
         capmodel_mesh_tmp.free()
+
+        # If shrink-wrapping, apply materials before the join
+        if pargs.glyph_application_method == 'shrinkwrap':
+            printi('Preparing individual materials')
+            colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
+        else:
+            uv_image_base:str = capmodel_name + '_uv_image.png'
+            uv_image_path = os_abspath(abspath('//' + uv_image_base))
+            if not check_permissions(uv_image_path, W_OK):
+                uv_image_path = os_abspath(expanduser(join('~', 'Downloads', uv_image_base)))
+
+            printi('Handling material')
+            (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, capmodel_object)
+            if len(colourMaterials) != 0:
+                uv_material_name = colourMaterials[0]
 
         printi('Updating cap-model scaling')
         capmodel_object.data.transform(capmodel_object.matrix_world)
@@ -147,7 +146,7 @@ def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict
     return colourMaterialsList
 
 
-def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, caps:[dict]) -> [str]:
+def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, capmodel:Object) -> [str]:
     uv_material_name:str = model_name + '_material'
     if uv_material_name not in data.materials or not use_existing_materials:
         # Overwrite material if not using existing ones!
@@ -188,8 +187,7 @@ def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, mod
                 'Multiple image nodes for "%s" were found in material "%s" when trying to use existing materials for uv' % (bpy_internal_uv_image_name, uv_material_name)
             )
 
-    for cap in caps:
-        cap['cap-obj'].active_material = data.materials[uv_material_name]
+    capmodel.active_material = data.materials[uv_material_name]
 
     return (imgNode, [ uv_material_name ])
 
