@@ -23,6 +23,7 @@ from re import IGNORECASE, match
 from statistics import mean
 from sys import argv, exit
 
+Object:type = None
 Collection:type = None
 Euler:type = LazyImport('mathutils', 'Euler')
 Matrix:type = LazyImport('mathutils', 'Matrix')
