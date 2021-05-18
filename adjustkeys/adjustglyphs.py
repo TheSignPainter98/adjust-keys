@@ -12,7 +12,6 @@ from .log import die, init_logging, printi, printw, print_warnings
 from .path import get_temp_file_name, walk
 from .positions import resolve_glyph_position
 from .scale import get_scale
-from .shrink_wrap import shrink_wrap_glyphs_to_keys
 from .util import concat, dict_union, frange, get_dicts_with_duplicate_field_values, get_only, inner_join, right_outer_join, list_diff, rob_rem, safe_get
 from .yaml_io import read_yaml, write_yaml
 from functools import reduce
@@ -56,7 +55,7 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_p
             remove_guide_from_cap(placed_glyphs[i]['svg'], pargs.glyph_part_ignore_regex)
             if glyph_style:
                 remove_fill_from_svg(placed_glyphs[i]['svg'])
-        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], glyph_style, pargs.glyph_unit_length, pargs.glyph_application_method, pargs.partition_uv_by_face_direction, layout_min_point, layout_max_point)
+        placed_glyphs[i]['vector'] = get_glyph_vector_data(placed_glyphs[i], glyph_style, pargs.glyph_unit_length, pargs.partition_uv_by_face_direction, layout_min_point, layout_max_point)
 
     svg_dims:Vector
     if pargs.partition_uv_by_face_direction:
@@ -72,70 +71,12 @@ def adjust_glyphs(layout:[dict], profile_data:dict, model_name:str, layout_min_p
             if 'vector' in p else '', placed_glyphs)) + ['</svg>'])
 
     svgObjectNames:[str] = None
-    if pargs.glyph_application_method == 'shrinkwrap':
-        if pargs.adjust_glyphs:
-            svgObjectNames = import_and_align_glyphs_as_curves(profile_data, layout_min_point, model_name, collection, svg, pargs)
-    else:
-        import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_min_point, layout_max_point, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
+    import_and_align_glyphs_as_raster(svg, imgNode, uv_image_path, uv_material_name, layout_min_point, layout_max_point, pargs.uv_res, pargs.adjust_glyphs or pargs.apply_colour_map, pargs.partition_uv_by_face_direction)
 
 
     printi('Successfully imported glyphs')
 
     return { 'glyph-names': svgObjectNames } if svgObjectNames is not None else {}
-
-def import_and_align_glyphs_as_curves(profile_data:dict, layout_min_point:Vector, keycapModelName:str, collection:Collection, svg:str, pargs:Namespace):
-    adjusted_svg_file_name:str = get_temp_file_name()
-    scale:float = get_scale(safe_get(profile_data, 'unit-length', default=1.0), pargs.glyph_unit_length, pargs.svg_units_per_mm)
-
-    printi('Writing svg to file "%s"' % adjusted_svg_file_name)
-    with open(adjusted_svg_file_name, 'w+') as f:
-        f.write(svg)
-
-    printi('Importing svg into blender')
-    collectionsPreImport:[str] = data.collections.keys()
-    objectsPreImport: [str] = data.objects.keys()
-    ops.import_curve.svg(filepath=adjusted_svg_file_name)
-    objectsPostImport: [str] = data.objects.keys()
-    collectionsPostImport:[str] = data.collections.keys()
-    svgObjectNames:[str] = list_diff(objectsPostImport, objectsPreImport)
-    collectionName:str = get_only(list_diff(collectionsPostImport, collectionsPreImport), 'No collections added when importing glyphs', 'Multiple collections added whilst importing glyphs, got %d: %s')
-
-    printi("Adding svg into the correct collection")
-    for svgObjectName in svgObjectNames:
-        collection.objects.link(data.objects[svgObjectName])
-    data.collections.remove(data.collections[collectionName])
-
-    # Apprpriately scale the objects
-    printi('Scaling and translating glyphs')
-    for svgObjectName in svgObjectNames:
-        svgObject = data.objects[svgObjectName]
-        scale_mat:Matrix = Matrix.Scale(scale * profile_data['scale'], 4)
-        translation_mat:Matrix
-        if layout_min_point.magnitude == 0:
-            translation_mat = Matrix.Identity(4)
-        else:
-            translation_vec:Vector = Matrix.Diagonal((1, -1, 1)) @ layout_min_point.to_3d()
-            translation_mat = Matrix.Translation(translation_vec)
-
-        svgObject.data.transform(translation_mat @ scale_mat)
-
-
-    # Clean away temporary files.
-    if exists(adjusted_svg_file_name):
-        printi('Cleaning away the placed-glyph svg file')
-        remove(adjusted_svg_file_name)
-
-    # Shrink-wrap if models were imported
-    if pargs.adjust_caps:
-        subsurf_params:dict = {
-                'viewport-levels': pargs.subsurf_viewport_levels,
-                'render-levels': pargs.subsurf_render_levels,
-                'quality': pargs.subsurf_quality,
-                'adaptive-subsurf': pargs.adaptive_subsurf
-            }
-        shrink_wrap_glyphs_to_keys(svgObjectNames, keycapModelName, profile_data['unit-length'], pargs.shrink_wrap_offset, subsurf_params, profile_data['scale'])
-
-    return svgObjectNames
 
 def import_and_align_glyphs_as_raster(svg:str, imgNode:ShaderNodeTexImage, uv_image_path:str, uv_material_name:str, layout_min_point:Vector, layout_max_point:Vector, uv_res:float, use_custom_image:bool, partition_uv_by_face_direction:bool):
     # Convert to png
@@ -342,7 +283,7 @@ def get_style(key:dict, style_key:str) -> str:
         printw('Style key "%s" was never applied to key "%s"' % (style_key, key['key']))
         return ''
 
-def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_method:float, partition_uv_by_face_direction:bool, layout_min_point:Vector, layout_max_point:Vector) -> [str]:
+def get_glyph_vector_data(glyph:dict, style:str, ulen:float, partition_uv_by_face_direction:bool, layout_min_point:Vector, layout_max_point:Vector) -> [str]:
     # Prepare glyph header contnet
     glyph_transformations:[str] = [
             'translate(%f %f)' % (glyph['glyph-pos'].x, glyph['glyph-pos'].y),
@@ -360,29 +301,28 @@ def get_glyph_vector_data(glyph:dict, style:str, ulen:float, glyph_application_m
         glyph_svg_data = [ '<g %s>' % ' '.join(glyph_svg_header_content) ] + glyph_svg_content + [ '</g>' ]
 
     cap_svg_data:[str] = []
-    if glyph_application_method == 'uv-map':
-        cap_svg_content:[str] = generate_cap_svg_content(glyph, ulen)
+    cap_svg_content:[str] = generate_cap_svg_content(glyph, ulen)
 
-        # Compute colouring for the top
-        cap_top_pos:Vector = ulen * (glyph['kle-pos'] - layout_min_point)
-        cap_top_transformations:[str] = [
-            'translate(%f %f)' % (cap_top_pos.x, cap_top_pos.y),
+    # Compute colouring for the top
+    cap_top_pos:Vector = ulen * (glyph['kle-pos'] - layout_min_point)
+    cap_top_transformations:[str] = [
+        'translate(%f %f)' % (cap_top_pos.x, cap_top_pos.y),
+        'rotate(%f)' % -degrees(glyph['rotation'])
+    ]
+    cap_top_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_top_transformations) ]
+
+    # Compute colouring for the bottom if separate
+    if partition_uv_by_face_direction:
+        cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ (layout_max_point - layout_min_point) - layout_min_point)
+        cap_bottom_transformations:[str] = [
+            'translate(%f %f)' % (cap_bottom_pos.x, cap_bottom_pos.y),
             'rotate(%f)' % -degrees(glyph['rotation'])
         ]
-        cap_top_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_top_transformations) ]
+        cap_bottom_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_bottom_transformations) ]
 
-        # Compute colouring for the bottom if separate
-        if partition_uv_by_face_direction:
-            cap_bottom_pos:Vector = ulen * (glyph['kle-pos'] + Matrix.Diagonal((0, 1)) @ (layout_max_point - layout_min_point) - layout_min_point)
-            cap_bottom_transformations:[str] = [
-                'translate(%f %f)' % (cap_bottom_pos.x, cap_bottom_pos.y),
-                'rotate(%f)' % -degrees(glyph['rotation'])
-            ]
-            cap_bottom_svg_header:[str] = [ 'transform="%s"' % ' '.join(cap_bottom_transformations) ]
-
-        cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_top_svg_header) ] + cap_svg_content + [ '</g>' ]
-        if partition_uv_by_face_direction:
-            cap_svg_data += [ '<g %s>' % ' '.join(cap_bottom_svg_header) ] + cap_svg_content + [ '</g>' ]
+    cap_svg_data:[str] = [ '<g %s>' % ' '.join(cap_top_svg_header) ] + cap_svg_content + [ '</g>' ]
+    if partition_uv_by_face_direction:
+        cap_svg_data += [ '<g %s>' % ' '.join(cap_bottom_svg_header) ] + cap_svg_content + [ '</g>' ]
 
     # Combine and return
     return ['<g>'] + cap_svg_data + glyph_svg_data + ['</g>']

@@ -71,20 +71,12 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         collection.objects.link(capmodel_object)
         capmodel_mesh_tmp.free()
 
-        # If shrink-wrapping, apply materials before the join
-        if pargs.glyph_application_method == 'shrinkwrap':
-            printi('Preparing individual materials')
-            colourMaterials = generate_shrink_wrap_materials(pargs.use_existing_materials, colour_map, caps)
-        else:
-            uv_image_base:str = capmodel_name + '_uv_image.png'
-            uv_image_path = os_abspath(abspath('//' + uv_image_base))
-            if not check_permissions(uv_image_path, W_OK):
-                uv_image_path = os_abspath(expanduser(join('~', 'Downloads', uv_image_base)))
-
-            printi('Handling material')
-            (imgNode, colourMaterials) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, capmodel_object)
-            if len(colourMaterials) != 0:
-                uv_material_name = colourMaterials[0]
+        printi('Handling material')
+        uv_image_base:str = capmodel_name + '_uv_image.png'
+        uv_image_path = os_abspath(abspath('//' + uv_image_base))
+        if not check_permissions(uv_image_path, W_OK):
+            uv_image_path = os_abspath(expanduser(join('~', 'Downloads', uv_image_base)))
+        (imgNode, uv_material_name) = generate_uv_map_materials(pargs.use_existing_materials, uv_image_path, capmodel_name, capmodel_object)
 
         printi('Updating cap-model scaling')
         capmodel_object.data.transform(capmodel_object.matrix_world)
@@ -92,10 +84,9 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         capmodel_object.data.transform(capmodel_object.matrix_world)
         capmodel_object.matrix_world = Matrix.Identity(4)
 
-        if pargs.glyph_application_method == 'uv-map':
-            printi('UV-unwrapping cap-model')
-            layout_scale:float = profile_data['unit-length'] * profile_data['scale']
-            uv_unwrap(capmodel_object, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
+        printi('UV-unwrapping cap-model')
+        layout_scale:float = profile_data['unit-length'] * profile_data['scale']
+        uv_unwrap(capmodel_object, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
 
     return { 'keycap-model-name': capmodel_name, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
 
@@ -114,39 +105,7 @@ def generate_capmodel_name(intended_name:str) -> str:
         name = intended_name + '-' + str(i)
     return name
 
-def generate_shrink_wrap_materials(use_existing_materials:bool, colour_map:[dict], caps:[dict]) -> [str]:
-    colourMaterialsList:list = []
-    colourMaterialsDict:dict = {}
-    if colour_map is not None:
-        colourMaterialsDict = { m['name'] : m for m in colour_map if 'cap-style' in m }
-        for m in colourMaterialsDict.values():
-            colourStr:str = str(m['cap-style'])
-            colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-            if m['name'] not in data.materials.keys() or not use_existing_materials:
-                m['material'] = data.materials.new(name=m['name'])
-                m['material'].diffuse_color = colour
-                colourMaterialsList.append(m['material'].name)
-            else:
-                m['material'] = data.materials[m['name']]
-                colourMaterialsList.append(m['name'])
-
-    # Apply materials
-    printi('Applying material colourings...')
-    for cap in caps:
-        if cap['cap-style-rule'] is not None:
-            colourRule:str = cap['cap-style-rule']
-            colourStr:str = cap['cap-style']
-            if colourRule not in colourMaterialsDict:
-                colour:[float,float,float] = tuple([ float(int(colourStr[i:i+2], 16)) / 255.0 for i in range(0, len(colourStr), 2) ] + [1.0])
-                colourMaterialsDict[colourRule]['material'] = data.materials.new(name=colourRule)
-                colourMaterialsDict[colourRule]['material'].diffuse_color = colour
-            cap['cap-obj'].data.materials.append(colourMaterialsDict[colourRule]['material'])
-            cap['cap-obj'].active_material = colourMaterialsDict[colourRule]['material']
-
-    return colourMaterialsList
-
-
-def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, capmodel:Object) -> [str]:
+def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, model_name:str, capmodel:Object) -> [str, str]:
     uv_material_name:str = model_name + '_material'
     if uv_material_name not in data.materials or not use_existing_materials:
         # Overwrite material if not using existing ones!
@@ -189,7 +148,7 @@ def generate_uv_map_materials(use_existing_materials:str, uv_image_path:str, mod
 
     capmodel.active_material = data.materials[uv_material_name]
 
-    return (imgNode, [ uv_material_name ])
+    return (imgNode, uv_material_name)
 
 
 def get_data(layout: [dict], cap_dir: str, colour_map:[dict], collection:Collection, profile_data:dict) -> [dict]:

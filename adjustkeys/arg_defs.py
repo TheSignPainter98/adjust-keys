@@ -240,31 +240,6 @@ args: [dict] = [{
     'label': 'List current options in YAML',
     'op': True
 }, {
-    'dest': 'glyph_application_method',
-    'short': '-M',
-    'long': '--glyph-application-method',
-    'action': 'store',
-    'help': 'Select the method of attaching the glyphs to the keys',
-    'default': 'uv-map',
-    'choices': [
-        'shrinkwrap',
-        'uv-map'
-    ],
-    'type': str,
-    'label': 'Glyph application method'
-}, {
-    'dest': 'shrink_wrap_offset',
-    'short': '-d',
-    'long': '--shrink-wrap-offset',
-    'action': 'store',
-    'help': 'Specify the offset above the surfave used by the shrink wrap',
-    'metavar': 'mm',
-    'default': 0.0001,
-    'label': 'Shrink wrap offset',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 1.0,
-}, {
     'dest': 'subsurf_viewport_levels',
     'short': '-Fv',
     'long': '--subsurf-viewport-levels',
