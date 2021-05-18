@@ -142,6 +142,7 @@ def dependencies(insertion_file:str) -> [[str, str]]:
     python_native_deps:[str] = [ # there must be a better way of doing this...
         'argparse',
         'bpy',
+        'bmesh',
         'collections',
         'copy',
         'decimal',
