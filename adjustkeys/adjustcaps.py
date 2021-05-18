@@ -14,8 +14,6 @@ from .util import concat, dict_union, flatten_list, get_dicts_with_duplicate_fie
 from .uv_unwrap import uv_unwrap
 from .yaml_io import read_yaml
 from argparse import Namespace
-from bmesh import new as new_mesh
-from bmesh.types import BMesh
 from concurrent.futures import ThreadPoolExecutor, wait
 from copy import deepcopy
 from math import inf, pi
@@ -30,9 +28,11 @@ Euler:type = LazyImport('mathutils', 'Euler')
 Matrix:type = LazyImport('mathutils', 'Matrix')
 Vector:type = LazyImport('mathutils', 'Vector')
 if blender_available():
+    from bmesh import new as new_mesh
+    from bmesh.types import BMesh
     from bpy import ops
     from bpy.path import abspath
-    from bpy.types import Collection
+    from bpy.types import Object, Collection
     data = LazyImport('bpy', 'data')
     context = LazyImport('bpy', 'context')
 
