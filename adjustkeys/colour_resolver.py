@@ -70,7 +70,6 @@ def resolve_matches(layout_context:dict, cap:dict, rule:Union[bool, dict]) -> [b
             conds.append(cond_result)
         elif statementKey.startswith('key-pos'):
             printi_name('Checking key position (%.4fu,%.4fu) satisfies condition "%s"...' % (cap['kle-pos'].x, cap['kle-pos'].y, rule['key-pos']), end=' ')
-            print(rule)
             cond_result:bool = eval_maths_cond(cap, rule['parsed-key-pos'])
             printi('%r' % cond_result)
 
