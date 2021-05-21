@@ -115,7 +115,7 @@ def adjustkeys(*args: [[str]]) -> dict:
         model_data = adjust_caps(coloured_layout, colour_map, profile_data, collection, layout_min_point, layout_max_point, pargs)
 
     glyph_data:dict = {}
-    if pargs.glyph_application_method != 'uv-map' or pargs.adjust_caps:
+    if pargs.adjust_caps:
         # Obtain data for glyph alignment
         model_name:str = safe_get(model_data, 'keycap-model-name')
         glyph_layout:[dict] = safe_get(model_data, '~caps-with-margin-offsets', default=coloured_layout)

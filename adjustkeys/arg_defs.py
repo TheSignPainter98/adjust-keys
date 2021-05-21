@@ -6,15 +6,6 @@ from os.path import join
 
 default_opts_file: str = 'opts.yml'
 args: [dict] = [{
-    'dest': 'adaptive_subsurf',
-    'short': '-Fn',
-    'long': '--no-adaptive-subsurf',
-    'action': 'store_false',
-    'help': 'Adaptively apply subdivision surface modifiers to the glyphs-parts by using size to determine the number of levels. Each glyph part has a number of subdivisions applied in the range [0...m], where m is (by context) either the max viewport or render subdivision level values',
-    'default': True,
-    'type': bool,
-    'label': 'Adaptively apply subsurf modifiers',
-}, {
     'dest': 'alignment',
     'short': '-a',
     'long': '--alignment',
@@ -239,67 +230,6 @@ args: [dict] = [{
     'type': bool,
     'label': 'List current options in YAML',
     'op': True
-}, {
-    'dest': 'glyph_application_method',
-    'short': '-M',
-    'long': '--glyph-application-method',
-    'action': 'store',
-    'help': 'Select the method of attaching the glyphs to the keys',
-    'default': 'uv-map',
-    'choices': [
-        'shrinkwrap',
-        'uv-map'
-    ],
-    'type': str,
-    'label': 'Glyph application method'
-}, {
-    'dest': 'shrink_wrap_offset',
-    'short': '-d',
-    'long': '--shrink-wrap-offset',
-    'action': 'store',
-    'help': 'Specify the offset above the surfave used by the shrink wrap',
-    'metavar': 'mm',
-    'default': 0.0001,
-    'label': 'Shrink wrap offset',
-    'type': float,
-    'soft-min': 0.0,
-    'soft-max': 1.0,
-}, {
-    'dest': 'subsurf_viewport_levels',
-    'short': '-Fv',
-    'long': '--subsurf-viewport-levels',
-    'action': 'store',
-    'help': 'Set the levels of the subdivision surface modifier applied ot glyph parts in the viewport',
-    'metavar': 'levels',
-    'default': 2,
-    'label': 'Subsurf mod viewport levels',
-    'type': int,
-    'min': 0,
-    'max': 11
-}, {
-    'dest': 'subsurf_render_levels',
-    'short': '-Fr',
-    'long': '--subsurf-render-levels',
-    'action': 'store',
-    'help': 'Set the levels of the subdivision surface modifier applied ot glyph parts in renders',
-    'metavar': 'levels',
-    'default': 3,
-    'label': 'Subsurf mod render levels',
-    'type': int,
-    'min': 0,
-    'max': 11
-}, {
-    'dest': 'subsurf_quality',
-    'short': '-Fq',
-    'long': '--subsurf-quality',
-    'action': 'store',
-    'help': 'Set the quality parameter of the subdivision surface modifier applied to all glyph-parts',
-    'metavar': 'quality',
-    'default': 3,
-    'label': 'Subsurf mod quality',
-    'type': int,
-    'min': 0,
-    'max': 10
 }, {
     'dest': 'svg_units_per_mm',
     'short': '-D',
