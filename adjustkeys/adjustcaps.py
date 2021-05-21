@@ -89,7 +89,7 @@ def adjust_caps(layout: [dict], colour_map:[dict], profile_data:dict, collection
         layout_scale:float = profile_data['unit-length'] * profile_data['scale']
         uv_unwrap(capmodel_object, layout_scale * layout_min_point, layout_scale * layout_max_point, pargs.partition_uv_by_face_direction)
 
-    return { 'keycap-model-name': capmodel_name, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
+    return { 'keycaps-model-name': capmodel_name, 'keycaps-model': capmodel_object, 'material-names': colourMaterials, '~caps-with-margin-offsets': caps, '~texture-image-node': imgNode, 'uv-image-path': uv_image_path, 'uv-material-name': uv_material_name }
 
 def check_permissions(fpath:str, perms:int) -> bool:
     try:
