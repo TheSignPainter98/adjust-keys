@@ -18,9 +18,10 @@ from sys import path, version_info
 # Allow site-packages to contain dll files (e.g. where the user needs to copy them in due to missing installers / packages)
 if version_info >= (3,8) and system() == 'Windows':
     from os import add_dll_directory, mkdir
-    from os.path import join
+    from os.path import exists, join
     site_packages_path = join(dirname(__file__), 'site-packages')
-    mkdir(site_packages_path)
+    if not exists(site_packages_path):
+        mkdir(site_packages_path)
     add_dll_directory(site_packages_path)
 
 
